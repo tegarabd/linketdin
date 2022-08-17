@@ -81,9 +81,21 @@ func ResolveGoogleAuth(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte("Email already registered"))
 		return
 	}
-	_, err = repository.CreateUserGoogle(guser)
+	user, err := repository.CreateUserGoogle(guser)
 	if err != nil {
 		panic(err)
+	}
+
+	activationCode, err := repository.CreateActivationCode(req.Context(), user.ID)
+	if err != nil {
+		res.Write([]byte("Failed to generate activation code"))
+		return
+	}
+
+	message := fmt.Sprintf("Verify your account with this code %s", activationCode.Code)
+	if err := SendEmail([]string{user.Email}, "Account Activation Verification Code", message); err != nil {
+		res.Write([]byte("Failed to send email"))
+		return
 	}
 
 	res.Write([]byte("Successfully registered"))

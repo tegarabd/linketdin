@@ -8,6 +8,9 @@ scalar Any
 scalar Time
 
 type Query {
+  user(input: String!): User! @goField(forceResolver: true)
+  postFeeds(input: PostFeed): [Post!]! @goField(forceResolver: true)
+
   comments: [Comment!]! @goField(forceResolver: true)
   connectInvitations: [ConnectInvitation!]! @goField(forceResolver: true)
   educations: [Education!]! @goField(forceResolver: true)

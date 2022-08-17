@@ -73,6 +73,16 @@ func (r *userMutationResolver) View(ctx context.Context, obj *model.UserMutation
 	return repository.ViewUser(ctx, input.ViewedUserID)
 }
 
+// Follow is the resolver for the follow field.
+func (r *userMutationResolver) Follow(ctx context.Context, obj *model.UserMutation, input *model.FollowUser) (*model.User, error) {
+	return repository.Follow(ctx, input)
+}
+
+// UnFollow is the resolver for the unFollow field.
+func (r *userMutationResolver) UnFollow(ctx context.Context, obj *model.UserMutation, input *model.FollowUser) (*model.User, error) {
+	return repository.UnFollow(ctx, input)
+}
+
 // Update is the resolver for the update field.
 func (r *userMutationResolver) Update(ctx context.Context, obj *model.UserMutation, input *model.UpdateUser) (*model.User, error) {
 	return repository.UpdateUser(ctx, input)

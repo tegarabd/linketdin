@@ -14,6 +14,7 @@ type ConnectionMutation {
 input CreateInvitation {
   fromUserId: String!
   toUserId: String!
+  note: String
 }
 
 input AcceptInvitation {

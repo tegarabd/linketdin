@@ -5,34 +5,38 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"server/graph/generated"
 	"server/graph/model"
+	"server/repository"
 )
 
 // From is the resolver for the from field.
 func (r *connectInvitationResolver) From(ctx context.Context, obj *model.ConnectInvitation) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetUserByID(ctx, obj.FromID)
 }
 
 // To is the resolver for the to field.
 func (r *connectInvitationResolver) To(ctx context.Context, obj *model.ConnectInvitation) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetUserByID(ctx, obj.ToID)
 }
 
 // Create is the resolver for the create field.
 func (r *connectionMutationResolver) Create(ctx context.Context, obj *model.ConnectionMutation, input *model.CreateInvitation) (*model.ConnectInvitation, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.CreateConnectInvitation(ctx, input)
 }
 
 // Accept is the resolver for the accept field.
 func (r *connectionMutationResolver) Accept(ctx context.Context, obj *model.ConnectionMutation, input *model.AcceptInvitation) (*model.ConnectInvitation, error) {
-	panic(fmt.Errorf("not implemented"))
+	_, err := repository.CreateConnection(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return repository.DeleteConnectInvitation(ctx, input.InvitationID)
 }
 
 // Reject is the resolver for the reject field.
 func (r *connectionMutationResolver) Reject(ctx context.Context, obj *model.ConnectionMutation, input *model.RejectInvitation) (*model.ConnectInvitation, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.DeleteConnectInvitation(ctx, input.InvitationID)
 }
 
 // ConnectInvitation returns generated.ConnectInvitationResolver implementation.

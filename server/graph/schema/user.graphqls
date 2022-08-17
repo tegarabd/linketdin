@@ -27,6 +27,8 @@ type User {
 
 type UserMutation {
   view(input: ViewUser): User! @goField(forceResolver: true)
+  follow(input: FollowUser): User! @goField(forceResolver: true)
+  unFollow(input: FollowUser): User! @goField(forceResolver: true)
   update(input: UpdateUser): User! @goField(forceResolver: true)
   activate(input: ActivateUser): User! @goField(forceResolver: true)
   verifyForgotPasswordEmail(input: ForgotPasswordEmail): User! @goField(forceResolver: true)
@@ -54,6 +56,11 @@ input UpdateUser {
 input ViewUser {
   viewerId: String!
   viewedUserId: String!
+}
+
+input FollowUser {
+  userId: String!
+  followingId: String!
 }
 
 input RegisterUser {

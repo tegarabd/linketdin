@@ -55,8 +55,9 @@ type CreateExperience struct {
 }
 
 type CreateInvitation struct {
-	FromUserID string `json:"fromUserId"`
-	ToUserID   string `json:"toUserId"`
+	FromUserID string  `json:"fromUserId"`
+	ToUserID   string  `json:"toUserId"`
+	Note       *string `json:"note"`
 }
 
 type CreateJob struct {
@@ -108,6 +109,11 @@ type ExperienceMutation struct {
 	Delete *Experience `json:"delete"`
 }
 
+type FollowUser struct {
+	UserID      string `json:"userId"`
+	FollowingID string `json:"followingId"`
+}
+
 type ForgotPasswordCode struct {
 	Code string `json:"code"`
 }
@@ -141,6 +147,12 @@ type MessageMutation struct {
 
 type NotificationMutation struct {
 	Create *Notification `json:"create"`
+}
+
+type PostFeed struct {
+	UserID string `json:"userId"`
+	Offset int    `json:"offset"`
+	Limit  int    `json:"limit"`
 }
 
 type PostMutation struct {
@@ -226,6 +238,8 @@ type UpdateUser struct {
 
 type UserMutation struct {
 	View                      *User `json:"view"`
+	Follow                    *User `json:"follow"`
+	UnFollow                  *User `json:"unFollow"`
 	Update                    *User `json:"update"`
 	Activate                  *User `json:"activate"`
 	VerifyForgotPasswordEmail *User `json:"verifyForgotPasswordEmail"`

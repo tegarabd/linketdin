@@ -23,6 +23,12 @@ input CreatePost {
   videoUrl: String
 }
 
+input PostFeed {
+  userId: String!
+  offset: Int!
+  limit: Int!
+}
+
 input LikePost {
   likerId: String!
   postId: String!

@@ -113,7 +113,10 @@ func GetUserConnections(ctx context.Context, user *model.User) ([]*model.User, e
 	db := database.GetDB()
 
 	connections := []*model.User{}
-	if err := db.Model(&user).Association("Connections").Find(&connections); err != nil {
+	if err := db.Raw(
+		"SELECT * FROM user_connections uc JOIN users u ON uc.connection_id = u.id WHERE user_id = ? " +
+		"UNION " +
+		"SELECT * FROM user_connections uc JOIN users u ON uc.user_id = u.id WHERE connection_id = ?", user.ID, user.ID).Find(&connections).Error; err != nil {
 		return nil, err
 	}
 
@@ -135,7 +138,7 @@ func GetUserFollowers(ctx context.Context, user *model.User) ([]*model.User, err
 	db := database.GetDB()
 
 	followers := []*model.User{}
-	if err := db.Model(&model.User{}).Where("following_id = ?", user.ID).Association("Following").Find(&followers); err != nil {
+	if err := db.Raw("SELECT * FROM user_follow uf JOIN users u ON uf.user_id = u.id WHERE following_id = ?", user.ID).Find(&followers).Error; err != nil {
 		return nil, err
 	}
 
@@ -200,7 +203,7 @@ func GetUserMightKnow(ctx context.Context, user *model.User) ([]*model.User, err
 	}
 	
 	mightKnow := []*model.User{}
-	if err := db.Model(&model.User{}).Where("user_id IN ? AND connection_id != ?", connectionIds, user.ID).Association("Connections").Find(&mightKnow); err != nil {
+	if err := db.Raw("SELECT * FROM user_connections uc JOIN users u WHERE uc.user_id = u.id WHERE user_id IN ? AND connection_id != ?", &connectionIds, user.ID).Find(&mightKnow).Error; err != nil {
 		return nil, err
 	}
 
@@ -338,9 +341,40 @@ func ResetPassword(ctx context.Context, input *model.ResetPassword) (*model.User
 	input.Password = tools.HashPassword(input.Password)
 
 	var user model.User
-	db.First(&user, "id = ?", input.UserID)
-
+	if err := db.First(&user, "id = ?", input.UserID).Error; err != nil {
+		return nil, err
+	}
 	if err := db.Model(&user).Update("password", input.Password).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func Follow(ctx context.Context, input *model.FollowUser) (*model.User, error) {
+	db := database.GetDB()
+
+	var user model.User
+	if err := db.First(&user, "id = ?", input.UserID).Error; err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(&user).Association("Following").Append(&model.User{ID: input.FollowingID}); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func UnFollow(ctx context.Context, input *model.FollowUser) (*model.User, error) {
+	db := database.GetDB()
+
+	var user model.User
+	if err := db.First(&user, "id = ?", input.UserID).Error; err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(&user).Association("Following").Delete(&model.User{ID: input.FollowingID}); err != nil {
 		return nil, err
 	}
 
