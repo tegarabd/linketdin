@@ -1,0 +1,88 @@
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  additionalName: String
+  profilePhotoUrl: String
+  backgroundPhotoUrl: String
+  headline: String
+  pronouns: String
+  profileLink: String!
+  about: String
+  location: Location
+  profileViews: Int!
+  isActive: Boolean!
+  experiences: [Experience!] @goField(forceResolver: true)
+  educations: [Education!] @goField(forceResolver: true)
+  connections: [User!] @goField(forceResolver: true)
+  followers: [User!] @goField(forceResolver: true)
+  following: [User!] @goField(forceResolver: true)
+  posts: [Post!] @goField(forceResolver: true)
+  invitations: [ConnectInvitation!] @goField(forceResolver: true)
+  notifications: [Notification!] @goField(forceResolver: true)
+  messages: [Message!] @goField(forceResolver: true)
+  userMightKnow: [User!] @goField(forceResolver: true)
+}
+
+type UserMutation {
+  view(input: ViewUser): User! @goField(forceResolver: true)
+  update(input: UpdateUser): User! @goField(forceResolver: true)
+  activate(input: ActivateUser): User! @goField(forceResolver: true)
+  verifyForgotPasswordEmail(input: ForgotPasswordEmail): User! @goField(forceResolver: true)
+  verifyForgotPasswordCode(input: ForgotPasswordCode): User! @goField(forceResolver: true)
+  resetPassword(input: ResetPassword): User! @goField(forceResolver: true)
+}
+
+input UpdateUser {
+  userId: ID!
+  email: String
+  firstName: String
+  lastName: String
+  additionalName: String
+  profilePhotoUrl: String
+  backgroundPhotoUrl: String
+  headline: String
+  pronouns: String
+  profileLink: String
+  about: String
+  locationCity: String
+  locationRegion: String
+  isActive: Boolean
+}
+
+input ViewUser {
+  viewerId: String!
+  viewedUserId: String!
+}
+
+input RegisterUser {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+}
+
+input LoginUser {
+  email: String!
+  password: String!
+}
+
+input ActivateUser {
+  id: ID!
+  code: String!
+}
+
+input ForgotPasswordEmail {
+  email: String!
+}
+
+input ForgotPasswordCode {
+  code: String!
+}
+
+input ResetPassword {
+  userId: String!
+  password: String!
+  confirmPassword: String!
+}

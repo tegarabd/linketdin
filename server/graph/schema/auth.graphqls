@@ -1,0 +1,22 @@
+type AuthMutation {
+  login(input: LoginUser!): Token! @goField(forceResolver: true)
+  register(input: RegisterUser!): Token! @goField(forceResolver: true)
+}
+
+type Token {
+  token: String!
+}
+
+type ActivationCode {
+  id: ID!
+  userId: String!
+  code: String!
+  expiredAt: Time!
+}
+
+type ResetPasswordCode {
+  id: ID!
+  userId: String!
+  code: String!
+  expiredAt: Time!
+}

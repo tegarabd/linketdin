@@ -1,0 +1,23 @@
+type Job {
+  id: ID!
+  title: String!
+  companyName: String!
+  workplace: String!
+  location: Location!
+  employmentType: String!
+  description: String!
+}
+
+type JobMutation {
+  create(input: CreateJob): Job! @goField(forceResolver: true)
+}
+
+input CreateJob {
+  title: String!
+  companyName: String!
+  workplace: String!
+  locationCity: String!
+  locationRegion: String!
+  employmentType: String!
+  description: String!
+}

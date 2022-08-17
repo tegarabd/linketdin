@@ -1,0 +1,25 @@
+type ConnectInvitation {
+  id: ID!
+  from: User! @goField(forceResolver: true)
+  to: User! @goField(forceResolver: true)
+  note: String
+}
+
+type ConnectionMutation {
+  create(input: CreateInvitation): ConnectInvitation @goField(forceResolver: true)
+  accept(input: AcceptInvitation): ConnectInvitation @goField(forceResolver: true)
+  reject(input: RejectInvitation): ConnectInvitation @goField(forceResolver: true)
+}
+
+input CreateInvitation {
+  fromUserId: String!
+  toUserId: String!
+}
+
+input AcceptInvitation {
+  invitationId: String!
+}
+
+input RejectInvitation {
+  invitationId: String!
+}

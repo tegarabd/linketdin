@@ -1,0 +1,18 @@
+type Message {
+  id: ID!
+  sender: User! @goField(forceResolver: true)
+  receiver: User! @goField(forceResolver: true)
+  text: String!
+  imageUrl: String
+}
+
+type MessageMutation {
+  create(input: CreateMessage): Message! @goField(forceResolver: true)
+}
+
+input CreateMessage {
+  senderId: String!
+  receiverId: String!
+  text: String!
+  imageUrl: String
+}

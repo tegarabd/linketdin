@@ -1,0 +1,14 @@
+type Notification {
+  id: ID!
+  from: User! @goField(forceResolver: true)
+  text: String!
+}
+
+type NotificationMutation {
+  create(input: CreateNotification): Notification! @goField(forceResolver: true)
+}
+
+input CreateNotification {
+  userId: String!
+  text: String!
+}

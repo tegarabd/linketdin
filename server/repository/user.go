@@ -1,0 +1,348 @@
+package repository
+
+import (
+	"context"
+	"server/database"
+	"server/graph/model"
+	"server/tools"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/markbates/goth"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+	"gorm.io/gorm"
+)
+
+func CreateUser(ctx context.Context, input model.RegisterUser) (*model.User, error) {
+	db := database.GetDB()
+
+	input.Password = tools.HashPassword(input.Password)
+	input.Email = strings.ToLower(input.Email)
+
+	user := model.User{
+		ID:       uuid.New().String(),
+		FirstName: input.FirstName,
+		LastName: input.LastName,
+		Email:    input.Email,
+		Password: input.Password,
+	}
+
+	if err := db.Model(user).Create(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func CreateUserGoogle(guser goth.User) (*model.User, error) {
+	db := database.GetDB()
+
+	user := model.User{
+		ID:                 guser.UserID,
+		Email:              guser.Email,
+		FirstName:          guser.FirstName,
+		LastName:           guser.LastName,
+		ProfilePhotoURL:    &guser.AvatarURL,
+	}
+
+	if err := db.Model(user).Create(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func GetUsers(ctx context.Context) ([]*model.User, error) {
+	db := database.GetDB()
+
+	users := []*model.User{}
+	
+	if err := db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func GetUserByID(ctx context.Context, id string) (*model.User, error) {
+	db := database.GetDB()
+
+	user := model.User{}
+	if err := db.First(&user, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
+	db := database.GetDB()
+
+	user := model.User{}
+	if err := db.Where("email LIKE ?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func GetUserExperiences(ctx context.Context, user *model.User) ([]*model.Experience, error) {
+	db := database.GetDB()
+
+	experiences := []*model.Experience{}
+	if err := db.Model(&user).Association("Experiences").Find(&experiences); err != nil {
+		return nil, err
+	}
+
+	return experiences, nil
+}
+
+func GetUserEducations(ctx context.Context, user *model.User) ([]*model.Education, error) {
+	db := database.GetDB()
+
+	educations := []*model.Education{}
+	if err := db.Model(&user).Association("Educations").Find(&educations); err != nil {
+		return nil, err
+	}
+
+	return educations, nil
+}
+
+func GetUserConnections(ctx context.Context, user *model.User) ([]*model.User, error) {
+	db := database.GetDB()
+
+	connections := []*model.User{}
+	if err := db.Model(&user).Association("Connections").Find(&connections); err != nil {
+		return nil, err
+	}
+
+	return connections, nil
+}
+
+func GetUserFollowing(ctx context.Context, user *model.User) ([]*model.User, error) {
+	db := database.GetDB()
+
+	following := []*model.User{}
+	if err := db.Model(&user).Association("Following").Find(&following); err != nil {
+		return nil, err
+	}
+
+	return following, nil
+}
+
+func GetUserFollowers(ctx context.Context, user *model.User) ([]*model.User, error) {
+	db := database.GetDB()
+
+	followers := []*model.User{}
+	if err := db.Model(&model.User{}).Where("following_id = ?", user.ID).Association("Following").Find(&followers); err != nil {
+		return nil, err
+	}
+
+	return followers, nil
+}
+
+func GetUserPosts(ctx context.Context, user *model.User) ([]*model.Post, error) {
+	db := database.GetDB()
+
+	posts := []*model.Post{}
+	if err := db.Model(&user).Association("Posts").Find(&posts); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
+func GetUserInvitations(ctx context.Context, user *model.User) ([]*model.ConnectInvitation, error) {
+	db := database.GetDB()
+
+	invitations := []*model.ConnectInvitation{}
+	if err := db.Model(&user).Association("Invitations").Find(&invitations); err != nil {
+		return nil, err
+	}
+
+	return invitations, nil
+}
+
+func GetUserNotifications(ctx context.Context, user *model.User) ([]*model.Notification, error) {
+	db := database.GetDB()
+
+	notifications := []*model.Notification{}
+	if err := db.Model(&user).Association("Notifications").Find(&notifications); err != nil {
+		return nil, err
+	}
+
+	return notifications, nil
+}
+
+func GetUserMessages(ctx context.Context, user *model.User) ([]*model.Message, error) {
+	db := database.GetDB()
+
+	messages := []*model.Message{}
+	if err := db.Model(&user).Association("Messages").Find(&messages); err != nil {
+		return nil, err
+	}
+
+	return messages, nil
+}
+
+func GetUserMightKnow(ctx context.Context, user *model.User) ([]*model.User, error) {
+	db := database.GetDB()
+
+	connections := []*model.User{}
+	if err := db.Model(&user).Association("Connections").Find(&connections); err != nil {
+		return nil, err
+	}
+
+	var connectionIds []string
+	for _, connection := range connections {
+		connectionIds = append(connectionIds, connection.ID)
+	}
+	
+	mightKnow := []*model.User{}
+	if err := db.Model(&model.User{}).Where("user_id IN ? AND connection_id != ?", connectionIds, user.ID).Association("Connections").Find(&mightKnow); err != nil {
+		return nil, err
+	}
+
+	return mightKnow, nil
+}
+
+func ViewUser(ctx context.Context, id string) (*model.User, error) {
+	db := database.GetDB()
+
+	var user model.User
+	db.First(&user, "id = ?", id)
+
+	if err := db.Model(&user).Update("profile_views", gorm.Expr("profile_views + ?", 1)).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func UpdateUser(ctx context.Context, input *model.UpdateUser) (*model.User, error) {
+	db := database.GetDB()
+
+	var user model.User
+	db.First(&user, "id = ?", input.UserID)
+
+	if err := db.Model(&user).Updates(input).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func CreateActivationCode(ctx context.Context, userId string) (*model.ActivationCode, error) {
+	db := database.GetDB()
+
+	activationCode := model.ActivationCode{
+		ID: uuid.NewString(),
+		UserID:    userId,
+		Code:      tools.GenerateCode(),
+		ExpiredAt: time.Now().Add(time.Hour),
+	}
+
+	if err := db.Create(&activationCode).Error; err != nil {
+		return nil, err
+	}
+
+	return &activationCode, nil
+}
+
+func VerifyActivationCode(ctx context.Context, input *model.ActivateUser) (*model.User, error) {
+	db := database.GetDB()
+
+	var user model.User
+	if err := db.Model(&model.User{}).Preload("ActivationCode").Find(&user).Error; err != nil {
+		return nil, err
+	}
+
+	if user.ActivationCode.Code == ""  {
+		return nil, &gqlerror.Error{
+			Message:    "No activation request yet",
+		}
+	}
+
+	if user.ActivationCode.ExpiredAt.Before(time.Now()) {
+		return nil, &gqlerror.Error{
+			Message:    "Code has been expired",
+		}
+	}
+
+	if user.ActivationCode.Code != input.Code {
+		return nil, &gqlerror.Error{
+			Message:    "Code does not match",
+		}
+	}
+	
+	db.Model(&user).Update("is_active", true)
+	return &user, nil
+}
+
+func CreateForgotPasswordCode(ctx context.Context, userId string) (*model.ResetPasswordCode, error) {
+	db := database.GetDB()
+
+	ForgotPasswordCode := model.ResetPasswordCode{
+		ID: uuid.NewString(),
+		UserID:    userId,
+		Code:      tools.GenerateCode(),
+		ExpiredAt: time.Now().Add(time.Hour),
+	}
+
+	if err := db.Create(&ForgotPasswordCode).Error; err != nil {
+		return nil, err
+	}
+
+	return &ForgotPasswordCode, nil
+}
+
+func VerifyForgotPasswordCode(ctx context.Context, input *model.ForgotPasswordCode) (*model.User, error) {
+	db := database.GetDB()
+
+	var user model.User
+	if err := db.Model(&model.User{}).Preload("PasswordCode").Find(&user).Error; err != nil {
+		return nil, err
+	}
+
+	if user.ResetPasswordCode.Code == ""  {
+		return nil, &gqlerror.Error{
+			Message:    "No reset password request yet",
+		}
+	}
+
+	if user.ResetPasswordCode.ExpiredAt.Before(time.Now()) {
+		return nil, &gqlerror.Error{
+			Message:    "Code has been expired",
+		}
+	}
+
+	if user.ResetPasswordCode.Code != input.Code {
+		return nil, &gqlerror.Error{
+			Message:    "Code does not match",
+		}
+	}
+
+	return &user, nil
+}
+
+func ResetPassword(ctx context.Context, input *model.ResetPassword) (*model.User, error) {
+	db := database.GetDB()
+
+	if input.ConfirmPassword != input.Password {
+		return nil, &gqlerror.Error{
+			Message:    "Password does not match",
+		}
+	}
+
+	input.Password = tools.HashPassword(input.Password)
+
+	var user model.User
+	db.First(&user, "id = ?", input.UserID)
+
+	if err := db.Model(&user).Update("password", input.Password).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}

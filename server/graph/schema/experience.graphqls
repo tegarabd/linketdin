@@ -1,0 +1,55 @@
+type Experience {
+  id: ID!
+  user: User! @goField(forceResolver: true)
+  title: String!
+  employmentType: String!
+  companyName: String!
+  location: Location!
+  isActive: Boolean!
+  startDate: Date!
+  endDate: Date
+  industry: String!
+  headline: String
+}
+
+type ExperienceMutation {
+  create(input: CreateExperience): Experience! @goField(forceResolver: true)
+  update(input: UpdateExperience): Experience! @goField(forceResolver: true)
+  delete(input: DeleteExperience): Experience! @goField(forceResolver: true)
+}
+
+input CreateExperience {
+  userId: String!
+  title: String!
+  employmentType: String!
+  isActive: Boolean!
+  companyName: String!
+  locationCity: String!
+  locationRegion: String!
+  startDateMonth: String! 
+  startDateYear: Int! 
+  endDateMonth: String
+  endDateYear: Int
+  industry: String!
+  headline: String
+}
+
+input UpdateExperience {
+  experienceId: String!
+  title: String
+  employmentType: String
+  companyName: String
+  isActive: Boolean
+  locationCity: String
+  locationRegion: String
+  startDateMonth: String
+  startDateYear: Int
+  endDateMonth: String
+  endDateYear: Int
+  industry: String
+  headline: String
+}
+
+input DeleteExperience {
+  experienceId: String!
+}

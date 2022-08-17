@@ -1,0 +1,43 @@
+type Post {
+  id: ID!
+  poster: User! @goField(forceResolver: true)
+  text: String!
+  photoUrl: String
+  videoUrl: String
+  comments: [Comment!] @goField(forceResolver: true)
+  sends: [User!] @goField(forceResolver: true)
+  likes: [User!] @goField(forceResolver: true)
+}
+
+type PostMutation {
+  create(input: CreatePost): Post! @goField(forceResolver: true)
+  like(input: LikePost): Post! @goField(forceResolver: true)
+  comment(input: CommentPost): Post! @goField(forceResolver: true)
+  share(input: SharePost): Post! @goField(forceResolver: true)
+}
+
+input CreatePost {
+  text: String!
+  posterId: String!
+  photoUrl: String
+  videoUrl: String
+}
+
+input LikePost {
+  likerId: String!
+  postId: String!
+}
+
+input CommentPost {
+  commenterId: String!
+  text: String!
+  postId: String!
+  repliedToCommentId: String 
+}
+
+input SharePost {
+  sourceId: String!
+  postId: String!
+  destinationId: String!
+}
+

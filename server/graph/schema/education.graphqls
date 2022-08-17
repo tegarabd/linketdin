@@ -1,0 +1,42 @@
+type Education {
+  id: ID!
+  user: User! @goField(forceResolver: true)
+  school: String!
+  degree: String!
+  field: String!
+  startDate: Date!
+  endDate: Date
+  grade: Float
+  activities: String
+  description: String
+}
+
+type EducationMutation {
+  create(input: CreateEducation): Education! @goField(forceResolver: true)
+  update(input: UpdateEducation): Education! @goField(forceResolver: true)
+  delete(input: DeleteEducation): Education! @goField(forceResolver: true)
+}
+
+
+input CreateEducation {
+  userId: String!
+  school: String!
+}
+
+input UpdateEducation {
+  educationId: String!
+  school: String
+  degree: String
+  field: String
+  startDateMonth: String
+  startDateYear: Int
+  endDateMonth: String
+  endDateYear: Int
+  grade: Float
+  activities: String
+  description: String
+}
+
+input DeleteEducation {
+  educationId: String!
+}

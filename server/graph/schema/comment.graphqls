@@ -1,0 +1,17 @@
+type Comment {
+  id: ID!
+  post: Post! @goField(forceResolver: true)
+  commenter: User! @goField(forceResolver: true)
+  text: String!
+  likes: [User!] @goField(forceResolver: true)
+  repliedTo: Comment @goField(forceResolver: true)
+}
+
+type CommentMutation {
+  like(input: LikeComment): Comment! @goField(forceResolver: true)
+}
+
+input LikeComment {
+  likerId: String!
+  commentId: String!
+}

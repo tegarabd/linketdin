@@ -1,0 +1,33 @@
+directive @goField(
+  forceResolver: Boolean
+  name: String
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+directive @auth on FIELD_DEFINITION
+
+scalar Any
+scalar Time
+
+type Query {
+  comments: [Comment!]! @goField(forceResolver: true)
+  connectInvitations: [ConnectInvitation!]! @goField(forceResolver: true)
+  educations: [Education!]! @goField(forceResolver: true)
+  experiences: [Experience!]! @goField(forceResolver: true)
+  jobs: [Job!]! @goField(forceResolver: true)
+  messages: [Message!]! @goField(forceResolver: true)
+  notifications: [Notification!]! @goField(forceResolver: true)
+  posts: [Post!]! @goField(forceResolver: true)
+  users: [User!]! @goField(forceResolver: true)
+}
+
+type Mutation {
+  auth: AuthMutation! @goField(forceResolver: true)
+  user: UserMutation! @goField(forceResolver: true)
+  post: PostMutation! @goField(forceResolver: true)
+  notification: NotificationMutation! @goField(forceResolver: true)
+  message: MessageMutation! @goField(forceResolver: true)
+  job: JobMutation! @goField(forceResolver: true)
+  experience: ExperienceMutation! @goField(forceResolver: true)
+  education: EducationMutation! @goField(forceResolver: true)
+  connection: ConnectionMutation! @goField(forceResolver: true)
+  comment: CommentMutation! @goField(forceResolver: true)
+}
