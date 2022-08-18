@@ -6,17 +6,32 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=linktdin
+      - POSTGRES_DB=linketdin
     ports:
       - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
-  server:
-    container_name: server
-    build: ./server
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+       - pgadmin:/var/lib/pgadmin
     ports:
-      - '8080:8080'
-    links:
-      - database
+      - '5050:80'
+  # server:
+  #   container_name: server
+  #   build: ./server
+  #   ports:
+  #     - '8080:8080'
+  #   links:
+  #     - database
+  #   depends_on:
+  #     - database
 volumes:
   pgdata:
+  pgadmin:
