@@ -16,8 +16,8 @@ func (r *postResolver) Poster(ctx context.Context, obj *model.Post) (*model.User
 }
 
 // Comments is the resolver for the comments field.
-func (r *postResolver) Comments(ctx context.Context, obj *model.Post) ([]*model.Comment, error) {
-	return repository.GetPostComments(ctx, obj)
+func (r *postResolver) Comments(ctx context.Context, obj *model.Post, offset int, limit int) ([]*model.Comment, error) {
+	return repository.GetPostComments(ctx, obj, limit, offset)
 }
 
 // Sends is the resolver for the sends field.
@@ -30,9 +30,19 @@ func (r *postResolver) Likes(ctx context.Context, obj *model.Post) ([]*model.Use
 	return repository.GetPostLikes(ctx, obj)
 }
 
+// Tags is the resolver for the tags field.
+func (r *postResolver) Tags(ctx context.Context, obj *model.Post) ([]*model.Tag, error) {
+	return repository.GetPostTags(ctx, obj)
+}
+
 // Create is the resolver for the create field.
 func (r *postMutationResolver) Create(ctx context.Context, obj *model.PostMutation, input *model.CreatePost) (*model.Post, error) {
 	return repository.CreatePost(ctx, input)
+}
+
+// AddTags is the resolver for the addTags field.
+func (r *postMutationResolver) AddTags(ctx context.Context, obj *model.PostMutation, input *model.AddPostTags) (*model.Post, error) {
+	return repository.AddPostTags(ctx, input)
 }
 
 // Like is the resolver for the like field.

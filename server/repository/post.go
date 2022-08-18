@@ -4,8 +4,10 @@ import (
 	"context"
 	"server/database"
 	"server/graph/model"
+	"strings"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func GetPostById(ctx context.Context, id string) (*model.Post, error) {
@@ -19,20 +21,42 @@ func GetPostById(ctx context.Context, id string) (*model.Post, error) {
 	return &post, nil
 }
 
-func GetPostFeed(ctx context.Context, input *model.PostFeed) ([]*model.Post, error) {
+func GetPostsByText(ctx context.Context, query string, limit int, offset int) ([]*model.Post, error) {
 	db := database.GetDB()
 
-	following, err := GetUserFollowing(ctx, &model.User{ID: input.UserID})
+	var posts []*model.Post
+	if err := db.Where("text ILIKE %?%", query).Limit(limit).Offset(offset).Find(&posts).Error; err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
+func GetPostsByTag(ctx context.Context, tag string, limit int, offset int) ([]*model.Post, error) {
+	db := database.GetDB()
+
+	var posts []*model.Post
+	if err := db.Model(&model.Tag{Text: tag}).Limit(limit).Offset(offset).Association("Posts").Find(&posts); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
+func GetPostFeed(ctx context.Context, userId string, limit int, offset int) ([]*model.Post, error) {
+	db := database.GetDB()
+
+	following, err := GetUserFollowing(ctx, &model.User{ID: userId})
 	if err != nil {
 		return nil, err
 	}
 
-	connection, err := GetUserConnections(ctx, &model.User{ID: input.UserID})
+	connection, err := GetUserConnections(ctx, &model.User{ID: userId})
 	if err != nil {
 		return nil, err
 	}
 
-	var posterIds []string
+	posterIds := make([]string, 0)
 	for _, poster := range following {
 		posterIds = append(posterIds, poster.ID)
 	}
@@ -41,18 +65,18 @@ func GetPostFeed(ctx context.Context, input *model.PostFeed) ([]*model.Post, err
 	}
 
 	var postFeeds []*model.Post
-	if err := db.Where("poster_id IN ?", &posterIds).Limit(input.Limit).Offset(input.Offset).Find(&postFeeds).Error; err != nil {
+	if err := db.Where("poster_id IN ?", posterIds).Limit(limit).Offset(offset).Find(&postFeeds).Error; err != nil {
 		return nil, err
 	}
 
 	return postFeeds, nil
 }
 
-func GetPostComments(ctx context.Context, post *model.Post)  ([]*model.Comment, error) {
+func GetPostComments(ctx context.Context, post *model.Post, limit int, offset int)  ([]*model.Comment, error) {
 	db := database.GetDB()
 
 	var comments []*model.Comment
-	if err := db.Model(&post).Association("Comments").Find(&comments); err != nil {
+	if err := db.Model(&post).Limit(limit).Offset(offset).Where("replied_to_id IS NULL").Association("Comments").Find(&comments); err != nil {
 		return nil, err
 	}
 
@@ -79,6 +103,17 @@ func GetPostLikes(ctx context.Context, post *model.Post)  ([]*model.User, error)
 	}
 
 	return likes, nil
+}
+
+func GetPostTags(ctx context.Context, post *model.Post)  ([]*model.Tag, error) {
+	db := database.GetDB()
+
+	var tags []*model.Tag
+	if err := db.Model(&post).Association("Tags").Find(&tags); err != nil {
+		return nil, err
+	}
+
+	return tags, nil
 }
 
 func CreatePost(ctx context.Context, input *model.CreatePost) (*model.Post, error) {
@@ -152,4 +187,37 @@ func AddPostSend(ctx context.Context, input *model.SharePost) (*model.Post, erro
 	}
 
 	return post, err
+}
+
+func AddPostTags(ctx context.Context, input *model.AddPostTags) (*model.Post, error) {
+	db := database.GetDB()
+
+	post, err := GetPostById(ctx, input.PostID)
+	if err != nil {
+		return nil, err
+	}
+
+	tags := strings.Split(input.Tags, "#")
+	tags = tags[1:]
+
+	var hashtags []*model.Tag
+
+	for _, tag := range tags {
+		hashtag, err := GetTagByText(ctx, tag)
+		if err != nil && err == gorm.ErrRecordNotFound {
+			hashtag, err := CreateTag(ctx, tag)
+			if err != nil {
+				return nil, err
+			}
+			hashtags = append(hashtags, hashtag)
+		} else {
+			hashtags = append(hashtags, hashtag)
+		}
+	}
+
+	if err := db.Model(&post).Association("Tags").Append(hashtags); err != nil {
+		return nil, err
+	}
+
+	return post, nil
 }

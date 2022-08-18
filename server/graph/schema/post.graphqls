@@ -4,13 +4,16 @@ type Post {
   text: String!
   photoUrl: String
   videoUrl: String
-  comments: [Comment!] @goField(forceResolver: true)
+  comments(offset: Int!, limit: Int!): [Comment!] @goField(forceResolver: true)
   sends: [User!] @goField(forceResolver: true)
   likes: [User!] @goField(forceResolver: true)
+  tags: [Tag!]! @goField(forceResolver: true)
+  createdAt: Time!
 }
 
 type PostMutation {
   create(input: CreatePost): Post! @goField(forceResolver: true)
+  addTags(input: AddPostTags): Post! @goField(forceResolver: true)
   like(input: LikePost): Post! @goField(forceResolver: true)
   comment(input: CommentPost): Post! @goField(forceResolver: true)
   share(input: SharePost): Post! @goField(forceResolver: true)
@@ -21,12 +24,6 @@ input CreatePost {
   posterId: String!
   photoUrl: String
   videoUrl: String
-}
-
-input PostFeed {
-  userId: String!
-  offset: Int!
-  limit: Int!
 }
 
 input LikePost {
@@ -47,3 +44,7 @@ input SharePost {
   destinationId: String!
 }
 
+input AddPostTags {
+  postId: String!
+  tags: String!
+}

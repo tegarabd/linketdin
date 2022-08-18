@@ -11,6 +11,11 @@ type ActivateUser struct {
 	Code string `json:"code"`
 }
 
+type AddPostTags struct {
+	PostID string `json:"postId"`
+	Tags   string `json:"tags"`
+}
+
 type AuthMutation struct {
 	Login    *Token `json:"login"`
 	Register *Token `json:"register"`
@@ -150,14 +155,9 @@ type NotificationMutation struct {
 	Create *Notification `json:"create"`
 }
 
-type PostFeed struct {
-	UserID string `json:"userId"`
-	Offset int    `json:"offset"`
-	Limit  int    `json:"limit"`
-}
-
 type PostMutation struct {
 	Create  *Post `json:"create"`
+	AddTags *Post `json:"addTags"`
 	Like    *Post `json:"like"`
 	Comment *Post `json:"comment"`
 	Share   *Post `json:"share"`

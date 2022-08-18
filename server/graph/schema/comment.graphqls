@@ -4,7 +4,8 @@ type Comment {
   commenter: User! @goField(forceResolver: true)
   text: String!
   likes: [User!] @goField(forceResolver: true)
-  repliedTo: Comment @goField(forceResolver: true)
+  replies(offset: Int!, limit: Int!): [Comment!]! @goField(forceResolver: true)
+  createdAt: Time!
 }
 
 type CommentMutation {

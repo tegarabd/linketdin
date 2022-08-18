@@ -4,6 +4,7 @@ type Message {
   receiver: User! @goField(forceResolver: true)
   text: String!
   imageUrl: String
+  createdAt: Time!
 }
 
 type MessageMutation {

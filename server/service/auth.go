@@ -3,12 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"server/graph/model"
 	"server/repository"
 	"server/tools"
 
-	"github.com/markbates/goth/gothic"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gorm.io/gorm"
 )
@@ -68,41 +66,6 @@ func Login(ctx context.Context, input model.LoginUser) (interface{}, error) {
 
 	return token, nil
 
-}
-
-func ResolveGoogleAuth(res http.ResponseWriter, req *http.Request) {
-	guser, err := gothic.CompleteUserAuth(res, req)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = repository.GetUserByEmail(req.Context(), guser.Email)
-	if err == nil {
-		res.Write([]byte("Email already registered"))
-		return
-	}
-	user, err := repository.CreateUserGoogle(guser)
-	if err != nil {
-		panic(err)
-	}
-
-	activationCode, err := repository.CreateActivationCode(req.Context(), user.ID)
-	if err != nil {
-		res.Write([]byte("Failed to generate activation code"))
-		return
-	}
-
-	message := fmt.Sprintf("Verify your account with this code %s", activationCode.Code)
-	if err := SendEmail([]string{user.Email}, "Account Activation Verification Code", message); err != nil {
-		res.Write([]byte("Failed to send email"))
-		return
-	}
-
-	res.Write([]byte("Successfully registered"))
-}
-
-func BeginGoogleAuth(res http.ResponseWriter, req *http.Request) {
-	gothic.BeginAuthHandler(res, req)
 }
 
 func ResolveForgotPasswordCode(ctx context.Context, user *model.User) (*model.User, error) {

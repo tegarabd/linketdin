@@ -30,6 +30,17 @@ func GetCommentLikes(ctx context.Context, comment *model.Comment)  ([]*model.Use
 	return likes, nil
 }
 
+func GetCommentReplies(ctx context.Context, comment *model.Comment, limit int, offset int) ([]*model.Comment, error) {
+	db := database.GetDB()
+
+	var replies []*model.Comment
+	if err := db.Model(&comment).Limit(limit).Offset(offset).Association("Replies").Find(&replies); err != nil {
+		return nil, err
+	}
+
+	return replies, nil
+}
+
 func CreateComment(ctx context.Context, input *model.CommentPost) (*model.Comment, error) {
 	db := database.GetDB()
 
@@ -38,7 +49,7 @@ func CreateComment(ctx context.Context, input *model.CommentPost) (*model.Commen
 		PostID:      input.PostID,
 		CommenterID: input.CommenterID,
 		Text:        input.Text,
-		RepliedToID: *input.RepliedToCommentID,
+		RepliedToID: input.RepliedToCommentID,
 	}
 
 	if err := db.Create(&comment).Error; err != nil {

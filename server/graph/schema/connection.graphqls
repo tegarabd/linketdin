@@ -3,6 +3,7 @@ type ConnectInvitation {
   from: User! @goField(forceResolver: true)
   to: User! @goField(forceResolver: true)
   note: String
+  createdAt: Time!
 }
 
 type ConnectionMutation {

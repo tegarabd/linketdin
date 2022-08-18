@@ -5,10 +5,10 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"server/graph/generated"
 	"server/graph/model"
 	"server/repository"
+	"strings"
 )
 
 // Auth is the resolver for the auth field.
@@ -67,53 +67,27 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 }
 
 // PostFeeds is the resolver for the postFeeds field.
-func (r *queryResolver) PostFeeds(ctx context.Context, input *model.PostFeed) ([]*model.Post, error) {
-	return repository.GetPostFeed(ctx, input)
+func (r *queryResolver) PostFeeds(ctx context.Context, userID string, limit int, offset int) ([]*model.Post, error) {
+	return repository.GetPostFeed(ctx, userID, limit, offset)
 }
 
-// Comments is the resolver for the comments field.
-func (r *queryResolver) Comments(ctx context.Context) ([]*model.Comment, error) {
-	panic(fmt.Errorf("not implemented"))
+// SearchPost is the resolver for the searchPost field.
+func (r *queryResolver) SearchPost(ctx context.Context, query string, limit int, offset int) ([]*model.Post, error) {
+	if strings.HasPrefix(query, "#") {
+		return repository.GetPostsByTag(ctx, query[1:], limit, offset)
+	} else {
+		return repository.GetPostsByText(ctx, query, limit, offset)
+	}
 }
 
-// ConnectInvitations is the resolver for the connectInvitations field.
-func (r *queryResolver) ConnectInvitations(ctx context.Context) ([]*model.ConnectInvitation, error) {
-	panic(fmt.Errorf("not implemented"))
+// SearchUser is the resolver for the searchUser field.
+func (r *queryResolver) SearchUser(ctx context.Context, query string, limit int, offset int) ([]*model.User, error) {
+	return repository.GetUsersByName(ctx, query, limit, offset)
 }
 
-// Educations is the resolver for the educations field.
-func (r *queryResolver) Educations(ctx context.Context) ([]*model.Education, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-// Experiences is the resolver for the experiences field.
-func (r *queryResolver) Experiences(ctx context.Context) ([]*model.Experience, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-// Jobs is the resolver for the jobs field.
-func (r *queryResolver) Jobs(ctx context.Context) ([]*model.Job, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-// Messages is the resolver for the messages field.
-func (r *queryResolver) Messages(ctx context.Context) ([]*model.Message, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-// Notifications is the resolver for the notifications field.
-func (r *queryResolver) Notifications(ctx context.Context) ([]*model.Notification, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-// Posts is the resolver for the posts field.
-func (r *queryResolver) Posts(ctx context.Context) ([]*model.Post, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	return repository.GetUsers(ctx)
+// SearchConnectedUser is the resolver for the searchConnectedUser field.
+func (r *queryResolver) SearchConnectedUser(ctx context.Context, userID string, query string) ([]*model.User, error) {
+	return repository.GetUserConnectionsByName(ctx, userID, query)
 }
 
 // Mutation returns generated.MutationResolver implementation.

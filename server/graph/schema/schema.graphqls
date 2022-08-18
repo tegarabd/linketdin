@@ -8,18 +8,11 @@ scalar Any
 scalar Time
 
 type Query {
-  user(id: String!): User! @goField(forceResolver: true)
-  postFeeds(input: PostFeed): [Post!]! @goField(forceResolver: true)
-
-  comments: [Comment!]! @goField(forceResolver: true)
-  connectInvitations: [ConnectInvitation!]! @goField(forceResolver: true)
-  educations: [Education!]! @goField(forceResolver: true)
-  experiences: [Experience!]! @goField(forceResolver: true)
-  jobs: [Job!]! @goField(forceResolver: true)
-  messages: [Message!]! @goField(forceResolver: true)
-  notifications: [Notification!]! @goField(forceResolver: true)
-  posts: [Post!]! @goField(forceResolver: true)
-  users: [User!]! @goField(forceResolver: true)
+  user(id: String!): User! @goField(forceResolver: true) @auth
+  postFeeds(userId: String!, limit: Int!, offset: Int!): [Post!]! @goField(forceResolver: true) @auth
+  searchPost(query: String!, limit: Int!, offset: Int!): [Post!]! @goField(forceResolver: true) @auth
+  searchUser(query: String!, limit: Int!, offset: Int!): [User!]! @goField(forceResolver: true) @auth
+  searchConnectedUser(userId: String!, query: String!): [User!]! @goField(forceResolver: true) @auth
 }
 
 type Mutation {

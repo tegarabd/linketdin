@@ -13,4 +13,5 @@ type Post struct {
 	Comments []*Comment `json:"comments"`
 	Sends    []*User    `json:"sends" gorm:"many2many:post_sends;"`
 	Likes    []*User    `json:"likes" gorm:"many2many:post_likes;"`
+	Tags []*Tag `gorm:"many2many:comment_tags;"`
 }

@@ -2,6 +2,7 @@ type Notification {
   id: ID!
   from: User! @goField(forceResolver: true)
   text: String!
+  createdAt: Time!
 }
 
 type NotificationMutation {

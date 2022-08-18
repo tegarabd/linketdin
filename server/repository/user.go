@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/markbates/goth"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gorm.io/gorm"
 )
@@ -26,24 +25,6 @@ func CreateUser(ctx context.Context, input model.RegisterUser) (*model.User, err
 		LastName: input.LastName,
 		Email:    input.Email,
 		Password: input.Password,
-	}
-
-	if err := db.Model(user).Create(&user).Error; err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
-func CreateUserGoogle(guser goth.User) (*model.User, error) {
-	db := database.GetDB()
-
-	user := model.User{
-		ID:                 guser.UserID,
-		Email:              guser.Email,
-		FirstName:          guser.FirstName,
-		LastName:           guser.LastName,
-		ProfilePhotoURL:    &guser.AvatarURL,
 	}
 
 	if err := db.Model(user).Create(&user).Error; err != nil {
@@ -74,6 +55,24 @@ func GetUserByID(ctx context.Context, id string) (*model.User, error) {
 	}
 
 	return &user, nil
+}
+
+func GetUsersByName(ctx context.Context, query string, limit int, offset int) ([]*model.User, error) {
+	db := database.GetDB()
+
+	users := []*model.User{}
+	
+	if err := db.
+		Where("first_name LIKE %?%", query).
+		Or("last_name LIKE %?%", query).
+		Or("additional_name LIKE %?%", query).
+		Limit(limit).
+		Offset(offset).
+		Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
@@ -122,6 +121,23 @@ func GetUserConnections(ctx context.Context, user *model.User) ([]*model.User, e
 
 	return connections, nil
 }
+
+func GetUserConnectionsByName(ctx context.Context, userId string, query string) ([]*model.User, error) {
+	db := database.GetDB()
+
+	connections := []*model.User{}
+	if err := db.Raw(
+		"SELECT * FROM user_connections uc JOIN users u ON uc.connection_id = u.id WHERE user_id = ? " +
+		"AND (u.first_name ILIKE '%?%' OR u.last_name ILIKE '%?%' OR u.additional_name ILIKE '%?%') " +
+		"UNION " +
+		"SELECT * FROM user_connections uc JOIN users u ON uc.user_id = u.id WHERE connection_id = ? " +
+		"AND (u.first_name ILIKE '%?%' OR u.last_name ILIKE '%?%' OR u.additional_name ILIKE '%?%')", userId, query, query, query, userId, query, query, query).Find(&connections).Error; err != nil {
+		return nil, err
+	}
+
+	return connections, nil
+}
+
 
 func GetUserFollowing(ctx context.Context, user *model.User) ([]*model.User, error) {
 	db := database.GetDB()
@@ -192,18 +208,18 @@ func GetUserMessages(ctx context.Context, user *model.User) ([]*model.Message, e
 func GetUserMightKnow(ctx context.Context, user *model.User) ([]*model.User, error) {
 	db := database.GetDB()
 
-	connections := []*model.User{}
-	if err := db.Model(&user).Association("Connections").Find(&connections); err != nil {
+	connections, err := GetUserConnections(ctx, user)
+	if err != nil {
 		return nil, err
 	}
 
-	var connectionIds []string
+	connectionIds := make([]string, 0)
 	for _, connection := range connections {
 		connectionIds = append(connectionIds, connection.ID)
 	}
 	
 	mightKnow := []*model.User{}
-	if err := db.Raw("SELECT * FROM user_connections uc JOIN users u WHERE uc.user_id = u.id WHERE user_id IN ? AND connection_id != ?", &connectionIds, user.ID).Find(&mightKnow).Error; err != nil {
+	if err := db.Raw("SELECT * FROM user_connections uc JOIN users u ON uc.connection_id = u.id WHERE uc.user_id IN ? AND uc.connection_id <> ?", connectionIds, user.ID).Find(&mightKnow).Error; err != nil {
 		return nil, err
 	}
 
@@ -283,7 +299,14 @@ func VerifyActivationCode(ctx context.Context, input *model.ActivateUser) (*mode
 		}
 	}
 	
-	db.Model(&user).Update("is_active", true)
+	if err := db.Model(&user).Update("is_active", true).Error; err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(&user).Association("ActivationCode").Clear(); err != nil {
+		return nil, err
+	}
+
 	return &user, nil
 }
 
@@ -328,6 +351,10 @@ func VerifyForgotPasswordCode(ctx context.Context, input *model.ForgotPasswordCo
 		return nil, &gqlerror.Error{
 			Message:    "Code does not match",
 		}
+	}
+
+	if err := db.Model(&user).Association("ResetPasswordCode").Clear(); err != nil {
+		return nil, err
 	}
 
 	return &user, nil

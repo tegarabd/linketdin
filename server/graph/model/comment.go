@@ -11,6 +11,6 @@ type Comment struct {
 	Commenter   *User   `json:"commenter"`
 	Text        string  `json:"text"`
 	Likes       []*User `json:"likes" gorm:"many2many:comment_likes;"`
-	RepliedToID string
-	RepliedTo   *Comment `json:"repliedTo"`
+	RepliedToID *string
+	Replies	[]Comment `json:"replies" gorm:"foreignkey:RepliedToID"`
 }

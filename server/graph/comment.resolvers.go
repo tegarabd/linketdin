@@ -25,9 +25,9 @@ func (r *commentResolver) Likes(ctx context.Context, obj *model.Comment) ([]*mod
 	return repository.GetCommentLikes(ctx, obj)
 }
 
-// RepliedTo is the resolver for the repliedTo field.
-func (r *commentResolver) RepliedTo(ctx context.Context, obj *model.Comment) (*model.Comment, error) {
-	return repository.GetCommentById(ctx, obj.RepliedToID)
+// Replies is the resolver for the replies field.
+func (r *commentResolver) Replies(ctx context.Context, obj *model.Comment, offset int, limit int) ([]*model.Comment, error) {
+	return repository.GetCommentReplies(ctx, obj, limit, offset)
 }
 
 // Like is the resolver for the like field.
