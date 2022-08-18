@@ -115,6 +115,7 @@ type FollowUser struct {
 }
 
 type ForgotPasswordCode struct {
+	ID   string `json:"id"`
 	Code string `json:"code"`
 }
 

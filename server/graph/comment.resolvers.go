@@ -5,34 +5,34 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"server/graph/generated"
 	"server/graph/model"
+	"server/repository"
 )
 
 // Post is the resolver for the post field.
 func (r *commentResolver) Post(ctx context.Context, obj *model.Comment) (*model.Post, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetPostById(ctx, obj.PostID)
 }
 
 // Commenter is the resolver for the commenter field.
 func (r *commentResolver) Commenter(ctx context.Context, obj *model.Comment) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetUserByID(ctx, obj.CommenterID)
 }
 
 // Likes is the resolver for the likes field.
 func (r *commentResolver) Likes(ctx context.Context, obj *model.Comment) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetCommentLikes(ctx, obj)
 }
 
 // RepliedTo is the resolver for the repliedTo field.
 func (r *commentResolver) RepliedTo(ctx context.Context, obj *model.Comment) (*model.Comment, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetCommentById(ctx, obj.RepliedToID)
 }
 
 // Like is the resolver for the like field.
 func (r *commentMutationResolver) Like(ctx context.Context, obj *model.CommentMutation, input *model.LikeComment) (*model.Comment, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.AddCommentLike(ctx, input)
 }
 
 // Comment returns generated.CommentResolver implementation.

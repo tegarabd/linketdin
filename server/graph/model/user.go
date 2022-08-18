@@ -13,7 +13,7 @@ type User struct {
 	ProfilePhotoURL    *string              `json:"profilePhotoUrl"`
 	BackgroundPhotoURL *string              `json:"backgroundPhotoUrl"`
 	Headline           *string              `json:"headline"`
-	Pronouns           *string              `json:"pronou"`
+	Pronouns           *string              `json:"pronouns"`
 	ProfileLink        string               `json:"profileLink"`
 	About              *string              `json:"about"`
 	Location           *Location            `json:"location" gorm:"embedded"`

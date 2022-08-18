@@ -213,27 +213,31 @@ func GetUserMightKnow(ctx context.Context, user *model.User) ([]*model.User, err
 func ViewUser(ctx context.Context, id string) (*model.User, error) {
 	db := database.GetDB()
 
-	var user model.User
-	db.First(&user, "id = ?", id)
+	user, err := GetUserByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := db.Model(&user).Update("profile_views", gorm.Expr("profile_views + ?", 1)).Error; err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func UpdateUser(ctx context.Context, input *model.UpdateUser) (*model.User, error) {
 	db := database.GetDB()
 
-	var user model.User
-	db.First(&user, "id = ?", input.UserID)
+	user, err := GetUserByID(ctx, input.UserID)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := db.Model(&user).Updates(input).Error; err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func CreateActivationCode(ctx context.Context, userId string) (*model.ActivationCode, error) {
@@ -257,7 +261,7 @@ func VerifyActivationCode(ctx context.Context, input *model.ActivateUser) (*mode
 	db := database.GetDB()
 
 	var user model.User
-	if err := db.Model(&model.User{}).Preload("ActivationCode").Find(&user).Error; err != nil {
+	if err := db.Model(&model.User{ID: input.ID}).Preload("ActivationCode").Find(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -304,7 +308,7 @@ func VerifyForgotPasswordCode(ctx context.Context, input *model.ForgotPasswordCo
 	db := database.GetDB()
 
 	var user model.User
-	if err := db.Model(&model.User{}).Preload("PasswordCode").Find(&user).Error; err != nil {
+	if err := db.Model(&model.User{ID: input.ID}).Preload("PasswordCode").Find(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -340,22 +344,23 @@ func ResetPassword(ctx context.Context, input *model.ResetPassword) (*model.User
 
 	input.Password = tools.HashPassword(input.Password)
 
-	var user model.User
-	if err := db.First(&user, "id = ?", input.UserID).Error; err != nil {
+	user, err := GetUserByID(ctx, input.UserID)
+	if err != nil {
 		return nil, err
 	}
+
 	if err := db.Model(&user).Update("password", input.Password).Error; err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func Follow(ctx context.Context, input *model.FollowUser) (*model.User, error) {
 	db := database.GetDB()
 
-	var user model.User
-	if err := db.First(&user, "id = ?", input.UserID).Error; err != nil {
+	user, err := GetUserByID(ctx, input.UserID)
+	if err != nil {
 		return nil, err
 	}
 
@@ -363,14 +368,14 @@ func Follow(ctx context.Context, input *model.FollowUser) (*model.User, error) {
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func UnFollow(ctx context.Context, input *model.FollowUser) (*model.User, error) {
 	db := database.GetDB()
 
-	var user model.User
-	if err := db.First(&user, "id = ?", input.UserID).Error; err != nil {
+	user, err := GetUserByID(ctx, input.UserID)
+	if err != nil {
 		return nil, err
 	}
 
@@ -378,5 +383,5 @@ func UnFollow(ctx context.Context, input *model.FollowUser) (*model.User, error)
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }

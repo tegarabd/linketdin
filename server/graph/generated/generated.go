@@ -228,7 +228,7 @@ type ComplexityRoot struct {
 		Notifications      func(childComplexity int) int
 		PostFeeds          func(childComplexity int, input *model.PostFeed) int
 		Posts              func(childComplexity int) int
-		User               func(childComplexity int, input string) int
+		User               func(childComplexity int, id string) int
 		Users              func(childComplexity int) int
 	}
 
@@ -363,7 +363,7 @@ type PostMutationResolver interface {
 	Share(ctx context.Context, obj *model.PostMutation, input *model.SharePost) (*model.Post, error)
 }
 type QueryResolver interface {
-	User(ctx context.Context, input string) (*model.User, error)
+	User(ctx context.Context, id string) (*model.User, error)
 	PostFeeds(ctx context.Context, input *model.PostFeed) ([]*model.Post, error)
 	Comments(ctx context.Context) ([]*model.Comment, error)
 	ConnectInvitations(ctx context.Context) ([]*model.ConnectInvitation, error)
@@ -1223,7 +1223,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["input"].(string)), true
+		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -1913,7 +1913,7 @@ scalar Any
 scalar Time
 
 type Query {
-  user(input: String!): User! @goField(forceResolver: true)
+  user(id: String!): User! @goField(forceResolver: true)
   postFeeds(input: PostFeed): [Post!]! @goField(forceResolver: true)
 
   comments: [Comment!]! @goField(forceResolver: true)
@@ -2027,6 +2027,7 @@ input ForgotPasswordEmail {
 }
 
 input ForgotPasswordCode {
+  id: ID!
   code: String!
 }
 
@@ -2361,14 +2362,14 @@ func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs m
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -7757,7 +7758,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().User(rctx, fc.Args["input"].(string))
+		return ec.resolvers.Query().User(rctx, fc.Args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13393,13 +13394,21 @@ func (ec *executionContext) unmarshalInputForgotPasswordCode(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"code"}
+	fieldsInOrder := [...]string{"id", "code"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "code":
 			var err error
 

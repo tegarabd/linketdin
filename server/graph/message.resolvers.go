@@ -5,24 +5,24 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"server/graph/generated"
 	"server/graph/model"
+	"server/repository"
 )
 
 // Sender is the resolver for the sender field.
 func (r *messageResolver) Sender(ctx context.Context, obj *model.Message) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetUserByID(ctx, obj.SenderID)
 }
 
 // Receiver is the resolver for the receiver field.
 func (r *messageResolver) Receiver(ctx context.Context, obj *model.Message) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetUserByID(ctx, obj.ReceiverID)
 }
 
 // Create is the resolver for the create field.
 func (r *messageMutationResolver) Create(ctx context.Context, obj *model.MessageMutation, input *model.CreateMessage) (*model.Message, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.CreateMessage(ctx, input)
 }
 
 // Message returns generated.MessageResolver implementation.

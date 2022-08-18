@@ -62,13 +62,13 @@ func (r *mutationResolver) Comment(ctx context.Context) (*model.CommentMutation,
 }
 
 // User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, input string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	return repository.GetUserByID(ctx, id)
 }
 
 // PostFeeds is the resolver for the postFeeds field.
 func (r *queryResolver) PostFeeds(ctx context.Context, input *model.PostFeed) ([]*model.Post, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetPostFeed(ctx, input)
 }
 
 // Comments is the resolver for the comments field.

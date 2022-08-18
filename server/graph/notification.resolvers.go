@@ -5,19 +5,19 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"server/graph/generated"
 	"server/graph/model"
+	"server/repository"
 )
 
 // From is the resolver for the from field.
 func (r *notificationResolver) From(ctx context.Context, obj *model.Notification) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetUserByID(ctx, obj.FromID)
 }
 
 // Create is the resolver for the create field.
 func (r *notificationMutationResolver) Create(ctx context.Context, obj *model.NotificationMutation, input *model.CreateNotification) (*model.Notification, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.CreateNotification(ctx, input)
 }
 
 // Notification returns generated.NotificationResolver implementation.

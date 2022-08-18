@@ -5,29 +5,29 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"server/graph/generated"
 	"server/graph/model"
+	"server/repository"
 )
 
 // User is the resolver for the user field.
 func (r *experienceResolver) User(ctx context.Context, obj *model.Experience) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetUserByID(ctx, obj.UserID)
 }
 
 // Create is the resolver for the create field.
 func (r *experienceMutationResolver) Create(ctx context.Context, obj *model.ExperienceMutation, input *model.CreateExperience) (*model.Experience, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.CreateExperience(ctx, input)
 }
 
 // Update is the resolver for the update field.
 func (r *experienceMutationResolver) Update(ctx context.Context, obj *model.ExperienceMutation, input *model.UpdateExperience) (*model.Experience, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.UpdateExperience(ctx, input)
 }
 
 // Delete is the resolver for the delete field.
 func (r *experienceMutationResolver) Delete(ctx context.Context, obj *model.ExperienceMutation, input *model.DeleteExperience) (*model.Experience, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.DeleteExperience(ctx, input)
 }
 
 // Experience returns generated.ExperienceResolver implementation.

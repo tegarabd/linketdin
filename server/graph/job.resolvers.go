@@ -5,14 +5,14 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"server/graph/generated"
 	"server/graph/model"
+	"server/repository"
 )
 
 // Create is the resolver for the create field.
 func (r *jobMutationResolver) Create(ctx context.Context, obj *model.JobMutation, input *model.CreateJob) (*model.Job, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.CreateJob(ctx, input)
 }
 
 // JobMutation returns generated.JobMutationResolver implementation.

@@ -1,11 +1,22 @@
-version: '3.8'
 services:
-  db:
+  database:
     container_name: database
-    image: postgres:latest
+    image: postgres:14.5
     restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=linktdin
     ports:
       - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  server:
+    container_name: server
+    build: ./server
+    ports:
+      - '8080:8080'
+    links:
+      - database
+volumes:
+  pgdata:

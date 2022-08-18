@@ -5,29 +5,29 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"server/graph/generated"
 	"server/graph/model"
+	"server/repository"
 )
 
 // User is the resolver for the user field.
 func (r *educationResolver) User(ctx context.Context, obj *model.Education) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.GetUserByID(ctx, obj.UserID)
 }
 
 // Create is the resolver for the create field.
 func (r *educationMutationResolver) Create(ctx context.Context, obj *model.EducationMutation, input *model.CreateEducation) (*model.Education, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.CreateEducation(ctx, input)
 }
 
 // Update is the resolver for the update field.
 func (r *educationMutationResolver) Update(ctx context.Context, obj *model.EducationMutation, input *model.UpdateEducation) (*model.Education, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.UpdateEducation(ctx, input)
 }
 
 // Delete is the resolver for the delete field.
 func (r *educationMutationResolver) Delete(ctx context.Context, obj *model.EducationMutation, input *model.DeleteEducation) (*model.Education, error) {
-	panic(fmt.Errorf("not implemented"))
+	return repository.DeleteEducation(ctx, input)
 }
 
 // Education returns generated.EducationResolver implementation.
