@@ -21,7 +21,8 @@ func initRoute() (*mux.Router) {
 	router.Use(middleware.AuthMiddleware)
 
 	c := generated.Config{Resolvers: &resolver.Resolver{}}
-	c.Directives.Auth = directives.Auth
+	c.Directives.Authenticated = directives.Authenticated
+	c.Directives.Notauthenticated = directives.NotAuthenticated
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(c))
 

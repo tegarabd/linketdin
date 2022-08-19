@@ -8,10 +8,14 @@ import (
 	"server/graph/generated"
 	"server/graph/model"
 	"server/repository"
-	"server/service"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+// Headline is the resolver for the headline field.
+func (r *userResolver) Headline(ctx context.Context, obj *model.User) (*string, error) {
+	return repository.GetUserHeadline(ctx, obj)
+}
 
 // Experiences is the resolver for the experiences field.
 func (r *userResolver) Experiences(ctx context.Context, obj *model.User) ([]*model.Experience, error) {
@@ -101,30 +105,6 @@ func (r *userMutationResolver) UnBlock(ctx context.Context, obj *model.UserMutat
 // Update is the resolver for the update field.
 func (r *userMutationResolver) Update(ctx context.Context, obj *model.UserMutation, input *model.UpdateUser) (*model.User, error) {
 	return repository.UpdateUser(ctx, input)
-}
-
-// Activate is the resolver for the activate field.
-func (r *userMutationResolver) Activate(ctx context.Context, obj *model.UserMutation, input *model.ActivateUser) (*model.User, error) {
-	return repository.VerifyActivationCode(ctx, input)
-}
-
-// VerifyForgotPasswordEmail is the resolver for the verifyForgotPasswordEmail field.
-func (r *userMutationResolver) VerifyForgotPasswordEmail(ctx context.Context, obj *model.UserMutation, input *model.ForgotPasswordEmail) (*model.User, error) {
-	user, err := repository.GetUserByEmail(ctx, input.Email)
-	if err != nil {
-		return nil, err
-	}
-	return service.ResolveForgotPasswordCode(ctx, user)
-}
-
-// VerifyForgotPasswordCode is the resolver for the verifyForgotPasswordCode field.
-func (r *userMutationResolver) VerifyForgotPasswordCode(ctx context.Context, obj *model.UserMutation, input *model.ForgotPasswordCode) (*model.User, error) {
-	return repository.VerifyForgotPasswordCode(ctx, input)
-}
-
-// ResetPassword is the resolver for the resetPassword field.
-func (r *userMutationResolver) ResetPassword(ctx context.Context, obj *model.UserMutation, input *model.ResetPassword) (*model.User, error) {
-	return repository.ResetPassword(ctx, input)
 }
 
 // User returns generated.UserResolver implementation.

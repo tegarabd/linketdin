@@ -3,7 +3,7 @@ directive @goField(
   name: String
 ) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 directive @authenticated on FIELD_DEFINITION
-directive @activated on FIELD_DEFINITION
+directive @notauthenticated on FIELD_DEFINITION
 
 scalar Any
 scalar Time
@@ -17,14 +17,14 @@ type Query {
 }
 
 type Mutation {
-  auth: AuthMutation! @goField(forceResolver: true)
-  user: UserMutation! @goField(forceResolver: true)
-  post: PostMutation! @goField(forceResolver: true)
-  notification: NotificationMutation! @goField(forceResolver: true)
-  message: MessageMutation! @goField(forceResolver: true)
-  job: JobMutation! @goField(forceResolver: true)
-  experience: ExperienceMutation! @goField(forceResolver: true)
-  education: EducationMutation! @goField(forceResolver: true)
-  connection: ConnectionMutation! @goField(forceResolver: true)
-  comment: CommentMutation! @goField(forceResolver: true)
+  auth: AuthMutation! @goField(forceResolver: true) @notauthenticated
+  user: UserMutation! @goField(forceResolver: true) @authenticated
+  post: PostMutation! @goField(forceResolver: true) @authenticated
+  notification: NotificationMutation! @goField(forceResolver: true) @authenticated
+  message: MessageMutation! @goField(forceResolver: true) @authenticated
+  job: JobMutation! @goField(forceResolver: true) @authenticated
+  experience: ExperienceMutation! @goField(forceResolver: true) @authenticated
+  education: EducationMutation! @goField(forceResolver: true) @authenticated
+  connection: ConnectionMutation! @goField(forceResolver: true) @authenticated
+  comment: CommentMutation! @goField(forceResolver: true) @authenticated
 }

@@ -7,6 +7,7 @@ import (
 	"context"
 	"server/graph/generated"
 	"server/graph/model"
+	"server/repository"
 	"server/service"
 )
 
@@ -22,14 +23,36 @@ func (r *authMutationResolver) Login(ctx context.Context, obj *model.AuthMutatio
 }
 
 // Register is the resolver for the register field.
-func (r *authMutationResolver) Register(ctx context.Context, obj *model.AuthMutation, input model.RegisterUser) (*model.Token, error) {
-	token, err := service.Register(ctx, input)
+func (r *authMutationResolver) Register(ctx context.Context, obj *model.AuthMutation, input model.RegisterUser) (*model.ActivationID, error) {
+	activationCode, err := service.Register(ctx, input)
 	if err != nil {
 		return nil, err
 	}
-	return &model.Token{
-		Token: token.(string),
-	}, nil
+	return &model.ActivationID{ActivationID: activationCode.(string)}, nil
+}
+
+// Activate is the resolver for the activate field.
+func (r *authMutationResolver) Activate(ctx context.Context, obj *model.AuthMutation, input *model.ActivateUser) (*model.User, error) {
+	return repository.VerifyActivationCode(ctx, input)
+}
+
+// VerifyForgotPasswordEmail is the resolver for the verifyForgotPasswordEmail field.
+func (r *authMutationResolver) VerifyForgotPasswordEmail(ctx context.Context, obj *model.AuthMutation, input *model.ForgotPasswordEmail) (*model.ForgotPasswordID, error) {
+	user, err := repository.GetUserByEmail(ctx, input.Email)
+	if err != nil {
+		return nil, err
+	}
+	return service.ResolveForgotPasswordCode(ctx, user)
+}
+
+// VerifyForgotPasswordCode is the resolver for the verifyForgotPasswordCode field.
+func (r *authMutationResolver) VerifyForgotPasswordCode(ctx context.Context, obj *model.AuthMutation, input *model.ForgotPasswordCode) (*model.User, error) {
+	return repository.VerifyForgotPasswordCode(ctx, input)
+}
+
+// ResetPassword is the resolver for the resetPassword field.
+func (r *authMutationResolver) ResetPassword(ctx context.Context, obj *model.AuthMutation, input *model.ResetPassword) (*model.User, error) {
+	return repository.ResetPassword(ctx, input)
 }
 
 // AuthMutation returns generated.AuthMutationResolver implementation.

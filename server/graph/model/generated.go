@@ -7,8 +7,12 @@ type AcceptInvitation struct {
 }
 
 type ActivateUser struct {
-	ID   string `json:"id"`
-	Code string `json:"code"`
+	ActivationID string `json:"activationId"`
+	Code         string `json:"code"`
+}
+
+type ActivationID struct {
+	ActivationID string `json:"activationId"`
 }
 
 type AddPostTags struct {
@@ -17,8 +21,12 @@ type AddPostTags struct {
 }
 
 type AuthMutation struct {
-	Login    *Token `json:"login"`
-	Register *Token `json:"register"`
+	Login                     *Token            `json:"login"`
+	Register                  *ActivationID     `json:"register"`
+	Activate                  *User             `json:"activate"`
+	VerifyForgotPasswordEmail *ForgotPasswordID `json:"verifyForgotPasswordEmail"`
+	VerifyForgotPasswordCode  *User             `json:"verifyForgotPasswordCode"`
+	ResetPassword             *User             `json:"resetPassword"`
 }
 
 type BlockUser struct {
@@ -125,12 +133,16 @@ type FollowUser struct {
 }
 
 type ForgotPasswordCode struct {
-	ID   string `json:"id"`
-	Code string `json:"code"`
+	ForgotPasswordID string `json:"forgotPasswordId"`
+	Code             string `json:"code"`
 }
 
 type ForgotPasswordEmail struct {
 	Email string `json:"email"`
+}
+
+type ForgotPasswordID struct {
+	ForgotPasswordID string `json:"forgotPasswordId"`
 }
 
 type JobMutation struct {
@@ -243,16 +255,12 @@ type UpdateUser struct {
 }
 
 type UserMutation struct {
-	View                      *User `json:"view"`
-	Follow                    *User `json:"follow"`
-	UnFollow                  *User `json:"unFollow"`
-	Block                     *User `json:"block"`
-	UnBlock                   *User `json:"unBlock"`
-	Update                    *User `json:"update"`
-	Activate                  *User `json:"activate"`
-	VerifyForgotPasswordEmail *User `json:"verifyForgotPasswordEmail"`
-	VerifyForgotPasswordCode  *User `json:"verifyForgotPasswordCode"`
-	ResetPassword             *User `json:"resetPassword"`
+	View     *User `json:"view"`
+	Follow   *User `json:"follow"`
+	UnFollow *User `json:"unFollow"`
+	Block    *User `json:"block"`
+	UnBlock  *User `json:"unBlock"`
+	Update   *User `json:"update"`
 }
 
 type ViewUser struct {

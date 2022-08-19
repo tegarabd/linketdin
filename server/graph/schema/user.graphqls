@@ -6,7 +6,7 @@ type User {
   additionalName: String
   profilePhotoUrl: String
   backgroundPhotoUrl: String
-  headline: String
+  headline: String @goField(forceResolver: true)
   pronouns: String
   profileLink: String!
   about: String

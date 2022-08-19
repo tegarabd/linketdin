@@ -86,6 +86,27 @@ func GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	return &user, nil
 }
 
+func GetUserHeadline(ctx context.Context, user *model.User) (*string, error) {
+	db := database.GetDB()
+
+	experiences := []*model.Experience{}
+	if err := db.Model(&user).Association("Experiences").Find(&experiences); err != nil {
+		return nil, err
+	}
+
+	headlineStr := new(string)
+	var headline strings.Builder
+	for _, experience := range experiences {
+		if experience.Headline != nil {
+			headline.WriteString(*experience.Headline + "\n")
+		}
+	}
+
+	*headlineStr = headline.String()
+
+	return headlineStr, nil
+}
+
 func GetUserExperiences(ctx context.Context, user *model.User) ([]*model.Experience, error) {
 	db := database.GetDB()
 
@@ -290,38 +311,38 @@ func CreateActivationCode(ctx context.Context, userId string) (*model.Activation
 func VerifyActivationCode(ctx context.Context, input *model.ActivateUser) (*model.User, error) {
 	db := database.GetDB()
 
-	var user model.User
-	if err := db.Model(&model.User{ID: input.ID}).Preload("ActivationCode").Find(&user).Error; err != nil {
+	activationCode := model.ActivationCode{ID: input.ActivationID}
+	if err := db.Model(&activationCode).Preload("User").Find(&activationCode).Error; err != nil {
 		return nil, err
 	}
 
-	if user.ActivationCode.Code == ""  {
+	if activationCode.Code == ""  {
 		return nil, &gqlerror.Error{
 			Message:    "No activation request yet",
 		}
 	}
 
-	if user.ActivationCode.ExpiredAt.Before(time.Now()) {
+	if activationCode.ExpiredAt.Before(time.Now()) {
 		return nil, &gqlerror.Error{
 			Message:    "Code has been expired",
 		}
 	}
 
-	if user.ActivationCode.Code != input.Code {
+	if activationCode.Code != input.Code {
 		return nil, &gqlerror.Error{
 			Message:    "Code does not match",
 		}
 	}
 	
-	if err := db.Model(&user).Update("is_active", true).Error; err != nil {
+	if err := db.Model(&activationCode.User).Update("is_active", true).Error; err != nil {
 		return nil, err
 	}
 
-	if err := db.Model(&user).Association("ActivationCode").Clear(); err != nil {
+	if err := db.Model(&activationCode).Association("User").Clear(); err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return &activationCode.User, nil
 }
 
 func CreateForgotPasswordCode(ctx context.Context, userId string) (*model.ResetPasswordCode, error) {
@@ -343,35 +364,35 @@ func CreateForgotPasswordCode(ctx context.Context, userId string) (*model.ResetP
 
 func VerifyForgotPasswordCode(ctx context.Context, input *model.ForgotPasswordCode) (*model.User, error) {
 	db := database.GetDB()
-
-	var user model.User
-	if err := db.Model(&model.User{ID: input.ID}).Preload("PasswordCode").Find(&user).Error; err != nil {
+	
+	resetPasswordCode := model.ResetPasswordCode{ID: input.ForgotPasswordID}
+	if err := db.Model(&resetPasswordCode).Preload("User").Find(&resetPasswordCode).Error; err != nil {
 		return nil, err
 	}
 
-	if user.ResetPasswordCode.Code == ""  {
+	if resetPasswordCode.Code == ""  {
 		return nil, &gqlerror.Error{
 			Message:    "No reset password request yet",
 		}
 	}
 
-	if user.ResetPasswordCode.ExpiredAt.Before(time.Now()) {
+	if resetPasswordCode.ExpiredAt.Before(time.Now()) {
 		return nil, &gqlerror.Error{
 			Message:    "Code has been expired",
 		}
 	}
 
-	if user.ResetPasswordCode.Code != input.Code {
+	if resetPasswordCode.Code != input.Code {
 		return nil, &gqlerror.Error{
 			Message:    "Code does not match",
 		}
 	}
 
-	if err := db.Model(&user).Association("ResetPasswordCode").Clear(); err != nil {
+	if err := db.Model(&resetPasswordCode).Association("User").Clear(); err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return &resetPasswordCode.User, nil
 }
 
 func ResetPassword(ctx context.Context, input *model.ResetPassword) (*model.User, error) {

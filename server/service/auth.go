@@ -53,12 +53,7 @@ func Register(ctx context.Context, input model.RegisterUser) (interface{}, error
 		return nil, err
 	}
 
-	token, err := JwtGenerate(ctx, user.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return token, nil
+	return activationCode, nil
 }
 
 func Login(ctx context.Context, input model.LoginUser) (interface{}, error) {
@@ -84,6 +79,12 @@ func Login(ctx context.Context, input model.LoginUser) (interface{}, error) {
 		return nil, err
 	}
 
+	if !user.IsActive {
+		return nil, &gqlerror.Error{
+				Message: "Account not activated yet",
+			}
+	}
+
 	if err := tools.ComparePassword(user.Password, input.Password); err != nil {
 		return nil, err
 	}
@@ -97,7 +98,7 @@ func Login(ctx context.Context, input model.LoginUser) (interface{}, error) {
 
 }
 
-func ResolveForgotPasswordCode(ctx context.Context, user *model.User) (*model.User, error) {
+func ResolveForgotPasswordCode(ctx context.Context, user *model.User) (*model.ForgotPasswordID, error) {
 
 	forgotPasswordCode, err := repository.CreateForgotPasswordCode(ctx, user.ID)
 	if err != nil {
@@ -109,5 +110,5 @@ func ResolveForgotPasswordCode(ctx context.Context, user *model.User) (*model.Us
 		return nil, err
 	}
 
-	return user, nil
+	return &model.ForgotPasswordID{ForgotPasswordID: forgotPasswordCode.ID}, nil
 }
