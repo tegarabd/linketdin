@@ -122,6 +122,20 @@ func GetUserConnections(ctx context.Context, user *model.User) ([]*model.User, e
 	return connections, nil
 }
 
+func GetUserBlocked(ctx context.Context, user *model.User) ([]*model.User, error) {
+	db := database.GetDB()
+
+	blocked := []*model.User{}
+	if err := db.Raw(
+		"SELECT * FROM user_blocked ub JOIN users u ON ub.blocked_id = u.id WHERE user_id = ? " +
+		"UNION " +
+		"SELECT * FROM user_blocked ub JOIN users u ON ub.user_id = u.id WHERE blocked_id = ?", user.ID, user.ID).Find(&blocked).Error; err != nil {
+		return nil, err
+	}
+
+	return blocked, nil
+}
+
 func GetUserConnectionsByName(ctx context.Context, userId string, query string) ([]*model.User, error) {
 	db := database.GetDB()
 
@@ -407,6 +421,36 @@ func UnFollow(ctx context.Context, input *model.FollowUser) (*model.User, error)
 	}
 
 	if err := db.Model(&user).Association("Following").Delete(&model.User{ID: input.FollowingID}); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func Block(ctx context.Context, input *model.BlockUser) (*model.User, error) {
+	db := database.GetDB()
+
+	user, err := GetUserByID(ctx, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(&user).Association("Blocked").Append(&model.User{ID: input.BlockedID}); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func UnBlock(ctx context.Context, input *model.BlockUser) (*model.User, error) {
+	db := database.GetDB()
+
+	user, err := GetUserByID(ctx, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(&user).Association("Blocked").Delete(&model.User{ID: input.BlockedID}); err != nil {
 		return nil, err
 	}
 

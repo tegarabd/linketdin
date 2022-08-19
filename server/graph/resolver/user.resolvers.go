@@ -1,4 +1,4 @@
-package graph
+package resolver
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -63,6 +63,11 @@ func (r *userResolver) UserMightKnow(ctx context.Context, obj *model.User) ([]*m
 	return repository.GetUserMightKnow(ctx, obj)
 }
 
+// Blocked is the resolver for the blocked field.
+func (r *userResolver) Blocked(ctx context.Context, obj *model.User) ([]*model.User, error) {
+	return repository.GetUserBlocked(ctx, obj)
+}
+
 // View is the resolver for the view field.
 func (r *userMutationResolver) View(ctx context.Context, obj *model.UserMutation, input *model.ViewUser) (*model.User, error) {
 	if input.ViewerID == input.ViewedUserID {
@@ -81,6 +86,16 @@ func (r *userMutationResolver) Follow(ctx context.Context, obj *model.UserMutati
 // UnFollow is the resolver for the unFollow field.
 func (r *userMutationResolver) UnFollow(ctx context.Context, obj *model.UserMutation, input *model.FollowUser) (*model.User, error) {
 	return repository.UnFollow(ctx, input)
+}
+
+// Block is the resolver for the block field.
+func (r *userMutationResolver) Block(ctx context.Context, obj *model.UserMutation, input *model.BlockUser) (*model.User, error) {
+	return repository.Block(ctx, input)
+}
+
+// UnBlock is the resolver for the unBlock field.
+func (r *userMutationResolver) UnBlock(ctx context.Context, obj *model.UserMutation, input *model.BlockUser) (*model.User, error) {
+	return repository.UnBlock(ctx, input)
 }
 
 // Update is the resolver for the update field.

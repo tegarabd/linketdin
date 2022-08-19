@@ -6,12 +6,30 @@ import (
 	"server/graph/model"
 	"server/repository"
 	"server/tools"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gorm.io/gorm"
 )
 
 func Register(ctx context.Context, input model.RegisterUser) (interface{}, error) {
+	
+	var errValidation strings.Builder
+	if input.Email == "" || input.Password == "" || input.FirstName == "" || input.LastName == "" {
+		errValidation.WriteString("All field must be filled\n")
+	}
+	if !tools.ValidEmail(input.Email) {
+		errValidation.WriteString("Email must be valid\n");
+	}
+	if len(input.Password) < 8 {
+		errValidation.WriteString("Password must be 8 characters or more\n")
+	}
+
+	if errValidation.Len() > 0 {
+		return nil, &gqlerror.Error{
+			Message: errValidation.String(),
+		}
+	}
 
 	_, err := repository.GetUserByEmail(ctx, input.Email)
 	if err == nil {
@@ -44,6 +62,17 @@ func Register(ctx context.Context, input model.RegisterUser) (interface{}, error
 }
 
 func Login(ctx context.Context, input model.LoginUser) (interface{}, error) {
+
+	var errValidation strings.Builder
+	if input.Email == "" || input.Password == "" {
+		errValidation.WriteString("All field must be filled\n")
+	}
+
+	if errValidation.Len() > 0 {
+		return nil, &gqlerror.Error{
+			Message: errValidation.String(),
+		}
+	}
 
 	user, err := repository.GetUserByEmail(ctx, input.Email)
 	if err != nil {

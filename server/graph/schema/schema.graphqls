@@ -2,17 +2,18 @@ directive @goField(
   forceResolver: Boolean
   name: String
 ) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
-directive @auth on FIELD_DEFINITION
+directive @authenticated on FIELD_DEFINITION
+directive @activated on FIELD_DEFINITION
 
 scalar Any
 scalar Time
 
 type Query {
-  user(id: String!): User! @goField(forceResolver: true) @auth
-  postFeeds(userId: String!, limit: Int!, offset: Int!): [Post!]! @goField(forceResolver: true) @auth
-  searchPost(query: String!, limit: Int!, offset: Int!): [Post!]! @goField(forceResolver: true) @auth
-  searchUser(query: String!, limit: Int!, offset: Int!): [User!]! @goField(forceResolver: true) @auth
-  searchConnectedUser(userId: String!, query: String!): [User!]! @goField(forceResolver: true) @auth
+  user(id: String!): User! @goField(forceResolver: true) @authenticated
+  postFeeds(userId: String!, limit: Int!, offset: Int!): [Post!]! @goField(forceResolver: true) @authenticated
+  searchPost(query: String!, limit: Int!, offset: Int!): [Post!]! @goField(forceResolver: true) @authenticated
+  searchUser(query: String!, limit: Int!, offset: Int!): [User!]! @goField(forceResolver: true) @authenticated
+  searchConnectedUser(userId: String!, query: String!): [User!]! @goField(forceResolver: true) @authenticated
 }
 
 type Mutation {

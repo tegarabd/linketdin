@@ -21,6 +21,11 @@ type AuthMutation struct {
 	Register *Token `json:"register"`
 }
 
+type BlockUser struct {
+	UserID    string `json:"userId"`
+	BlockedID string `json:"blockedId"`
+}
+
 type CommentMutation struct {
 	Like *Comment `json:"like"`
 }
@@ -241,6 +246,8 @@ type UserMutation struct {
 	View                      *User `json:"view"`
 	Follow                    *User `json:"follow"`
 	UnFollow                  *User `json:"unFollow"`
+	Block                     *User `json:"block"`
+	UnBlock                   *User `json:"unBlock"`
 	Update                    *User `json:"update"`
 	Activate                  *User `json:"activate"`
 	VerifyForgotPasswordEmail *User `json:"verifyForgotPasswordEmail"`

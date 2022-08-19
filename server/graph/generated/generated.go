@@ -253,6 +253,7 @@ type ComplexityRoot struct {
 		About              func(childComplexity int) int
 		AdditionalName     func(childComplexity int) int
 		BackgroundPhotoURL func(childComplexity int) int
+		Blocked            func(childComplexity int) int
 		Connections        func(childComplexity int) int
 		Educations         func(childComplexity int) int
 		Email              func(childComplexity int) int
@@ -278,8 +279,10 @@ type ComplexityRoot struct {
 
 	UserMutation struct {
 		Activate                  func(childComplexity int, input *model.ActivateUser) int
+		Block                     func(childComplexity int, input *model.BlockUser) int
 		Follow                    func(childComplexity int, input *model.FollowUser) int
 		ResetPassword             func(childComplexity int, input *model.ResetPassword) int
+		UnBlock                   func(childComplexity int, input *model.BlockUser) int
 		UnFollow                  func(childComplexity int, input *model.FollowUser) int
 		Update                    func(childComplexity int, input *model.UpdateUser) int
 		VerifyForgotPasswordCode  func(childComplexity int, input *model.ForgotPasswordCode) int
@@ -388,11 +391,14 @@ type UserResolver interface {
 	Notifications(ctx context.Context, obj *model.User) ([]*model.Notification, error)
 	Messages(ctx context.Context, obj *model.User) ([]*model.Message, error)
 	UserMightKnow(ctx context.Context, obj *model.User) ([]*model.User, error)
+	Blocked(ctx context.Context, obj *model.User) ([]*model.User, error)
 }
 type UserMutationResolver interface {
 	View(ctx context.Context, obj *model.UserMutation, input *model.ViewUser) (*model.User, error)
 	Follow(ctx context.Context, obj *model.UserMutation, input *model.FollowUser) (*model.User, error)
 	UnFollow(ctx context.Context, obj *model.UserMutation, input *model.FollowUser) (*model.User, error)
+	Block(ctx context.Context, obj *model.UserMutation, input *model.BlockUser) (*model.User, error)
+	UnBlock(ctx context.Context, obj *model.UserMutation, input *model.BlockUser) (*model.User, error)
 	Update(ctx context.Context, obj *model.UserMutation, input *model.UpdateUser) (*model.User, error)
 	Activate(ctx context.Context, obj *model.UserMutation, input *model.ActivateUser) (*model.User, error)
 	VerifyForgotPasswordEmail(ctx context.Context, obj *model.UserMutation, input *model.ForgotPasswordEmail) (*model.User, error)
@@ -1341,6 +1347,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.BackgroundPhotoURL(childComplexity), true
 
+	case "User.blocked":
+		if e.complexity.User.Blocked == nil {
+			break
+		}
+
+		return e.complexity.User.Blocked(childComplexity), true
+
 	case "User.connections":
 		if e.complexity.User.Connections == nil {
 			break
@@ -1500,6 +1513,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserMutation.Activate(childComplexity, args["input"].(*model.ActivateUser)), true
 
+	case "UserMutation.block":
+		if e.complexity.UserMutation.Block == nil {
+			break
+		}
+
+		args, err := ec.field_UserMutation_block_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.UserMutation.Block(childComplexity, args["input"].(*model.BlockUser)), true
+
 	case "UserMutation.follow":
 		if e.complexity.UserMutation.Follow == nil {
 			break
@@ -1523,6 +1548,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserMutation.ResetPassword(childComplexity, args["input"].(*model.ResetPassword)), true
+
+	case "UserMutation.unBlock":
+		if e.complexity.UserMutation.UnBlock == nil {
+			break
+		}
+
+		args, err := ec.field_UserMutation_unBlock_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.UserMutation.UnBlock(childComplexity, args["input"].(*model.BlockUser)), true
 
 	case "UserMutation.unFollow":
 		if e.complexity.UserMutation.UnFollow == nil {
@@ -1595,6 +1632,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputAcceptInvitation,
 		ec.unmarshalInputActivateUser,
 		ec.unmarshalInputAddPostTags,
+		ec.unmarshalInputBlockUser,
 		ec.unmarshalInputCommentPost,
 		ec.unmarshalInputCreateEducation,
 		ec.unmarshalInputCreateExperience,
@@ -2021,12 +2059,15 @@ type Mutation {
   notifications: [Notification!] @goField(forceResolver: true)
   messages: [Message!] @goField(forceResolver: true)
   userMightKnow: [User!] @goField(forceResolver: true)
+  blocked: [User!] @goField(forceResolver: true)
 }
 
 type UserMutation {
   view(input: ViewUser): User! @goField(forceResolver: true)
   follow(input: FollowUser): User! @goField(forceResolver: true)
   unFollow(input: FollowUser): User! @goField(forceResolver: true)
+  block(input: BlockUser): User! @goField(forceResolver: true)
+  unBlock(input: BlockUser): User! @goField(forceResolver: true)
   update(input: UpdateUser): User! @goField(forceResolver: true)
   activate(input: ActivateUser): User! @goField(forceResolver: true)
   verifyForgotPasswordEmail(input: ForgotPasswordEmail): User! @goField(forceResolver: true)
@@ -2059,6 +2100,11 @@ input ViewUser {
 input FollowUser {
   userId: String!
   followingId: String!
+}
+
+input BlockUser {
+  userId: String!
+  blockedId: String!
 }
 
 input RegisterUser {
@@ -2615,6 +2661,21 @@ func (ec *executionContext) field_UserMutation_activate_args(ctx context.Context
 	return args, nil
 }
 
+func (ec *executionContext) field_UserMutation_block_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.BlockUser
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOBlockUser2ᚖserverᚋgraphᚋmodelᚐBlockUser(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_UserMutation_follow_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2637,6 +2698,21 @@ func (ec *executionContext) field_UserMutation_resetPassword_args(ctx context.Co
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalOResetPassword2ᚖserverᚋgraphᚋmodelᚐResetPassword(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_UserMutation_unBlock_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.BlockUser
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOBlockUser2ᚖserverᚋgraphᚋmodelᚐBlockUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3249,6 +3325,8 @@ func (ec *executionContext) fieldContext_Comment_commenter(ctx context.Context, 
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -3384,6 +3462,8 @@ func (ec *executionContext) fieldContext_Comment_likes(ctx context.Context, fiel
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -3708,6 +3788,8 @@ func (ec *executionContext) fieldContext_ConnectInvitation_from(ctx context.Cont
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -3802,6 +3884,8 @@ func (ec *executionContext) fieldContext_ConnectInvitation_to(ctx context.Contex
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -4305,6 +4389,8 @@ func (ec *executionContext) fieldContext_Education_user(ctx context.Context, fie
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -5026,6 +5112,8 @@ func (ec *executionContext) fieldContext_Experience_user(ctx context.Context, fi
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -6282,6 +6370,8 @@ func (ec *executionContext) fieldContext_Message_sender(ctx context.Context, fie
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -6376,6 +6466,8 @@ func (ec *executionContext) fieldContext_Message_receiver(ctx context.Context, f
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -6676,6 +6768,10 @@ func (ec *executionContext) fieldContext_Mutation_user(ctx context.Context, fiel
 				return ec.fieldContext_UserMutation_follow(ctx, field)
 			case "unFollow":
 				return ec.fieldContext_UserMutation_unFollow(ctx, field)
+			case "block":
+				return ec.fieldContext_UserMutation_block(ctx, field)
+			case "unBlock":
+				return ec.fieldContext_UserMutation_unBlock(ctx, field)
 			case "update":
 				return ec.fieldContext_UserMutation_update(ctx, field)
 			case "activate":
@@ -7228,6 +7324,8 @@ func (ec *executionContext) fieldContext_Notification_from(ctx context.Context, 
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -7519,6 +7617,8 @@ func (ec *executionContext) fieldContext_Post_poster(ctx context.Context, field 
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -7804,6 +7904,8 @@ func (ec *executionContext) fieldContext_Post_sends(ctx context.Context, field g
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -7895,6 +7997,8 @@ func (ec *executionContext) fieldContext_Post_likes(ctx context.Context, field g
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -8488,6 +8592,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -8807,6 +8913,8 @@ func (ec *executionContext) fieldContext_Query_searchUser(ctx context.Context, f
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -8932,6 +9040,8 @@ func (ec *executionContext) fieldContext_Query_searchConnectedUser(ctx context.C
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -10200,6 +10310,8 @@ func (ec *executionContext) fieldContext_User_connections(ctx context.Context, f
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -10291,6 +10403,8 @@ func (ec *executionContext) fieldContext_User_followers(ctx context.Context, fie
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -10382,6 +10496,8 @@ func (ec *executionContext) fieldContext_User_following(ctx context.Context, fie
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -10695,6 +10811,101 @@ func (ec *executionContext) fieldContext_User_userMightKnow(ctx context.Context,
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_blocked(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_blocked(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().Blocked(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚕᚖserverᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_blocked(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "additionalName":
+				return ec.fieldContext_User_additionalName(ctx, field)
+			case "profilePhotoUrl":
+				return ec.fieldContext_User_profilePhotoUrl(ctx, field)
+			case "backgroundPhotoUrl":
+				return ec.fieldContext_User_backgroundPhotoUrl(ctx, field)
+			case "headline":
+				return ec.fieldContext_User_headline(ctx, field)
+			case "pronouns":
+				return ec.fieldContext_User_pronouns(ctx, field)
+			case "profileLink":
+				return ec.fieldContext_User_profileLink(ctx, field)
+			case "about":
+				return ec.fieldContext_User_about(ctx, field)
+			case "location":
+				return ec.fieldContext_User_location(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
+			case "isActive":
+				return ec.fieldContext_User_isActive(ctx, field)
+			case "experiences":
+				return ec.fieldContext_User_experiences(ctx, field)
+			case "educations":
+				return ec.fieldContext_User_educations(ctx, field)
+			case "connections":
+				return ec.fieldContext_User_connections(ctx, field)
+			case "followers":
+				return ec.fieldContext_User_followers(ctx, field)
+			case "following":
+				return ec.fieldContext_User_following(ctx, field)
+			case "posts":
+				return ec.fieldContext_User_posts(ctx, field)
+			case "invitations":
+				return ec.fieldContext_User_invitations(ctx, field)
+			case "notifications":
+				return ec.fieldContext_User_notifications(ctx, field)
+			case "messages":
+				return ec.fieldContext_User_messages(ctx, field)
+			case "userMightKnow":
+				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -10789,6 +11000,8 @@ func (ec *executionContext) fieldContext_UserMutation_view(ctx context.Context, 
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -10894,6 +11107,8 @@ func (ec *executionContext) fieldContext_UserMutation_follow(ctx context.Context
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -10999,6 +11214,8 @@ func (ec *executionContext) fieldContext_UserMutation_unFollow(ctx context.Conte
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -11011,6 +11228,220 @@ func (ec *executionContext) fieldContext_UserMutation_unFollow(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_UserMutation_unFollow_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserMutation_block(ctx context.Context, field graphql.CollectedField, obj *model.UserMutation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserMutation_block(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UserMutation().Block(rctx, obj, fc.Args["input"].(*model.BlockUser))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖserverᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserMutation_block(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserMutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "additionalName":
+				return ec.fieldContext_User_additionalName(ctx, field)
+			case "profilePhotoUrl":
+				return ec.fieldContext_User_profilePhotoUrl(ctx, field)
+			case "backgroundPhotoUrl":
+				return ec.fieldContext_User_backgroundPhotoUrl(ctx, field)
+			case "headline":
+				return ec.fieldContext_User_headline(ctx, field)
+			case "pronouns":
+				return ec.fieldContext_User_pronouns(ctx, field)
+			case "profileLink":
+				return ec.fieldContext_User_profileLink(ctx, field)
+			case "about":
+				return ec.fieldContext_User_about(ctx, field)
+			case "location":
+				return ec.fieldContext_User_location(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
+			case "isActive":
+				return ec.fieldContext_User_isActive(ctx, field)
+			case "experiences":
+				return ec.fieldContext_User_experiences(ctx, field)
+			case "educations":
+				return ec.fieldContext_User_educations(ctx, field)
+			case "connections":
+				return ec.fieldContext_User_connections(ctx, field)
+			case "followers":
+				return ec.fieldContext_User_followers(ctx, field)
+			case "following":
+				return ec.fieldContext_User_following(ctx, field)
+			case "posts":
+				return ec.fieldContext_User_posts(ctx, field)
+			case "invitations":
+				return ec.fieldContext_User_invitations(ctx, field)
+			case "notifications":
+				return ec.fieldContext_User_notifications(ctx, field)
+			case "messages":
+				return ec.fieldContext_User_messages(ctx, field)
+			case "userMightKnow":
+				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_UserMutation_block_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserMutation_unBlock(ctx context.Context, field graphql.CollectedField, obj *model.UserMutation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserMutation_unBlock(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UserMutation().UnBlock(rctx, obj, fc.Args["input"].(*model.BlockUser))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖserverᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserMutation_unBlock(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserMutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "additionalName":
+				return ec.fieldContext_User_additionalName(ctx, field)
+			case "profilePhotoUrl":
+				return ec.fieldContext_User_profilePhotoUrl(ctx, field)
+			case "backgroundPhotoUrl":
+				return ec.fieldContext_User_backgroundPhotoUrl(ctx, field)
+			case "headline":
+				return ec.fieldContext_User_headline(ctx, field)
+			case "pronouns":
+				return ec.fieldContext_User_pronouns(ctx, field)
+			case "profileLink":
+				return ec.fieldContext_User_profileLink(ctx, field)
+			case "about":
+				return ec.fieldContext_User_about(ctx, field)
+			case "location":
+				return ec.fieldContext_User_location(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
+			case "isActive":
+				return ec.fieldContext_User_isActive(ctx, field)
+			case "experiences":
+				return ec.fieldContext_User_experiences(ctx, field)
+			case "educations":
+				return ec.fieldContext_User_educations(ctx, field)
+			case "connections":
+				return ec.fieldContext_User_connections(ctx, field)
+			case "followers":
+				return ec.fieldContext_User_followers(ctx, field)
+			case "following":
+				return ec.fieldContext_User_following(ctx, field)
+			case "posts":
+				return ec.fieldContext_User_posts(ctx, field)
+			case "invitations":
+				return ec.fieldContext_User_invitations(ctx, field)
+			case "notifications":
+				return ec.fieldContext_User_notifications(ctx, field)
+			case "messages":
+				return ec.fieldContext_User_messages(ctx, field)
+			case "userMightKnow":
+				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_UserMutation_unBlock_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -11104,6 +11535,8 @@ func (ec *executionContext) fieldContext_UserMutation_update(ctx context.Context
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -11209,6 +11642,8 @@ func (ec *executionContext) fieldContext_UserMutation_activate(ctx context.Conte
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -11314,6 +11749,8 @@ func (ec *executionContext) fieldContext_UserMutation_verifyForgotPasswordEmail(
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -11419,6 +11856,8 @@ func (ec *executionContext) fieldContext_UserMutation_verifyForgotPasswordCode(c
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -11524,6 +11963,8 @@ func (ec *executionContext) fieldContext_UserMutation_resetPassword(ctx context.
 				return ec.fieldContext_User_messages(ctx, field)
 			case "userMightKnow":
 				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -13406,6 +13847,42 @@ func (ec *executionContext) unmarshalInputAddPostTags(ctx context.Context, obj i
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
 			it.Tags, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputBlockUser(ctx context.Context, obj interface{}) (model.BlockUser, error) {
+	var it model.BlockUser
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"userId", "blockedId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "userId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "blockedId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("blockedId"))
+			it.BlockedID, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16826,6 +17303,23 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				return innerFunc(ctx)
 
 			})
+		case "blocked":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_blocked(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16897,6 +17391,46 @@ func (ec *executionContext) _UserMutation(ctx context.Context, sel ast.Selection
 					}
 				}()
 				res = ec._UserMutation_unFollow(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "block":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserMutation_block(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "unBlock":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserMutation_unBlock(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -18177,6 +18711,14 @@ func (ec *executionContext) unmarshalOAddPostTags2ᚖserverᚋgraphᚋmodelᚐAd
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputAddPostTags(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOBlockUser2ᚖserverᚋgraphᚋmodelᚐBlockUser(ctx context.Context, v interface{}) (*model.BlockUser, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputBlockUser(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

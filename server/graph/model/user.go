@@ -29,4 +29,5 @@ type User struct {
 	Invitations        []*ConnectInvitation `json:"invitations" gorm:"foreignKey:FromID;foreignKey:ToID"`
 	Notifications      []*Notification      `json:"notifications" gorm:"foreignKey:FromID"`
 	Messages           []*Message           `json:"messages" gorm:"foreignKey:SenderID;foreignKey:ReceiverID"`
+	Blocked	[]*User `json:"blocked" gorm:"many2many:user_blocked"`
 }

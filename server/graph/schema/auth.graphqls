@@ -1,6 +1,12 @@
 type AuthMutation {
-  login(input: LoginUser!): Token! @goField(forceResolver: true)
+  login(input: LoginUser!): Token! @goField(forceResolver: true) @activated
   register(input: RegisterUser!): Token! @goField(forceResolver: true)
+  activate(input: ActivateUser): User! @goField(forceResolver: true)
+  verifyForgotPasswordEmail(input: ForgotPasswordEmail): User!
+    @goField(forceResolver: true)
+  verifyForgotPasswordCode(input: ForgotPasswordCode): User!
+    @goField(forceResolver: true)
+  resetPassword(input: ResetPassword): User! @goField(forceResolver: true)
 }
 
 type Token {
@@ -19,4 +25,24 @@ type ResetPasswordCode {
   userId: String!
   code: String!
   expiredAt: Time!
+}
+
+input ActivateUser {
+  userId: ID!
+  code: String!
+}
+
+input ForgotPasswordEmail {
+  email: String!
+}
+
+input ForgotPasswordCode {
+  userId: ID!
+  code: String!
+}
+
+input ResetPassword {
+  userId: String!
+  password: String!
+  confirmPassword: String!
 }

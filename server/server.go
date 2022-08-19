@@ -6,8 +6,8 @@ import (
 	"os"
 	"server/database"
 	"server/directives"
-	"server/graph"
 	"server/graph/generated"
+	"server/graph/resolver"
 	"server/middleware"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -20,7 +20,7 @@ func initRoute() (*mux.Router) {
 	router := mux.NewRouter()
 	router.Use(middleware.AuthMiddleware)
 
-	c := generated.Config{Resolvers: &graph.Resolver{}}
+	c := generated.Config{Resolvers: &resolver.Resolver{}}
 	c.Directives.Auth = directives.Auth
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(c))
