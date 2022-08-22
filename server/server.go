@@ -12,11 +12,12 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
-func initRoute() (*mux.Router) {
+func initRouter() (*mux.Router) {
 	router := mux.NewRouter()
 	router.Use(middleware.AuthMiddleware)
 
@@ -46,10 +47,14 @@ func main() {
 	database.Connect()
 	database.Migrate()
 
-	router := initRoute()
+	router := initRouter()
+
+	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	origins	:= handlers.AllowedOrigins([]string{"http://127.0.0.1:5173"})
+	methods := handlers.AllowedMethods([]string{"POST"})
 
 	log.Printf("connect to http://127.0.0.1:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe(":"+port, handlers.CORS(origins, headers, methods)(router)))
 
 	defer database.CloseDB()
 }

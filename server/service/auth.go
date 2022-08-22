@@ -16,13 +16,13 @@ func Register(ctx context.Context, input model.RegisterUser) (interface{}, error
 	
 	var errValidation strings.Builder
 	if input.Email == "" || input.Password == "" || input.FirstName == "" || input.LastName == "" {
-		errValidation.WriteString("All field must be filled\n")
+		errValidation.WriteString("All field must be filled#")
 	}
 	if !tools.ValidEmail(input.Email) {
-		errValidation.WriteString("Email must be valid\n");
+		errValidation.WriteString("Email must be valid#");
 	}
 	if len(input.Password) < 8 {
-		errValidation.WriteString("Password must be 8 characters or more\n")
+		errValidation.WriteString("Password must be 8 characters or more#")
 	}
 
 	if errValidation.Len() > 0 {
@@ -53,14 +53,14 @@ func Register(ctx context.Context, input model.RegisterUser) (interface{}, error
 		return nil, err
 	}
 
-	return activationCode, nil
+	return activationCode.Code, nil
 }
 
 func Login(ctx context.Context, input model.LoginUser) (interface{}, error) {
 
 	var errValidation strings.Builder
 	if input.Email == "" || input.Password == "" {
-		errValidation.WriteString("All field must be filled\n")
+		errValidation.WriteString("All field must be filled#")
 	}
 
 	if errValidation.Len() > 0 {

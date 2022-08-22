@@ -1,7 +1,59 @@
-import React from "react";
+import { useMutation } from "@apollo/client";
+import { ChangeEvent, FormEvent, useState } from "react";
+import Errors from "../components/form/Errors";
+import Form from "../components/form/Form";
+import Input from "../components/form/Input";
+import SubmitButton from "../components/form/SubmitButton";
+import Title from "../components/form/Title";
+import EntirePageLoading from "../components/utilities/EntirePageLoading";
+import StyledLink from "../components/utilities/StyledLink";
+import { LOGIN } from "../graphql/authentication";
+import EntirePageLayout from "../layouts/EntirePageLayout";
+import { useAuthentication } from "../providers/AuthenticationContextProvider";
+import { LoginData } from "../types/authentication";
 
 function LoginPage() {
-  return <div>LoginPage</div>;
+  const authentication = useAuthentication();
+  const [login, { loading, error }] = useMutation(LOGIN);
+  const [loginData, setLoginData] = useState<LoginData>({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setLoginData({
+      ...loginData,
+      [event.target.id]: event.target.value,
+    });
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const {
+      auth: {
+        login: { token },
+      },
+    } = (await login({ variables: { input: loginData } })).data;
+    authentication.login(token);
+  };
+
+  return (
+    <EntirePageLayout>
+      <Title>Sign In</Title>
+      <Form onSubmit={handleSubmit}>
+        <label htmlFor="email">Email</label>
+        <Input id="email" type="email" onChange={handleChange} />
+        <label htmlFor="password">Password</label>
+        <Input id="password" type="password" onChange={handleChange} />
+        {error && <Errors errors={error.message.split("#")} />}
+        <SubmitButton type="submit">Join</SubmitButton>
+      </Form>
+      <span>
+        New to LinketdIn? <StyledLink to="/auth/register">Join now</StyledLink>
+      </span>
+      {loading && <EntirePageLoading />}
+    </EntirePageLayout>
+  );
 }
 
 export default LoginPage;

@@ -1,15 +1,13 @@
 import React from "react";
+import { useAuthentication } from "../providers/AuthenticationContextProvider";
 import { Redirect } from "../tools/Redirect";
 
 function AboutPage() {
-  const shouldRedirect = true;
-
-  return (
-    <>
-      AboutPage
-      {shouldRedirect && <Redirect replace to="/feed" />}
-    </>
-  );
+  const authentication = useAuthentication();
+  if (authentication.isLoggedIn) {
+    return <Redirect to="/feed" />;
+  }
+  return <div>AboutPage</div>;
 }
 
 export default AboutPage;

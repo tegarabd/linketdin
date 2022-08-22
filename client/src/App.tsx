@@ -1,5 +1,8 @@
 import { Route, Routes } from "react-router-dom";
-import NavigationBar from "./components/NavigationBar";
+import Header from "./components/header";
+import Layout from "./layouts/Layout";
+import AuthenticatedRoute from "./middlewares/AuthenticatedRoute";
+import GuestRoute from "./middlewares/GuestRoute";
 import AboutPage from "./pages/AboutPage";
 import AuthPage from "./pages/AuthPage";
 import FeedPage from "./pages/FeedPage";
@@ -11,17 +14,61 @@ import NotificationsPage from "./pages/NotificationsPage";
 function App() {
   return (
     <>
-      <NavigationBar />
-      <Routes>
-        <Route path="/" element={<AboutPage />} />
-        <Route path="/auth/*" element={<AuthPage />} />
-        <Route path="/feed" element={<FeedPage />} />
-        <Route path="/mynetwork" element={<MyNetworkPage />} />
-        <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/messaging" element={<MessagingPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="*" element={<h1>Not Found</h1>} />
-      </Routes>
+      <Header />
+      <Layout>
+        <Routes>
+          <Route path="/" element={<AboutPage />} />
+          <Route
+            path="/auth/*"
+            element={
+              <GuestRoute>
+                <AuthPage />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/feed"
+            element={
+              <AuthenticatedRoute>
+                <FeedPage />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route
+            path="/mynetwork"
+            element={
+              <AuthenticatedRoute>
+                <MyNetworkPage />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route
+            path="/jobs"
+            element={
+              <AuthenticatedRoute>
+                <JobsPage />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route
+            path="/messaging/*"
+            element={
+              <AuthenticatedRoute>
+                <MessagingPage />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <AuthenticatedRoute>
+                <NotificationsPage />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route path="*" element={<h1>404 Not Found</h1>} />
+        </Routes>
+      </Layout>
     </>
   );
 }

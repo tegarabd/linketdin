@@ -7,13 +7,17 @@ import {
 import { setContext } from "@apollo/client/link/context";
 import React from "react";
 
-function BackendServiceProvider({ children }: { children: React.ReactNode }) {
+function BackendServiceContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const httpLink = createHttpLink({
-    uri: import.meta.env.BACKEND_SERVER_URL,
+    uri: import.meta.env.VITE_BACKEND_SERVER_URL,
   });
 
   const authLink = setContext((_, { headers }) => {
-    const token = localStorage.getItem(import.meta.env.TOKEN_KEY);
+    const token = localStorage.getItem(import.meta.env.VITE_TOKEN_KEY);
 
     return {
       headers: {
@@ -28,11 +32,7 @@ function BackendServiceProvider({ children }: { children: React.ReactNode }) {
     cache: new InMemoryCache(),
   });
 
-  return (
-    <>
-      <ApolloProvider client={client}>{children}</ApolloProvider>
-    </>
-  );
+  return <ApolloProvider client={client}>{children}</ApolloProvider>;
 }
 
-export default BackendServiceProvider;
+export default BackendServiceContextProvider;

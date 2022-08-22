@@ -1,18 +1,33 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 :root {
   --primary-light: #f3f2ef;
   --secondary-light: #ffffff;
   --accent-light: #0a66c2;
   --font-light: rgba(0, 0, 0, 0.9);
+  --error-light: #ac3737;
+  --overlay-light: rgba(243, 242, 239, 0.5);
 
   --primary-dark: #000000;
   --secondary-dark: #1d2226;
   --accent-dark: #d0e8ff;
   --font-dark: rgba(255, 255, 255, 0.9);
+  --error-dark: #be5858;
+  --overlay-dark: rgb(0, 0, 0, 0.5);
 
   --layout-none-max-width: 576px;
   --layout-md-max-width: 720px;
   --layout-lg-max-width: 960px;
   --layout-xl-max-width: 1128px;
+
+  --header-height: 3.2rem;
+  --footer-height: 2rem;
 
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", "Fira Sans", Ubuntu, Oxygen, "Oxygen Sans", Cantarell,
@@ -34,14 +49,27 @@
 }
 
 a {
-  font-weight: 500;
   text-decoration: inherit;
+  color: inherit;
 }
 
 body {
-  margin: 0;
   min-width: 320px;
   min-height: 100vh;
+}
+
+input, button, select {
+  font: inherit;
+  color: inherit;
+  background-color: inherit;
+  border: none;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  align-items: center;
 }
 
 /* @media (prefers-color-scheme: dark) {

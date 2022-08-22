@@ -1,10 +1,11 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { useAuthentication } from "../providers/AuthenticationContextProvider";
+import { Redirect } from "../tools/Redirect";
 
 function AuthenticatedRoute({ children }: { children: JSX.Element }) {
-  const location = useLocation();
+  const authentication = useAuthentication();
 
-  if (location) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!authentication.isLoggedIn) {
+    return <Redirect to="/auth/login" />;
   }
 
   return children;

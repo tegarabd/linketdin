@@ -5,6 +5,7 @@ import ActivationPage from "./ActivationPage";
 import ForgotPasswordPage from "./ForgotPasswordPage";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
+
 function AuthPage() {
   return (
     <Routes>
