@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import styled from "styled-components";
 import Header from "./components/header";
 import Layout from "./layouts/Layout";
 import AuthenticatedRoute from "./middlewares/AuthenticatedRoute";
@@ -10,6 +11,8 @@ import JobsPage from "./pages/JobsPage";
 import MessagingPage from "./pages/MessagingPage";
 import MyNetworkPage from "./pages/MyNetworkPage";
 import NotificationsPage from "./pages/NotificationsPage";
+
+
 
 function App() {
   return (

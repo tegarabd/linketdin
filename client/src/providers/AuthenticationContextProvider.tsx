@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useJwt } from "../hooks/useJwt";
 
 interface AuthenticationContextType {
   isLoggedIn: boolean;
@@ -13,18 +14,26 @@ function AuthenticationContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const token = localStorage.getItem(import.meta.env.VITE_TOKEN_KEY);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!token);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const login = (token: string) => {
-    localStorage.setItem(import.meta.env.VITE_TOKEN_KEY, token);
-    setIsLoggedIn(true);
+    const { isValid } = useJwt(token);
+    if (isValid) {
+      localStorage.setItem(import.meta.env.VITE_TOKEN_KEY, token);
+      setIsLoggedIn(true);
+    }
   };
 
   const logout = () => {
     localStorage.setItem(import.meta.env.VITE_TOKEN_KEY, "");
     setIsLoggedIn(false);
   };
+
+  useEffect(() => {
+    const { isValid } = useJwt();
+    setIsLoggedIn(isValid);
+    return () => {};
+  }, [isLoggedIn]);
 
   const value = {
     isLoggedIn,

@@ -10,6 +10,7 @@ import StyledLink from "../components/utilities/StyledLink";
 import { REGISTER } from "../graphql/authentication";
 import EntirePageLayout from "../layouts/EntirePageLayout";
 import { useAuthentication } from "../providers/AuthenticationContextProvider";
+import GoogleSiginIn from "../tools/GoogleSiginIn";
 import { RegisterData } from "../types/authentication";
 
 function RegisterPage() {
@@ -58,6 +59,7 @@ function RegisterPage() {
         <Input id="password" type="password" onChange={handleChange} />
         {error && <Errors errors={error.message.split("#")} />}
         <SubmitButton type="submit">Join</SubmitButton>
+        <GoogleSiginIn />
       </Form>
       <span>
         Already in LinketdIn? <StyledLink to="/auth/login">Sign in</StyledLink>

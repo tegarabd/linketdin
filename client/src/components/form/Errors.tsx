@@ -10,8 +10,8 @@ const Wrapper = styled.div`
 function Errors({ errors }: { errors: Array<string> }) {
   return (
     <Wrapper>
-      {errors.map((error) => (
-        <div>{error}</div>
+      {errors.map((error, idx) => (
+        <div key={idx}>{error}</div>
       ))}
     </Wrapper>
   );

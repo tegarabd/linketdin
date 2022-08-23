@@ -17,6 +17,7 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  border-radius: 0.5rem;
 
   & > h1,
   span {

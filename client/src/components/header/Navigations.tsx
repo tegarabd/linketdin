@@ -7,6 +7,7 @@ import { ReactComponent as NotificationsIcon } from "../../assets/notifications-
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useAuthentication } from "../../providers/AuthenticationContextProvider";
+import RingLink from "../utilities/RingLink";
 
 const NavigationIcon = styled(Link)`
   display: flex;
@@ -14,8 +15,11 @@ const NavigationIcon = styled(Link)`
   align-items: center;
   justify-content: center;
   min-width: 6rem;
+  padding-top: 0.5rem;
   border-bottom: 0.125rem solid
     ${(props) => (props["aria-selected"] ? props.theme.font : "transparent")};
+  color: ${(props) =>
+    props["aria-selected"] ? props.theme.font : props.theme.fontDimmed};
 
   & > svg {
     width: 1.6rem;
@@ -24,18 +28,6 @@ const NavigationIcon = styled(Link)`
 
   & > span {
     font-size: 0.7rem;
-  }
-
-  & > h3 {
-    background-color: ${(props) => props.theme.accent};
-    color: ${(props) => props.theme.secondary};
-    border-radius: 100vw;
-    padding: 0.25rem 1rem;
-    font-weight: 500;
-  }
-
-  & > h3:first-child {
-    margin-right: 1rem;
   }
 `;
 
@@ -70,12 +62,8 @@ function Navigations() {
 
   return (
     <>
-      <NavigationIcon to="/auth/register">
-        <h3>Join Now</h3>
-      </NavigationIcon>
-      <NavigationIcon to="/auth/login">
-        <h3>Sign In</h3>
-      </NavigationIcon>
+      <RingLink to="/auth/register">Join now</RingLink>
+      <RingLink to="/auth/login">Sign in</RingLink>
     </>
   );
 }

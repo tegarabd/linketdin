@@ -19,3 +19,13 @@ export const LOGIN = gql`
     }
   }
 `;
+
+export const VERIFY_EMAIL = gql`
+  mutation verifyEmail($email: String!) {
+    auth {
+      verifyForgotPasswordEmail(input: { email: $email }) {
+        forgotPasswordId
+      }
+    }
+  }
+`;

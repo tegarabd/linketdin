@@ -4,11 +4,11 @@ import { Route, Routes } from "react-router-dom";
 function MessagingPage() {
   return (
     <>
-      <h1>MessageingPage</h1>
+      <div>MessageingPage</div>
       <Routes>
-        <Route path="/" element={<h1>No selected thread</h1>} />
-        <Route path="/thread/:threadId" element={<h1>Selected thread</h1>} />
-        <Route path="*" element={<h1>Not Found</h1>} />
+        <Route path="/" element={<div>No selected thread</div>} />
+        <Route path="/thread/:threadId" element={<div>Selected thread</div>} />
+        <Route path="*" element={<div>Not Found</div>} />
       </Routes>
     </>
   );

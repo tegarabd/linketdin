@@ -1,5 +1,6 @@
 import { useMutation } from "@apollo/client";
 import { ChangeEvent, FormEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Errors from "../components/form/Errors";
 import Form from "../components/form/Form";
 import Input from "../components/form/Input";
@@ -10,9 +11,11 @@ import StyledLink from "../components/utilities/StyledLink";
 import { LOGIN } from "../graphql/authentication";
 import EntirePageLayout from "../layouts/EntirePageLayout";
 import { useAuthentication } from "../providers/AuthenticationContextProvider";
+import GoogleSiginIn from "../tools/GoogleSiginIn";
 import { LoginData } from "../types/authentication";
 
 function LoginPage() {
+  const navigate = useNavigate();
   const authentication = useAuthentication();
   const [login, { loading, error }] = useMutation(LOGIN);
   const [loginData, setLoginData] = useState<LoginData>({
@@ -35,6 +38,7 @@ function LoginPage() {
       },
     } = (await login({ variables: { input: loginData } })).data;
     authentication.login(token);
+    navigate("/feed");
   };
 
   return (
@@ -45,8 +49,10 @@ function LoginPage() {
         <Input id="email" type="email" onChange={handleChange} />
         <label htmlFor="password">Password</label>
         <Input id="password" type="password" onChange={handleChange} />
+        <StyledLink to="/auth/forgot_password/verify_email" >Forgot password?</StyledLink>
         {error && <Errors errors={error.message.split("#")} />}
         <SubmitButton type="submit">Join</SubmitButton>
+        <GoogleSiginIn />
       </Form>
       <span>
         New to LinketdIn? <StyledLink to="/auth/register">Join now</StyledLink>
