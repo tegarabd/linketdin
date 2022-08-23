@@ -21,6 +21,7 @@ type AddPostTags struct {
 }
 
 type AuthMutation struct {
+	Google                    *Token            `json:"google"`
 	Login                     *Token            `json:"login"`
 	Register                  *ActivationID     `json:"register"`
 	Activate                  *User             `json:"activate"`
@@ -143,6 +144,14 @@ type ForgotPasswordEmail struct {
 
 type ForgotPasswordID struct {
 	ForgotPasswordID string `json:"forgotPasswordId"`
+}
+
+type GoogleAuth struct {
+	UserID          string `json:"userId"`
+	Email           string `json:"email"`
+	ProfilePhotoURL string `json:"profilePhotoUrl"`
+	FirstName       string `json:"firstName"`
+	LastName        string `json:"lastName"`
 }
 
 type JobMutation struct {

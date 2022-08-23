@@ -98,6 +98,51 @@ func Login(ctx context.Context, input model.LoginUser) (interface{}, error) {
 
 }
 
+func ResolveGoogleAuth(ctx context.Context, input model.GoogleAuth) (*model.Token, error) {
+	var errValidation strings.Builder
+	if input.Email == "" || input.UserID == "" || input.FirstName == "" || input.LastName == "" {
+		errValidation.WriteString("All field must be filled#")
+	}
+	if !tools.ValidEmail(input.Email) {
+		errValidation.WriteString("Email must be valid#");
+	}
+
+	if errValidation.Len() > 0 {
+		return nil, &gqlerror.Error{
+			Message: errValidation.String(),
+		}
+	}
+	// no email, register
+
+	user, err := repository.GetUserByID(ctx, input.UserID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			user, err := repository.CreateGoogleUser(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			token, err := JwtGenerate(ctx, user.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			return &model.Token{
+				Token: token,
+			}, nil
+		}
+		return nil, err
+	}
+
+	token, err := JwtGenerate(ctx, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Token{
+		Token: token,
+	}, nil
+}
+
 func ResolveForgotPasswordCode(ctx context.Context, user *model.User) (*model.ForgotPasswordID, error) {
 
 	forgotPasswordCode, err := repository.CreateForgotPasswordCode(ctx, user.ID)

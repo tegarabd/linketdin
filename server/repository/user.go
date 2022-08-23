@@ -34,6 +34,25 @@ func CreateUser(ctx context.Context, input model.RegisterUser) (*model.User, err
 	return &user, nil
 }
 
+func CreateGoogleUser(ctx context.Context, input model.GoogleAuth) (*model.User, error) {
+	db := database.GetDB()
+
+	user := model.User{
+		Model:              gorm.Model{},
+		ID:                 input.UserID,
+		Email:              input.Email,
+		FirstName:          input.FirstName,
+		LastName:           input.LastName,
+		ProfilePhotoURL:   	&input.ProfilePhotoURL,
+	}
+	
+	if err := db.Model(user).Create(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func GetUsers(ctx context.Context) ([]*model.User, error) {
 	db := database.GetDB()
 

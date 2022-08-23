@@ -49,11 +49,13 @@ function LoginPage() {
         <Input id="email" type="email" onChange={handleChange} />
         <label htmlFor="password">Password</label>
         <Input id="password" type="password" onChange={handleChange} />
-        <StyledLink to="/auth/forgot_password/verify_email" >Forgot password?</StyledLink>
+        <StyledLink to="/auth/forgot_password/verify_email">
+          Forgot password?
+        </StyledLink>
         {error && <Errors errors={error.message.split("#")} />}
         <SubmitButton type="submit">Join</SubmitButton>
-        <GoogleSiginIn />
       </Form>
+      <GoogleSiginIn />
       <span>
         New to LinketdIn? <StyledLink to="/auth/register">Join now</StyledLink>
       </span>

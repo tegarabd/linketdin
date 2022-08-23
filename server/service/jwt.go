@@ -10,7 +10,13 @@ import (
 )
 
 type JwtCustomClaim struct {
-	UserID string `json:"userId"`
+	Email string `json:"email"`
+	EmailVerifieed bool `json:"email_verified"`
+	Azp string `json:"azp"`
+	Name string `json:"name"`
+	Picture string `json:"picture"`
+	GivenName string `json:"given_name"`
+	FamilyName string `json:"family_name"`
 	jwt.StandardClaims
 }
 
@@ -26,8 +32,8 @@ func getJwtSecret() string {
 
 func JwtGenerate(ctx context.Context, userID string) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, &JwtCustomClaim{
-		UserID:             userID,
 		StandardClaims: jwt.StandardClaims{
+			Subject: userID,
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},

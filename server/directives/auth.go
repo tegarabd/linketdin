@@ -23,7 +23,7 @@ func Authenticated(ctx context.Context, obj interface{}, next graphql.Resolver) 
 func NotAuthenticated(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
 	claims := middleware.CtxValue(ctx)
 	if claims != nil {
-		_, err := repository.GetUserByID(ctx, claims.UserID)
+		_, err := repository.GetUserByID(ctx, claims.Subject)
 		if err == nil {
 			return nil, &gqlerror.Error{
 				Message: "Already authenticated",

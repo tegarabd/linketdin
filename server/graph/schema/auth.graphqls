@@ -1,4 +1,5 @@
 type AuthMutation {
+  google(input: GoogleAuth!): Token! @goField(forceResolver: true)
   login(input: LoginUser!): Token! @goField(forceResolver: true)
   register(input: RegisterUser!): ActivationId! @goField(forceResolver: true)
   activate(input: ActivateUser): User! @goField(forceResolver: true)
@@ -53,4 +54,12 @@ input ResetPassword {
   userId: String!
   password: String!
   confirmPassword: String!
+}
+
+input GoogleAuth {
+  userId: String!
+  email: String!
+  profilePhotoUrl: String!
+  firstName: String!
+  lastName: String!
 }

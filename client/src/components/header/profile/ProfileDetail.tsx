@@ -7,6 +7,7 @@ import Line from "../../utilities/Line";
 import BlurButton from "../../utilities/BlurButton";
 import { useAuthentication } from "../../../providers/AuthenticationContextProvider";
 import { useNavigate } from "react-router-dom";
+import { ThemeValue } from "../../../providers/ThemeContextProvider";
 
 const Wrapper = styled.div`
   top: calc(var(--header-height) + 0.5rem);
@@ -36,12 +37,19 @@ const Profile = styled.div`
       font-weight: 600;
     }
   }
+
+  & > img {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+  }
 `;
 
 function ProfileDetail({ user }: { user: UserProfile }) {
   const authentication = useAuthentication();
   const navigate = useNavigate();
-  const { toggleTheme } = useTheme();
+  const theme = useTheme();
+  const { toggleTheme } = theme as ThemeValue;
 
   const logout = () => {
     authentication.logout();
@@ -51,7 +59,11 @@ function ProfileDetail({ user }: { user: UserProfile }) {
   return (
     <Wrapper>
       <Profile>
-        <PhotoPlaceHolder size="large" user={user} />
+        {user.profilePhotoUrl ? (
+          <img src={user.profilePhotoUrl} />
+        ) : (
+          <PhotoPlaceHolder size="large" user={user} />
+        )}
         <div>
           <h4>
             {user.firstName} {user.lastName}

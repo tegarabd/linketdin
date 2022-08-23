@@ -11,6 +11,11 @@ import (
 	"server/service"
 )
 
+// Google is the resolver for the google field.
+func (r *authMutationResolver) Google(ctx context.Context, obj *model.AuthMutation, input model.GoogleAuth) (*model.Token, error) {
+	return service.ResolveGoogleAuth(ctx, input)
+}
+
 // Login is the resolver for the login field.
 func (r *authMutationResolver) Login(ctx context.Context, obj *model.AuthMutation, input model.LoginUser) (*model.Token, error) {
 	token, err := service.Login(ctx, input)

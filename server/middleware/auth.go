@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"context"
-	"server/service"
 	"net/http"
+	"server/service"
 )
 
 type authString string

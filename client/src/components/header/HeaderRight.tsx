@@ -1,15 +1,17 @@
-import React from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useAuthentication } from "../../providers/AuthenticationContextProvider";
 import Navigations from "./Navigations";
 import Profile from "./profile";
 
-const Wrapper = styled.div`
+const WrapperLoggedIn = styled.div`
   display: flex;
   align-items: flex-end;
   position: relative;
+`;
 
+const WrapperNotLoggedIn = styled.div`
+  display: flex;
+  align-items: center;
   & > a:last-child {
     margin-left: 1rem;
   }
@@ -18,11 +20,18 @@ const Wrapper = styled.div`
 function HeaderRight() {
   const authentication = useAuthentication();
 
+  if (authentication.isLoggedIn) {
+    return (
+      <WrapperLoggedIn>
+        <Navigations />
+        <Profile />
+      </WrapperLoggedIn>
+    );
+  }
   return (
-    <Wrapper>
+    <WrapperNotLoggedIn>
       <Navigations />
-      {authentication.isLoggedIn && <Profile />}
-    </Wrapper>
+    </WrapperNotLoggedIn>
   );
 }
 

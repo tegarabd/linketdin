@@ -20,6 +20,16 @@ export const LOGIN = gql`
   }
 `;
 
+export const GOOGLE = gql`
+  mutation googleAuth($input: GoogleAuth!) {
+    auth {
+      google(input: $input) {
+        token
+      }
+    }
+  }
+`;
+
 export const VERIFY_EMAIL = gql`
   mutation verifyEmail($email: String!) {
     auth {

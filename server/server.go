@@ -50,7 +50,7 @@ func main() {
 	router := initRouter()
 
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
-	origins	:= handlers.AllowedOrigins([]string{"http://127.0.0.1:5173"})
+	origins	:= handlers.AllowedOrigins([]string{"http://127.0.0.1:5173", "http://localhost:5173"})
 	methods := handlers.AllowedMethods([]string{"POST"})
 
 	log.Printf("connect to http://127.0.0.1:%s/ for GraphQL playground", port)

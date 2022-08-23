@@ -78,6 +78,7 @@ type ComplexityRoot struct {
 
 	AuthMutation struct {
 		Activate                  func(childComplexity int, input *model.ActivateUser) int
+		Google                    func(childComplexity int, input model.GoogleAuth) int
 		Login                     func(childComplexity int, input model.LoginUser) int
 		Register                  func(childComplexity int, input model.RegisterUser) int
 		ResetPassword             func(childComplexity int, input *model.ResetPassword) int
@@ -301,6 +302,7 @@ type ComplexityRoot struct {
 }
 
 type AuthMutationResolver interface {
+	Google(ctx context.Context, obj *model.AuthMutation, input model.GoogleAuth) (*model.Token, error)
 	Login(ctx context.Context, obj *model.AuthMutation, input model.LoginUser) (*model.Token, error)
 	Register(ctx context.Context, obj *model.AuthMutation, input model.RegisterUser) (*model.ActivationID, error)
 	Activate(ctx context.Context, obj *model.AuthMutation, input *model.ActivateUser) (*model.User, error)
@@ -478,6 +480,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AuthMutation.Activate(childComplexity, args["input"].(*model.ActivateUser)), true
+
+	case "AuthMutation.google":
+		if e.complexity.AuthMutation.Google == nil {
+			break
+		}
+
+		args, err := ec.field_AuthMutation_google_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.AuthMutation.Google(childComplexity, args["input"].(model.GoogleAuth)), true
 
 	case "AuthMutation.login":
 		if e.complexity.AuthMutation.Login == nil {
@@ -1671,6 +1685,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputFollowUser,
 		ec.unmarshalInputForgotPasswordCode,
 		ec.unmarshalInputForgotPasswordEmail,
+		ec.unmarshalInputGoogleAuth,
 		ec.unmarshalInputLikeComment,
 		ec.unmarshalInputLikePost,
 		ec.unmarshalInputLoginUser,
@@ -1743,6 +1758,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "../schema/auth.graphqls", Input: `type AuthMutation {
+  google(input: GoogleAuth!): Token! @goField(forceResolver: true)
   login(input: LoginUser!): Token! @goField(forceResolver: true)
   register(input: RegisterUser!): ActivationId! @goField(forceResolver: true)
   activate(input: ActivateUser): User! @goField(forceResolver: true)
@@ -1797,6 +1813,14 @@ input ResetPassword {
   userId: String!
   password: String!
   confirmPassword: String!
+}
+
+input GoogleAuth {
+  userId: String!
+  email: String!
+  profilePhotoUrl: String!
+  firstName: String!
+  lastName: String!
 }`, BuiltIn: false},
 	{Name: "../schema/comment.graphqls", Input: `type Comment {
   id: ID!
@@ -2187,6 +2211,21 @@ func (ec *executionContext) field_AuthMutation_activate_args(ctx context.Context
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalOActivateUser2ᚖserverᚋgraphᚋmodelᚐActivateUser(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_AuthMutation_google_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.GoogleAuth
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNGoogleAuth2serverᚋgraphᚋmodelᚐGoogleAuth(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3085,6 +3124,65 @@ func (ec *executionContext) fieldContext_ActivationId_activationId(ctx context.C
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AuthMutation_google(ctx context.Context, field graphql.CollectedField, obj *model.AuthMutation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AuthMutation_google(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.AuthMutation().Google(rctx, obj, fc.Args["input"].(model.GoogleAuth))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Token)
+	fc.Result = res
+	return ec.marshalNToken2ᚖserverᚋgraphᚋmodelᚐToken(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AuthMutation_google(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthMutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "token":
+				return ec.fieldContext_Token_token(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_AuthMutation_google_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -7235,6 +7333,8 @@ func (ec *executionContext) fieldContext_Mutation_auth(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "google":
+				return ec.fieldContext_AuthMutation_google(ctx, field)
 			case "login":
 				return ec.fieldContext_AuthMutation_login(ctx, field)
 			case "register":
@@ -14795,6 +14895,66 @@ func (ec *executionContext) unmarshalInputForgotPasswordEmail(ctx context.Contex
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGoogleAuth(ctx context.Context, obj interface{}) (model.GoogleAuth, error) {
+	var it model.GoogleAuth
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"userId", "email", "profilePhotoUrl", "firstName", "lastName"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "userId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "profilePhotoUrl":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profilePhotoUrl"))
+			it.ProfilePhotoURL, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			it.FirstName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			it.LastName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputLikeComment(ctx context.Context, obj interface{}) (model.LikeComment, error) {
 	var it model.LikeComment
 	asMap := map[string]interface{}{}
@@ -15566,6 +15726,26 @@ func (ec *executionContext) _AuthMutation(ctx context.Context, sel ast.Selection
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("AuthMutation")
+		case "google":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AuthMutation_google(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "login":
 			field := field
 
@@ -18431,6 +18611,11 @@ func (ec *executionContext) marshalNForgotPasswordId2ᚖserverᚋgraphᚋmodel�
 		return graphql.Null
 	}
 	return ec._ForgotPasswordId(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNGoogleAuth2serverᚋgraphᚋmodelᚐGoogleAuth(ctx context.Context, v interface{}) (model.GoogleAuth, error) {
+	res, err := ec.unmarshalInputGoogleAuth(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {

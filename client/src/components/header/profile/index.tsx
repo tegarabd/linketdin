@@ -42,9 +42,9 @@ const Text = styled.div`
 `;
 
 function Profile() {
-  const { userId } = useJwt();
+  const { sub } = useJwt();
   const { data, loading } = useQuery(USER_PROFILE, {
-    variables: { id: userId },
+    variables: { id: sub },
   });
 
   const [detailOpened, setDetailOpened] = useState(false);
