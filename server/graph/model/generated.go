@@ -25,6 +25,8 @@ type AuthMutation struct {
 	Login                     *Token            `json:"login"`
 	Register                  *ActivationID     `json:"register"`
 	Activate                  *User             `json:"activate"`
+	IsEmailAlreadyTaken       bool              `json:"isEmailAlreadyTaken"`
+	IsPasswordValid           bool              `json:"isPasswordValid"`
 	VerifyForgotPasswordEmail *ForgotPasswordID `json:"verifyForgotPasswordEmail"`
 	VerifyForgotPasswordCode  *User             `json:"verifyForgotPasswordCode"`
 	ResetPassword             *User             `json:"resetPassword"`
@@ -190,10 +192,16 @@ type PostMutation struct {
 }
 
 type RegisterUser struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
+	Email           string  `json:"email"`
+	Password        string  `json:"password"`
+	FirstName       string  `json:"firstName"`
+	LastName        string  `json:"lastName"`
+	LocationRegion  string  `json:"locationRegion"`
+	LocationCity    string  `json:"locationCity"`
+	JobTitle        string  `json:"jobTitle"`
+	EmploymentType  string  `json:"employmentType"`
+	Company         string  `json:"company"`
+	ProfilePhotoURL *string `json:"profilePhotoUrl"`
 }
 
 type RejectInvitation struct {

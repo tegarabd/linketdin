@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import NotFound from "./error/NotFound";
 
 function MessagingPage() {
   return (
@@ -8,7 +9,7 @@ function MessagingPage() {
       <Routes>
         <Route path="/" element={<div>No selected thread</div>} />
         <Route path="/thread/:threadId" element={<div>Selected thread</div>} />
-        <Route path="*" element={<div>Not Found</div>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

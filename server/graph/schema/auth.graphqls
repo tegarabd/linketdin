@@ -2,12 +2,32 @@ type AuthMutation {
   google(input: GoogleAuth!): Token! @goField(forceResolver: true)
   login(input: LoginUser!): Token! @goField(forceResolver: true)
   register(input: RegisterUser!): ActivationId! @goField(forceResolver: true)
-  activate(input: ActivateUser): User! @goField(forceResolver: true)
+  activate(input: ActivateUser!): User! @goField(forceResolver: true)
+  isEmailAlreadyTaken(email: String!): Boolean! @goField(forceResolver: true)
+  isPasswordValid(password: String!): Boolean! @goField(forceResolver: true)
   verifyForgotPasswordEmail(input: ForgotPasswordEmail): ForgotPasswordId!
     @goField(forceResolver: true)
-  verifyForgotPasswordCode(input: ForgotPasswordCode): User!
+  verifyForgotPasswordCode(input: ForgotPasswordCode!): User!
     @goField(forceResolver: true)
-  resetPassword(input: ResetPassword): User! @goField(forceResolver: true)
+  resetPassword(input: ResetPassword!): User! @goField(forceResolver: true)
+}
+
+input RegisterUser {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  locationRegion: String!
+  locationCity: String!
+  jobTitle: String!
+  employmentType: String!
+  company: String!
+  profilePhotoUrl: String
+}
+
+input LoginUser {
+  email: String!
+  password: String!
 }
 
 type Token {

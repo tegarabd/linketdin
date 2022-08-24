@@ -57,7 +57,8 @@ body {
 
 input,
 button,
-select {
+select,
+option {
   font: inherit;
   color: inherit;
   background-color: inherit;

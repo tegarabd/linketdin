@@ -1,15 +1,15 @@
 import { useMutation } from "@apollo/client";
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Errors from "../components/form/Errors";
-import Form from "../components/form/Form";
-import Input from "../components/form/Input";
-import SubmitButton from "../components/form/SubmitButton";
-import Title from "../components/form/Title";
-import BlurButton from "../components/utilities/BlurButton";
-import EntirePageLoading from "../components/utilities/EntirePageLoading";
-import { VERIFY_EMAIL } from "../graphql/authentication";
-import EntirePageLayout from "../layouts/EntirePageLayout";
+import Errors from "../../../components/form/Errors";
+import Form from "../../../components/form/Form";
+import Input from "../../../components/form/Input";
+import ButtonPrimary from "../../../components/utilities/ButtonPrimary";
+import Title from "../../../components/form/Title";
+import ButtonBlur from "../../../components/utilities/ButtonBlur";
+import EntirePageLoading from "../../../components/utilities/EntirePageLoading";
+import { VERIFY_EMAIL } from "../../../graphql/authentication";
+import EntirePageLayout from "../../../layouts/EntirePageLayout";
 
 function VerifyEmailPage() {
   const [email, setEmail] = useState("");
@@ -28,7 +28,7 @@ function VerifyEmailPage() {
       },
     } = (await verifyEmail({ variables: { email } })).data;
     if (forgotPasswordId) {
-      navigate("/auth/forgot_password/verify_code")
+      navigate("/auth/forgot_password/verify_code");
     }
   };
 
@@ -39,8 +39,8 @@ function VerifyEmailPage() {
         <label htmlFor="email">Email</label>
         <Input id="email" type="email" onChange={handleChange} />
         {error && <Errors errors={error.message.split("#")} />}
-        <SubmitButton type="submit">Reset password</SubmitButton>
-        <BlurButton onClick={() => navigate(-1)}>Back</BlurButton>
+        <ButtonPrimary type="submit">Reset password</ButtonPrimary>
+        <ButtonBlur onClick={() => navigate(-1)}>Back</ButtonBlur>
       </Form>
       {loading && <EntirePageLoading />}
     </EntirePageLayout>

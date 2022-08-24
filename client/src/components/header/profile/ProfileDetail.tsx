@@ -4,7 +4,7 @@ import PhotoPlaceHolder from "./PhotoPlaceHolder";
 import { UserProfile } from ".";
 import RingLink from "../../utilities/RingLink";
 import Line from "../../utilities/Line";
-import BlurButton from "../../utilities/BlurButton";
+import ButtonBlur from "../../utilities/ButtonBlur";
 import { useAuthentication } from "../../../providers/AuthenticationContextProvider";
 import { useNavigate } from "react-router-dom";
 import { ThemeValue } from "../../../providers/ThemeContextProvider";
@@ -48,8 +48,7 @@ const Profile = styled.div`
 function ProfileDetail({ user }: { user: UserProfile }) {
   const authentication = useAuthentication();
   const navigate = useNavigate();
-  const theme = useTheme();
-  const { toggleTheme } = theme as ThemeValue;
+  const { toggleTheme } = useTheme() as ThemeValue;
 
   const logout = () => {
     authentication.logout();
@@ -73,8 +72,8 @@ function ProfileDetail({ user }: { user: UserProfile }) {
       </Profile>
       <RingLink to="/in/asfdsafd">View Profile</RingLink>
       <Line />
-      <BlurButton onClick={toggleTheme}>Toggle theme</BlurButton>
-      <BlurButton onClick={logout}>Sign out</BlurButton>
+      <ButtonBlur onClick={toggleTheme}>Toggle theme</ButtonBlur>
+      <ButtonBlur onClick={logout}>Sign out</ButtonBlur>
     </Wrapper>
   );
 }

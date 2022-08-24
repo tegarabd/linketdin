@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"server/database"
 	"server/graph/model"
 	"server/tools"
@@ -19,12 +20,29 @@ func CreateUser(ctx context.Context, input model.RegisterUser) (*model.User, err
 	input.Password = tools.HashPassword(input.Password)
 	input.Email = strings.ToLower(input.Email)
 
+	id := uuid.New().String()
+	headline := fmt.Sprintf("%s at %s", input.JobTitle, input.Company)
+
 	user := model.User{
-		ID:       uuid.New().String(),
+		ID:       id,
 		FirstName: input.FirstName,
 		LastName: input.LastName,
 		Email:    input.Email,
 		Password: input.Password,
+		ProfilePhotoURL: input.ProfilePhotoURL,
+		Location: &model.Location{
+			Region: input.LocationRegion,
+			City:   input.LocationCity,
+		},
+		Experiences: []*model.Experience{{
+			ID: uuid.NewString(),
+			UserID:         id,
+			Title:          input.JobTitle,
+			EmploymentType: input.EmploymentType,
+			CompanyName:    input.Company,
+			IsActive:       true,
+			Headline: &headline,
+		}},
 	}
 
 	if err := db.Model(user).Create(&user).Error; err != nil {
@@ -327,7 +345,7 @@ func CreateActivationCode(ctx context.Context, userId string) (*model.Activation
 	return &activationCode, nil
 }
 
-func VerifyActivationCode(ctx context.Context, input *model.ActivateUser) (*model.User, error) {
+func VerifyActivationCode(ctx context.Context, input model.ActivateUser) (*model.User, error) {
 	db := database.GetDB()
 
 	activationCode := model.ActivationCode{ID: input.ActivationID}
@@ -381,7 +399,7 @@ func CreateForgotPasswordCode(ctx context.Context, userId string) (*model.ResetP
 	return &ForgotPasswordCode, nil
 }
 
-func VerifyForgotPasswordCode(ctx context.Context, input *model.ForgotPasswordCode) (*model.User, error) {
+func VerifyForgotPasswordCode(ctx context.Context, input model.ForgotPasswordCode) (*model.User, error) {
 	db := database.GetDB()
 	
 	resetPasswordCode := model.ResetPasswordCode{ID: input.ForgotPasswordID}
@@ -414,7 +432,7 @@ func VerifyForgotPasswordCode(ctx context.Context, input *model.ForgotPasswordCo
 	return &resetPasswordCode.User, nil
 }
 
-func ResetPassword(ctx context.Context, input *model.ResetPassword) (*model.User, error) {
+func ResetPassword(ctx context.Context, input model.ResetPassword) (*model.User, error) {
 	db := database.GetDB()
 
 	if input.ConfirmPassword != input.Password {

@@ -77,12 +77,14 @@ type ComplexityRoot struct {
 	}
 
 	AuthMutation struct {
-		Activate                  func(childComplexity int, input *model.ActivateUser) int
+		Activate                  func(childComplexity int, input model.ActivateUser) int
 		Google                    func(childComplexity int, input model.GoogleAuth) int
+		IsEmailAlreadyTaken       func(childComplexity int, email string) int
+		IsPasswordValid           func(childComplexity int, password string) int
 		Login                     func(childComplexity int, input model.LoginUser) int
 		Register                  func(childComplexity int, input model.RegisterUser) int
-		ResetPassword             func(childComplexity int, input *model.ResetPassword) int
-		VerifyForgotPasswordCode  func(childComplexity int, input *model.ForgotPasswordCode) int
+		ResetPassword             func(childComplexity int, input model.ResetPassword) int
+		VerifyForgotPasswordCode  func(childComplexity int, input model.ForgotPasswordCode) int
 		VerifyForgotPasswordEmail func(childComplexity int, input *model.ForgotPasswordEmail) int
 	}
 
@@ -305,10 +307,12 @@ type AuthMutationResolver interface {
 	Google(ctx context.Context, obj *model.AuthMutation, input model.GoogleAuth) (*model.Token, error)
 	Login(ctx context.Context, obj *model.AuthMutation, input model.LoginUser) (*model.Token, error)
 	Register(ctx context.Context, obj *model.AuthMutation, input model.RegisterUser) (*model.ActivationID, error)
-	Activate(ctx context.Context, obj *model.AuthMutation, input *model.ActivateUser) (*model.User, error)
+	Activate(ctx context.Context, obj *model.AuthMutation, input model.ActivateUser) (*model.User, error)
+	IsEmailAlreadyTaken(ctx context.Context, obj *model.AuthMutation, email string) (bool, error)
+	IsPasswordValid(ctx context.Context, obj *model.AuthMutation, password string) (bool, error)
 	VerifyForgotPasswordEmail(ctx context.Context, obj *model.AuthMutation, input *model.ForgotPasswordEmail) (*model.ForgotPasswordID, error)
-	VerifyForgotPasswordCode(ctx context.Context, obj *model.AuthMutation, input *model.ForgotPasswordCode) (*model.User, error)
-	ResetPassword(ctx context.Context, obj *model.AuthMutation, input *model.ResetPassword) (*model.User, error)
+	VerifyForgotPasswordCode(ctx context.Context, obj *model.AuthMutation, input model.ForgotPasswordCode) (*model.User, error)
+	ResetPassword(ctx context.Context, obj *model.AuthMutation, input model.ResetPassword) (*model.User, error)
 }
 type CommentResolver interface {
 	Post(ctx context.Context, obj *model.Comment) (*model.Post, error)
@@ -479,7 +483,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.AuthMutation.Activate(childComplexity, args["input"].(*model.ActivateUser)), true
+		return e.complexity.AuthMutation.Activate(childComplexity, args["input"].(model.ActivateUser)), true
 
 	case "AuthMutation.google":
 		if e.complexity.AuthMutation.Google == nil {
@@ -492,6 +496,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AuthMutation.Google(childComplexity, args["input"].(model.GoogleAuth)), true
+
+	case "AuthMutation.isEmailAlreadyTaken":
+		if e.complexity.AuthMutation.IsEmailAlreadyTaken == nil {
+			break
+		}
+
+		args, err := ec.field_AuthMutation_isEmailAlreadyTaken_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.AuthMutation.IsEmailAlreadyTaken(childComplexity, args["email"].(string)), true
+
+	case "AuthMutation.isPasswordValid":
+		if e.complexity.AuthMutation.IsPasswordValid == nil {
+			break
+		}
+
+		args, err := ec.field_AuthMutation_isPasswordValid_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.AuthMutation.IsPasswordValid(childComplexity, args["password"].(string)), true
 
 	case "AuthMutation.login":
 		if e.complexity.AuthMutation.Login == nil {
@@ -527,7 +555,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.AuthMutation.ResetPassword(childComplexity, args["input"].(*model.ResetPassword)), true
+		return e.complexity.AuthMutation.ResetPassword(childComplexity, args["input"].(model.ResetPassword)), true
 
 	case "AuthMutation.verifyForgotPasswordCode":
 		if e.complexity.AuthMutation.VerifyForgotPasswordCode == nil {
@@ -539,7 +567,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.AuthMutation.VerifyForgotPasswordCode(childComplexity, args["input"].(*model.ForgotPasswordCode)), true
+		return e.complexity.AuthMutation.VerifyForgotPasswordCode(childComplexity, args["input"].(model.ForgotPasswordCode)), true
 
 	case "AuthMutation.verifyForgotPasswordEmail":
 		if e.complexity.AuthMutation.VerifyForgotPasswordEmail == nil {
@@ -1761,12 +1789,32 @@ var sources = []*ast.Source{
   google(input: GoogleAuth!): Token! @goField(forceResolver: true)
   login(input: LoginUser!): Token! @goField(forceResolver: true)
   register(input: RegisterUser!): ActivationId! @goField(forceResolver: true)
-  activate(input: ActivateUser): User! @goField(forceResolver: true)
+  activate(input: ActivateUser!): User! @goField(forceResolver: true)
+  isEmailAlreadyTaken(email: String!): Boolean! @goField(forceResolver: true)
+  isPasswordValid(password: String!): Boolean! @goField(forceResolver: true)
   verifyForgotPasswordEmail(input: ForgotPasswordEmail): ForgotPasswordId!
     @goField(forceResolver: true)
-  verifyForgotPasswordCode(input: ForgotPasswordCode): User!
+  verifyForgotPasswordCode(input: ForgotPasswordCode!): User!
     @goField(forceResolver: true)
-  resetPassword(input: ResetPassword): User! @goField(forceResolver: true)
+  resetPassword(input: ResetPassword!): User! @goField(forceResolver: true)
+}
+
+input RegisterUser {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  locationRegion: String!
+  locationCity: String!
+  jobTitle: String!
+  employmentType: String!
+  company: String!
+  profilePhotoUrl: String
+}
+
+input LoginUser {
+  email: String!
+  password: String!
 }
 
 type Token {
@@ -2184,18 +2232,6 @@ input FollowUser {
 input BlockUser {
   userId: String!
   blockedId: String!
-}
-
-input RegisterUser {
-  firstName: String!
-  lastName: String!
-  email: String!
-  password: String!
-}
-
-input LoginUser {
-  email: String!
-  password: String!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -2207,10 +2243,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_AuthMutation_activate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.ActivateUser
+	var arg0 model.ActivateUser
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOActivateUser2ᚖserverᚋgraphᚋmodelᚐActivateUser(ctx, tmp)
+		arg0, err = ec.unmarshalNActivateUser2serverᚋgraphᚋmodelᚐActivateUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2231,6 +2267,36 @@ func (ec *executionContext) field_AuthMutation_google_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_AuthMutation_isEmailAlreadyTaken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_AuthMutation_isPasswordValid_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["password"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["password"] = arg0
 	return args, nil
 }
 
@@ -2267,10 +2333,10 @@ func (ec *executionContext) field_AuthMutation_register_args(ctx context.Context
 func (ec *executionContext) field_AuthMutation_resetPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.ResetPassword
+	var arg0 model.ResetPassword
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOResetPassword2ᚖserverᚋgraphᚋmodelᚐResetPassword(ctx, tmp)
+		arg0, err = ec.unmarshalNResetPassword2serverᚋgraphᚋmodelᚐResetPassword(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2282,10 +2348,10 @@ func (ec *executionContext) field_AuthMutation_resetPassword_args(ctx context.Co
 func (ec *executionContext) field_AuthMutation_verifyForgotPasswordCode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.ForgotPasswordCode
+	var arg0 model.ForgotPasswordCode
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOForgotPasswordCode2ᚖserverᚋgraphᚋmodelᚐForgotPasswordCode(ctx, tmp)
+		arg0, err = ec.unmarshalNForgotPasswordCode2serverᚋgraphᚋmodelᚐForgotPasswordCode(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3319,7 +3385,7 @@ func (ec *executionContext) _AuthMutation_activate(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.AuthMutation().Activate(rctx, obj, fc.Args["input"].(*model.ActivateUser))
+		return ec.resolvers.AuthMutation().Activate(rctx, obj, fc.Args["input"].(model.ActivateUser))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3412,6 +3478,116 @@ func (ec *executionContext) fieldContext_AuthMutation_activate(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _AuthMutation_isEmailAlreadyTaken(ctx context.Context, field graphql.CollectedField, obj *model.AuthMutation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AuthMutation_isEmailAlreadyTaken(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.AuthMutation().IsEmailAlreadyTaken(rctx, obj, fc.Args["email"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AuthMutation_isEmailAlreadyTaken(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthMutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_AuthMutation_isEmailAlreadyTaken_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AuthMutation_isPasswordValid(ctx context.Context, field graphql.CollectedField, obj *model.AuthMutation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AuthMutation_isPasswordValid(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.AuthMutation().IsPasswordValid(rctx, obj, fc.Args["password"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AuthMutation_isPasswordValid(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthMutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_AuthMutation_isPasswordValid_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AuthMutation_verifyForgotPasswordEmail(ctx context.Context, field graphql.CollectedField, obj *model.AuthMutation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_AuthMutation_verifyForgotPasswordEmail(ctx, field)
 	if err != nil {
@@ -3485,7 +3661,7 @@ func (ec *executionContext) _AuthMutation_verifyForgotPasswordCode(ctx context.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.AuthMutation().VerifyForgotPasswordCode(rctx, obj, fc.Args["input"].(*model.ForgotPasswordCode))
+		return ec.resolvers.AuthMutation().VerifyForgotPasswordCode(rctx, obj, fc.Args["input"].(model.ForgotPasswordCode))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3592,7 +3768,7 @@ func (ec *executionContext) _AuthMutation_resetPassword(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.AuthMutation().ResetPassword(rctx, obj, fc.Args["input"].(*model.ResetPassword))
+		return ec.resolvers.AuthMutation().ResetPassword(rctx, obj, fc.Args["input"].(model.ResetPassword))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7341,6 +7517,10 @@ func (ec *executionContext) fieldContext_Mutation_auth(ctx context.Context, fiel
 				return ec.fieldContext_AuthMutation_register(ctx, field)
 			case "activate":
 				return ec.fieldContext_AuthMutation_activate(ctx, field)
+			case "isEmailAlreadyTaken":
+				return ec.fieldContext_AuthMutation_isEmailAlreadyTaken(ctx, field)
+			case "isPasswordValid":
+				return ec.fieldContext_AuthMutation_isPasswordValid(ctx, field)
 			case "verifyForgotPasswordEmail":
 				return ec.fieldContext_AuthMutation_verifyForgotPasswordEmail(ctx, field)
 			case "verifyForgotPasswordCode":
@@ -15070,13 +15250,29 @@ func (ec *executionContext) unmarshalInputRegisterUser(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"firstName", "lastName", "email", "password"}
+	fieldsInOrder := [...]string{"email", "password", "firstName", "lastName", "locationRegion", "locationCity", "jobTitle", "employmentType", "company", "profilePhotoUrl"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			it.Password, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "firstName":
 			var err error
 
@@ -15093,19 +15289,51 @@ func (ec *executionContext) unmarshalInputRegisterUser(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
-		case "email":
+		case "locationRegion":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("locationRegion"))
+			it.LocationRegion, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "password":
+		case "locationCity":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
-			it.Password, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("locationCity"))
+			it.LocationCity, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "jobTitle":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobTitle"))
+			it.JobTitle, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employmentType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employmentType"))
+			it.EmploymentType, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "company":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("company"))
+			it.Company, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "profilePhotoUrl":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profilePhotoUrl"))
+			it.ProfilePhotoURL, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -15796,6 +16024,46 @@ func (ec *executionContext) _AuthMutation(ctx context.Context, sel ast.Selection
 					}
 				}()
 				res = ec._AuthMutation_activate(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "isEmailAlreadyTaken":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AuthMutation_isEmailAlreadyTaken(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "isPasswordValid":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AuthMutation_isPasswordValid(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -18394,6 +18662,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) unmarshalNActivateUser2serverᚋgraphᚋmodelᚐActivateUser(ctx context.Context, v interface{}) (model.ActivateUser, error) {
+	res, err := ec.unmarshalInputActivateUser(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNActivationId2serverᚋgraphᚋmodelᚐActivationID(ctx context.Context, sel ast.SelectionSet, v model.ActivationID) graphql.Marshaler {
 	return ec._ActivationId(ctx, sel, &v)
 }
@@ -18597,6 +18870,11 @@ func (ec *executionContext) marshalNExperienceMutation2ᚖserverᚋgraphᚋmodel
 		return graphql.Null
 	}
 	return ec._ExperienceMutation(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNForgotPasswordCode2serverᚋgraphᚋmodelᚐForgotPasswordCode(ctx context.Context, v interface{}) (model.ForgotPasswordCode, error) {
+	res, err := ec.unmarshalInputForgotPasswordCode(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNForgotPasswordId2serverᚋgraphᚋmodelᚐForgotPasswordID(ctx context.Context, sel ast.SelectionSet, v model.ForgotPasswordID) graphql.Marshaler {
@@ -18821,6 +19099,11 @@ func (ec *executionContext) marshalNPostMutation2ᚖserverᚋgraphᚋmodelᚐPos
 
 func (ec *executionContext) unmarshalNRegisterUser2serverᚋgraphᚋmodelᚐRegisterUser(ctx context.Context, v interface{}) (model.RegisterUser, error) {
 	res, err := ec.unmarshalInputRegisterUser(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNResetPassword2serverᚋgraphᚋmodelᚐResetPassword(ctx context.Context, v interface{}) (model.ResetPassword, error) {
+	res, err := ec.unmarshalInputResetPassword(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -19255,14 +19538,6 @@ func (ec *executionContext) unmarshalOAcceptInvitation2ᚖserverᚋgraphᚋmodel
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOActivateUser2ᚖserverᚋgraphᚋmodelᚐActivateUser(ctx context.Context, v interface{}) (*model.ActivateUser, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputActivateUser(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOAddPostTags2ᚖserverᚋgraphᚋmodelᚐAddPostTags(ctx context.Context, v interface{}) (*model.AddPostTags, error) {
 	if v == nil {
 		return nil, nil
@@ -19611,14 +19886,6 @@ func (ec *executionContext) unmarshalOFollowUser2ᚖserverᚋgraphᚋmodelᚐFol
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOForgotPasswordCode2ᚖserverᚋgraphᚋmodelᚐForgotPasswordCode(ctx context.Context, v interface{}) (*model.ForgotPasswordCode, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputForgotPasswordCode(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOForgotPasswordEmail2ᚖserverᚋgraphᚋmodelᚐForgotPasswordEmail(ctx context.Context, v interface{}) (*model.ForgotPasswordEmail, error) {
 	if v == nil {
 		return nil, nil
@@ -19812,14 +20079,6 @@ func (ec *executionContext) unmarshalORejectInvitation2ᚖserverᚋgraphᚋmodel
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputRejectInvitation(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOResetPassword2ᚖserverᚋgraphᚋmodelᚐResetPassword(ctx context.Context, v interface{}) (*model.ResetPassword, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputResetPassword(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

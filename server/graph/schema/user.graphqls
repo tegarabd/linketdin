@@ -66,15 +66,3 @@ input BlockUser {
   userId: String!
   blockedId: String!
 }
-
-input RegisterUser {
-  firstName: String!
-  lastName: String!
-  email: String!
-  password: String!
-}
-
-input LoginUser {
-  email: String!
-  password: String!
-}

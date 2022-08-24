@@ -15,7 +15,15 @@ import (
 func Register(ctx context.Context, input model.RegisterUser) (interface{}, error) {
 	
 	var errValidation strings.Builder
-	if input.Email == "" || input.Password == "" || input.FirstName == "" || input.LastName == "" {
+	if input.Email == "" || 
+		input.Password == "" || 
+		input.FirstName == "" || 
+		input.LastName == "" || 
+		input.JobTitle == "" || 
+		input.EmploymentType == "" || 
+		input.Company == "" ||
+		input.LocationCity == "" ||
+		input.LocationRegion == "" {
 		errValidation.WriteString("All field must be filled#")
 	}
 	if !tools.ValidEmail(input.Email) {
@@ -34,7 +42,7 @@ func Register(ctx context.Context, input model.RegisterUser) (interface{}, error
 	_, err := repository.GetUserByEmail(ctx, input.Email)
 	if err == nil {
 		return nil, &gqlerror.Error{
-				Message: "Email already registered",
+				Message: "Email already taken",
 			}
 	}
 
@@ -53,7 +61,7 @@ func Register(ctx context.Context, input model.RegisterUser) (interface{}, error
 		return nil, err
 	}
 
-	return activationCode.Code, nil
+	return activationCode.ID, nil
 }
 
 func Login(ctx context.Context, input model.LoginUser) (interface{}, error) {

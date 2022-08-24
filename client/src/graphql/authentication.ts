@@ -30,6 +30,14 @@ export const GOOGLE = gql`
   }
 `;
 
+export const IS_EMAIL_ALREADY_TAKEN = gql`
+  mutation isEmailAlreadyTaken($email: String!) {
+    auth {
+      isEmailAlreadyTaken(email: $email)
+    }
+  }
+`;
+
 export const VERIFY_EMAIL = gql`
   mutation verifyEmail($email: String!) {
     auth {

@@ -9,6 +9,8 @@ import (
 	"server/graph/model"
 	"server/repository"
 	"server/service"
+
+	"gorm.io/gorm"
 )
 
 // Google is the resolver for the google field.
@@ -37,8 +39,29 @@ func (r *authMutationResolver) Register(ctx context.Context, obj *model.AuthMuta
 }
 
 // Activate is the resolver for the activate field.
-func (r *authMutationResolver) Activate(ctx context.Context, obj *model.AuthMutation, input *model.ActivateUser) (*model.User, error) {
+func (r *authMutationResolver) Activate(ctx context.Context, obj *model.AuthMutation, input model.ActivateUser) (*model.User, error) {
 	return repository.VerifyActivationCode(ctx, input)
+}
+
+// IsEmailAlreadyTaken is the resolver for the isEmailAlreadyTaken field.
+func (r *authMutationResolver) IsEmailAlreadyTaken(ctx context.Context, obj *model.AuthMutation, email string) (bool, error) {
+	_, err := repository.GetUserByEmail(ctx, email)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// IsPasswordValid is the resolver for the isPasswordValid field.
+func (r *authMutationResolver) IsPasswordValid(ctx context.Context, obj *model.AuthMutation, password string) (bool, error) {
+	if len(password) < 8 {
+		return false, nil
+	}
+	return true, nil
 }
 
 // VerifyForgotPasswordEmail is the resolver for the verifyForgotPasswordEmail field.
@@ -51,12 +74,12 @@ func (r *authMutationResolver) VerifyForgotPasswordEmail(ctx context.Context, ob
 }
 
 // VerifyForgotPasswordCode is the resolver for the verifyForgotPasswordCode field.
-func (r *authMutationResolver) VerifyForgotPasswordCode(ctx context.Context, obj *model.AuthMutation, input *model.ForgotPasswordCode) (*model.User, error) {
+func (r *authMutationResolver) VerifyForgotPasswordCode(ctx context.Context, obj *model.AuthMutation, input model.ForgotPasswordCode) (*model.User, error) {
 	return repository.VerifyForgotPasswordCode(ctx, input)
 }
 
 // ResetPassword is the resolver for the resetPassword field.
-func (r *authMutationResolver) ResetPassword(ctx context.Context, obj *model.AuthMutation, input *model.ResetPassword) (*model.User, error) {
+func (r *authMutationResolver) ResetPassword(ctx context.Context, obj *model.AuthMutation, input model.ResetPassword) (*model.User, error) {
 	return repository.ResetPassword(ctx, input)
 }
 

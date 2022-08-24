@@ -5,14 +5,13 @@ import Layout from "./layouts/Layout";
 import AuthenticatedRoute from "./middlewares/AuthenticatedRoute";
 import GuestRoute from "./middlewares/GuestRoute";
 import AboutPage from "./pages/AboutPage";
-import AuthPage from "./pages/AuthPage";
+import AuthPage from "./pages/authentication/AuthPage";
+import NotFound from "./pages/error/NotFound";
 import FeedPage from "./pages/FeedPage";
 import JobsPage from "./pages/JobsPage";
 import MessagingPage from "./pages/MessagingPage";
 import MyNetworkPage from "./pages/MyNetworkPage";
 import NotificationsPage from "./pages/NotificationsPage";
-
-
 
 function App() {
   return (
@@ -69,7 +68,7 @@ function App() {
               </AuthenticatedRoute>
             }
           />
-          <Route path="*" element={<h1>404 Not Found</h1>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
     </>
