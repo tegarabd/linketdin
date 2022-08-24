@@ -37,8 +37,6 @@ function RegisterPage() {
 
   useEffect(() => {
     if (Object.values(registerData).some((value) => value === "")) {
-      console.log("masih ada yang belom diisi");
-      console.log(registerData);
       return;
     }
 
@@ -49,7 +47,7 @@ function RegisterPage() {
 
   useEffect(() => {
     if (data) {
-      console.log(data);
+      navigate(`/auth/activate/${data.auth.register.activationId}`)
     }
 
     return () => {};

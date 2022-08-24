@@ -94,7 +94,7 @@ func Login(ctx context.Context, input model.LoginUser) (interface{}, error) {
 	}
 
 	if err := tools.ComparePassword(user.Password, input.Password); err != nil {
-		return nil, err
+		return nil, &gqlerror.Error{Message: "Password incorrect"}
 	}
 
 	token, err := JwtGenerate(ctx, user.ID)

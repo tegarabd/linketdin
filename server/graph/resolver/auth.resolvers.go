@@ -10,6 +10,7 @@ import (
 	"server/repository"
 	"server/service"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gorm.io/gorm"
 )
 
@@ -68,6 +69,11 @@ func (r *authMutationResolver) IsPasswordValid(ctx context.Context, obj *model.A
 func (r *authMutationResolver) VerifyForgotPasswordEmail(ctx context.Context, obj *model.AuthMutation, input *model.ForgotPasswordEmail) (*model.ForgotPasswordID, error) {
 	user, err := repository.GetUserByEmail(ctx, input.Email)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, &gqlerror.Error{
+				Message:    "Email not registered",
+			}
+		}
 		return nil, err
 	}
 	return service.ResolveForgotPasswordCode(ctx, user)

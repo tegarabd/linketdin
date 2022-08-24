@@ -47,3 +47,33 @@ export const VERIFY_EMAIL = gql`
     }
   }
 `;
+
+export const ACTIVATE = gql`
+  mutation activate($input: ActivateUser!) {
+    auth {
+      activate(input: $input) {
+        id
+      }
+    }
+  }
+`;
+
+export const VERIFY_FORGOT_PASSWORD_CODE = gql`
+  mutation verifyForgotPasswordCode($input: ForgotPasswordCode!) {
+    auth {
+      verifyForgotPasswordCode(input: $input) {
+        id
+      }
+    }
+  }
+`;
+
+export const RESET_PASSWORD = gql`
+  mutation resetPassword($input: ResetPassword!) {
+    auth {
+      resetPassword(input: $input) {
+        id
+      }
+    }
+  }
+`;

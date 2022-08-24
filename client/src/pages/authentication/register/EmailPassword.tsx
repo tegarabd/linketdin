@@ -57,7 +57,7 @@ function EmailPassword({
 
   return (
     <EntirePageLayout>
-      <Title>Register Email Password</Title>
+      <Title>Register</Title>
       <Form onSubmit={handleSubmit}>
         <label htmlFor="email">Email</label>
         <Input id="email" type="email" onChange={handleChange} />

@@ -28,6 +28,7 @@ const Wrapper = styled.div`
     width: 1.6rem;
     height: 1.6rem;
     border-radius: 50%;
+    object-fit: cover;
   }
 `;
 

@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client";
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Errors from "../../../components/form/Errors";
 import Form from "../../../components/form/Form";
@@ -20,17 +20,19 @@ function VerifyEmailPage() {
     setEmail(event.target.value);
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const {
-      auth: {
-        verifyForgotPasswordEmail: { forgotPasswordId },
-      },
-    } = (await verifyEmail({ variables: { email } })).data;
-    if (forgotPasswordId) {
-      navigate("/auth/forgot_password/verify_code");
-    }
+    verifyEmail({ variables: { email } });
   };
+
+  useEffect(() => {
+    if (data) {
+      navigate(
+        `/auth/forgot_password/verify_code/${data.auth.verifyForgotPasswordEmail.forgotPasswordId}`
+      );
+    }
+    return () => {};
+  }, [data]);
 
   return (
     <EntirePageLayout>

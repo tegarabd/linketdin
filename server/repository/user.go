@@ -375,7 +375,7 @@ func VerifyActivationCode(ctx context.Context, input model.ActivateUser) (*model
 		return nil, err
 	}
 
-	if err := db.Model(&activationCode).Association("User").Clear(); err != nil {
+	if err := db.Delete(&activationCode).Error; err != nil {
 		return nil, err
 	}
 
@@ -425,7 +425,7 @@ func VerifyForgotPasswordCode(ctx context.Context, input model.ForgotPasswordCod
 		}
 	}
 
-	if err := db.Model(&resetPasswordCode).Association("User").Clear(); err != nil {
+	if err := db.Delete(&resetPasswordCode).Error; err != nil {
 		return nil, err
 	}
 
