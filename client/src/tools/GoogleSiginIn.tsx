@@ -2,7 +2,7 @@ import { useMutation } from "@apollo/client";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import EntirePageLoading from "../components/utilities/EntirePageLoading";
+import EntirePageLoading from "../components/utilities/entirePage/EntirePageLoading";
 import { GOOGLE } from "../graphql/authentication";
 import { useJwt } from "../hooks/useJwt";
 import { useAuthentication } from "../providers/AuthenticationContextProvider";

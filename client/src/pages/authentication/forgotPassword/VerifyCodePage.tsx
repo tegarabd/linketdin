@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import Errors from "../../../components/form/Errors";
 import Title from "../../../components/form/Title";
-import EntirePageLoading from "../../../components/utilities/EntirePageLoading";
+import EntirePageLoading from "../../../components/utilities/entirePage/EntirePageLoading";
 import { VERIFY_FORGOT_PASSWORD_CODE } from "../../../graphql/authentication";
 import EntirePageLayout from "../../../layouts/EntirePageLayout";
 

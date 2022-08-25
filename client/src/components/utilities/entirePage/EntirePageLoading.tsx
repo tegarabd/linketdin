@@ -1,18 +1,6 @@
 import ReactDOM from "react-dom";
 import styled, { keyframes } from "styled-components";
-
-const Wrapper = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100vh;
-  background-color: ${(props) => props.theme.overlay};
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
+import EntirePageOverlay from "./EntirePageOverlay";
 
 const spinningAnimation = keyframes`
   0% {
@@ -21,7 +9,7 @@ const spinningAnimation = keyframes`
   100% {
     transform: rotate(360deg);
   }
-`
+`;
 
 const Loading = styled.div`
   border-radius: 50%;
@@ -34,9 +22,9 @@ const Loading = styled.div`
 
 function EntirePageLoading() {
   return ReactDOM.createPortal(
-    <Wrapper>
+    <EntirePageOverlay position="center" followTheme>
       <Loading />
-    </Wrapper>,
+    </EntirePageOverlay>,
     document.getElementById("loading")!
   );
 }

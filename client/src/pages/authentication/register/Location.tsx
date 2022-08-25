@@ -2,7 +2,7 @@ import React, { ChangeEvent, FormEvent, useState } from "react";
 import Errors from "../../../components/form/Errors";
 import Form from "../../../components/form/Form";
 import Input from "../../../components/form/Input";
-import ButtonPrimary from "../../../components/utilities/ButtonPrimary";
+import ButtonPrimary from "../../../components/utilities/button/ButtonPrimary";
 import Title from "../../../components/form/Title";
 import EntirePageLayout from "../../../layouts/EntirePageLayout";
 import { Redirect } from "../../../tools/Redirect";

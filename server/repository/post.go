@@ -65,7 +65,7 @@ func GetPostFeed(ctx context.Context, userId string, limit int, offset int) ([]*
 	}
 
 	var postFeeds []*model.Post
-	if err := db.Where("poster_id IN ?", posterIds).Limit(limit).Offset(offset).Find(&postFeeds).Error; err != nil {
+	if err := db.Where("poster_id IN ?", posterIds).Limit(limit).Offset(offset).Order("created_at DESC").Find(&postFeeds).Error; err != nil {
 		return nil, err
 	}
 

@@ -56,7 +56,7 @@ func Register(ctx context.Context, input model.RegisterUser) (interface{}, error
 		return nil, err
 	}
 
-	message := fmt.Sprintf("Verify your account with this code %s", activationCode.Code)
+	message := fmt.Sprintf("Verify your account via this link http://localhost:5173/auth/activate/%s with this code %s", activationCode.ID, activationCode.Code)
 	if err := SendEmail([]string{user.Email}, "Account Activation Verification Code", message); err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func ResolveForgotPasswordCode(ctx context.Context, user *model.User) (*model.Fo
 		return nil, err
 	}
 
-	message := fmt.Sprintf("Verify your email with this code %s", forgotPasswordCode.Code)
+	message := fmt.Sprintf("Verify your email via this link http://localhost:5173/auth/forgot_password/verify_code/%s with this code %s", forgotPasswordCode.ID, forgotPasswordCode.Code)
 	if err := SendEmail([]string{user.Email}, "Forgot Password Verification Code", message); err != nil {
 		return nil, err
 	}

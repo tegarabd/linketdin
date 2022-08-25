@@ -4,8 +4,9 @@ import styled from "styled-components";
 import { ReactComponent as ArrowIcon } from "../../../assets/arrow-icon.svg";
 import { USER_PROFILE } from "../../../graphql/user";
 import { useJwt } from "../../../hooks/useJwt";
-import EntirePageLoading from "../../utilities/EntirePageLoading";
-import PhotoPlaceHolder from "./PhotoPlaceHolder";
+import EntirePageLoading from "../../utilities/entirePage/EntirePageLoading";
+import ProfilePhoto from "../../profile/profilePhoto/ProfilePhoto";
+import PhotoPhotoPlaceholder from "../../profile/profilePhoto/ProfilePhotoPlaceholder";
 import ProfileDetail from "./ProfileDetail";
 
 export interface UserProfile {
@@ -23,13 +24,6 @@ const Wrapper = styled.div`
   min-width: 6rem;
   border-bottom: 0.125rem solid transparent;
   cursor: pointer;
-
-  & > img {
-    width: 1.6rem;
-    height: 1.6rem;
-    border-radius: 50%;
-    object-fit: cover;
-  }
 `;
 
 const Text = styled.div`
@@ -44,7 +38,7 @@ const Text = styled.div`
 
 function Profile() {
   const { sub } = useJwt();
-  const { data, loading } = useQuery(USER_PROFILE, {
+  const { client, data, loading } = useQuery(USER_PROFILE, {
     variables: { id: sub },
   });
 
@@ -57,18 +51,13 @@ function Profile() {
     <>
       <Wrapper onClick={toggleDetail}>
         {loading && <EntirePageLoading />}
-        {data &&
-          (data.user.profilePhotoUrl ? (
-            <img src={data.user.profilePhotoUrl} />
-          ) : (
-            <PhotoPlaceHolder user={data.user} />
-          ))}
+        {data && <ProfilePhoto user={data.user} size="small" />}
         <Text>
           <span>Me</span>
           <ArrowIcon />
         </Text>
       </Wrapper>
-      {data && detailOpened && <ProfileDetail user={data.user} />}
+      {data && detailOpened && <ProfileDetail user={data.user} client={client} />}
     </>
   );
 }

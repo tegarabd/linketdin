@@ -7,7 +7,7 @@ import GuestRoute from "./middlewares/GuestRoute";
 import AboutPage from "./pages/AboutPage";
 import AuthPage from "./pages/authentication/AuthPage";
 import NotFound from "./pages/error/NotFound";
-import FeedPage from "./pages/FeedPage";
+import FeedPage from "./pages/feed/FeedPage";
 import JobsPage from "./pages/JobsPage";
 import MessagingPage from "./pages/MessagingPage";
 import MyNetworkPage from "./pages/MyNetworkPage";

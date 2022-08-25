@@ -5,6 +5,7 @@ import {
   InMemoryCache,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
+import { offsetLimitPagination } from "@apollo/client/utilities";
 import React from "react";
 
 function BackendServiceContextProvider({
@@ -29,7 +30,15 @@ function BackendServiceContextProvider({
 
   const client = new ApolloClient({
     link: authLink.concat(httpLink),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            postFeeds: offsetLimitPagination(),
+          },
+        },
+      },
+    }),
   });
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>;

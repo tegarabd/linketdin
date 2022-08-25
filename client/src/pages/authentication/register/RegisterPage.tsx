@@ -1,7 +1,7 @@
 import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import EntirePageLoading from "../../../components/utilities/EntirePageLoading";
+import EntirePageLoading from "../../../components/utilities/entirePage/EntirePageLoading";
 import { REGISTER } from "../../../graphql/authentication";
 import { Redirect } from "../../../tools/Redirect";
 import {

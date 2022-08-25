@@ -1,15 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import styled, { useTheme } from "styled-components";
-import PhotoPlaceHolder from "./PhotoPlaceHolder";
 import { UserProfile } from ".";
-import RingLink from "../../utilities/RingLink";
+import RingLink from "../../utilities/link/RingLink";
 import Line from "../../utilities/Line";
-import ButtonBlur from "../../utilities/ButtonBlur";
+import ButtonBlur from "../../utilities/button/ButtonBlur";
 import { useAuthentication } from "../../../providers/AuthenticationContextProvider";
 import { useNavigate } from "react-router-dom";
 import { ThemeValue } from "../../../providers/ThemeContextProvider";
+import ProfilePhoto from "../../profile/profilePhoto/ProfilePhoto";
+import Content from "../../utilities/Content";
+import ProfileNameHeadline from "../../profile/ProfileNameHeadline";
+import { ApolloClient } from "@apollo/client";
+import EntirePageLoading from "../../utilities/entirePage/EntirePageLoading";
 
-const Wrapper = styled.div`
+const Wrapper = styled(Content)`
   top: calc(var(--header-height) + 0.5rem);
   right: 0;
   width: 16rem;
@@ -27,49 +31,34 @@ const Profile = styled.div`
   display: grid;
   grid-template-columns: 3.5rem auto;
   height: 3.5rem;
-
-  & > div {
-    & > div {
-      font-size: 0.9rem;
-      line-height: 1.2;
-    }
-    & > h4 {
-      font-weight: 600;
-    }
-  }
-
-  & > img {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 50%;
-    object-fit: cover;
-  }
 `;
 
-function ProfileDetail({ user }: { user: UserProfile }) {
+function ProfileDetail({
+  user,
+  client,
+}: {
+  user: UserProfile;
+  client: ApolloClient<any>;
+}) {
   const authentication = useAuthentication();
   const navigate = useNavigate();
   const { toggleTheme } = useTheme() as ThemeValue;
+  const [loading, setLoading] = useState(false);
 
-  const logout = () => {
+  const logout = async () => {
     authentication.logout();
+    setLoading(true);
+    await client.resetStore();
+    setLoading(false);
     navigate("/auth/login");
   };
 
   return (
     <Wrapper>
+      {loading && <EntirePageLoading />}
       <Profile>
-        {user.profilePhotoUrl ? (
-          <img src={user.profilePhotoUrl} />
-        ) : (
-          <PhotoPlaceHolder size="large" user={user} />
-        )}
-        <div>
-          <h4>
-            {user.firstName} {user.lastName}
-          </h4>
-          <div>{user.headline}</div>
-        </div>
+        <ProfilePhoto user={user} size="large" />
+        <ProfileNameHeadline user={user} />
       </Profile>
       <RingLink to="/in/asfdsafd">View Profile</RingLink>
       <Line />

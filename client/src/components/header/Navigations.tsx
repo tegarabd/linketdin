@@ -6,7 +6,7 @@ import { ReactComponent as NotificationsIcon } from "../../assets/notifications-
 import styled from "styled-components";
 import { Link, LinkProps, useMatch, useResolvedPath } from "react-router-dom";
 import { useAuthentication } from "../../providers/AuthenticationContextProvider";
-import RingLink from "../utilities/RingLink";
+import RingLink from "../utilities/link/RingLink";
 
 const NavigationIcon = styled(Link)`
   display: flex;

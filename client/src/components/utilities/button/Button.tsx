@@ -5,7 +5,7 @@ const Button = styled.button`
   border-radius: 100vw;
   font-weight: 500;
   border: none;
-  cursor: pointer;
+  cursor: ${props => props.disabled ? "not-allowed" : "pointer"};
 `;
 
 export default Button;

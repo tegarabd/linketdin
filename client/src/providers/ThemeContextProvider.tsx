@@ -41,6 +41,7 @@ function ThemeContextProvider({ children }: { children: React.ReactNode }) {
     fontDimmed: `var(--font-dimmed-${currentTheme})`,
     error: `var(--error-${currentTheme})`,
     overlay: `var(--overlay-${currentTheme})`,
+    shadow: `var(--shadow-${currentTheme})`,
     toggleTheme,
   });
 

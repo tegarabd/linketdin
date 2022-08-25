@@ -5,8 +5,13 @@ export const USER_PROFILE = gql`
     user(id: $id) {
       firstName
       lastName
+      additionalName
       profilePhotoUrl
       headline
+      backgroundPhotoUrl
+      connections {
+        id
+      }
     }
   }
 `;

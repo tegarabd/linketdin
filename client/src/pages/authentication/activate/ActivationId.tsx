@@ -6,7 +6,7 @@ import styled from "styled-components";
 import Errors from "../../../components/form/Errors";
 import Form from "../../../components/form/Form";
 import Title from "../../../components/form/Title";
-import EntirePageLoading from "../../../components/utilities/EntirePageLoading";
+import EntirePageLoading from "../../../components/utilities/entirePage/EntirePageLoading";
 import { ACTIVATE } from "../../../graphql/authentication";
 import EntirePageLayout from "../../../layouts/EntirePageLayout";
 
