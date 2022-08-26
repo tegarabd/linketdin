@@ -14,7 +14,7 @@ function AuthenticationContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const login = (token: string) => {
     const { isValid } = useJwt(token);

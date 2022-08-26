@@ -10,11 +10,48 @@ const Wrapper = styled.div<Props>`
   justify-content: center;
   align-items: center;
   font-weight: 500;
-  font-size: ${(props) => (props.size === "large" ? "1.2rem" : "0.8rem")};
+  border: ${(props) =>
+    props.size === "extra-large"
+      ? `0.25rem solid ${props.theme.secondary}`
+      : "none"};
+  font-size: ${(props) => {
+    switch (props.size) {
+      case "extra-large":
+        return "5rem";
+      case "large":
+        return "1.5rem";
+      case "small":
+        return "0.8rem";
+      default:
+        return "0.8rem";
+    }
+  }};
   text-align: center;
   border-radius: 50%;
-  width: ${(props) => (props.size === "large" ? "3rem" : "1.6rem")};
-  height: ${(props) => (props.size === "large" ? "3rem" : "1.6rem")};
+  width: ${(props) => {
+    switch (props.size) {
+      case "extra-large":
+        return "10rem";
+      case "large":
+        return "3rem";
+      case "small":
+        return "1.6rem";
+      default:
+        return "1.6rem";
+    }
+  }};
+  height: ${(props) => {
+    switch (props.size) {
+      case "extra-large":
+        return "10rem";
+      case "large":
+        return "3rem";
+      case "small":
+        return "1.6rem";
+      default:
+        return "1.6rem";
+    }
+  }};
   color: ${(props) => props.theme.secondary};
   background-color: ${(props) => props.theme.accent};
 `;

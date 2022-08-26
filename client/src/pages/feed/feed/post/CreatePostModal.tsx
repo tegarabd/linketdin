@@ -131,7 +131,7 @@ function CreatePostModal({ onClose }: { onClose: VoidFunction }) {
         )}
         {file && file.type.startsWith("video") && (
           <Preview>
-            <Video src={source} />
+            <Video src={source} controls />
             <AbsoluteButtonClose onClick={removeFile}>
               <CrossIcon />
             </AbsoluteButtonClose>

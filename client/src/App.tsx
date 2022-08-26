@@ -7,11 +7,12 @@ import GuestRoute from "./middlewares/GuestRoute";
 import AboutPage from "./pages/AboutPage";
 import AuthPage from "./pages/authentication/AuthPage";
 import NotFound from "./pages/error/NotFound";
-import FeedPage from "./pages/feed/FeedPage";
+import FeedPage from "./pages/feed";
 import JobsPage from "./pages/JobsPage";
 import MessagingPage from "./pages/MessagingPage";
 import MyNetworkPage from "./pages/MyNetworkPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import ProfilePage from "./pages/profile";
 
 function App() {
   return (
@@ -65,6 +66,14 @@ function App() {
             element={
               <AuthenticatedRoute>
                 <NotificationsPage />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route
+            path="/in/:userId"
+            element={
+              <AuthenticatedRoute>
+                <ProfilePage />
               </AuthenticatedRoute>
             }
           />

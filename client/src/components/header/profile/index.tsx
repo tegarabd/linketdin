@@ -10,6 +10,7 @@ import PhotoPhotoPlaceholder from "../../profile/profilePhoto/ProfilePhotoPlaceh
 import ProfileDetail from "./ProfileDetail";
 
 export interface UserProfile {
+  id: string;
   firstName: string;
   lastName: string;
   profilePhotoUrl: string;
@@ -57,7 +58,9 @@ function Profile() {
           <ArrowIcon />
         </Text>
       </Wrapper>
-      {data && detailOpened && <ProfileDetail user={data.user} client={client} />}
+      {data && detailOpened && (
+        <ProfileDetail user={data.user} client={client} />
+      )}
     </>
   );
 }

@@ -60,7 +60,7 @@ function ProfileDetail({
         <ProfilePhoto user={user} size="large" />
         <ProfileName user={user} withHeadline />
       </Profile>
-      <RingLink to="/in/asfdsafd">View Profile</RingLink>
+      <RingLink to={`/in/${user.id}`}>View Profile</RingLink>
       <Line />
       <ButtonBlur onClick={toggleTheme}>Toggle theme</ButtonBlur>
       <ButtonBlur onClick={logout}>Sign out</ButtonBlur>

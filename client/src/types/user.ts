@@ -1,6 +1,6 @@
 import { ConnectInvitation } from "./connectInvitation";
 import { Education } from "./education";
-import { Expereince } from "./experience";
+import { Experience } from "./experience";
 import { Location } from "./location";
 import { Message } from "./message";
 import { Notification } from "./notification";
@@ -21,7 +21,7 @@ export type User = {
   location: Location;
   profileViews: number;
   isActive: boolean;
-  experiences: Array<Expereince>;
+  experiences: Array<Experience>;
   educations: Array<Education>;
   connections: Array<User>;
   followers: Array<User>;
