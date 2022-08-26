@@ -5,7 +5,11 @@ const Button = styled.button`
   border-radius: 100vw;
   font-weight: 500;
   border: none;
-  cursor: ${props => props.disabled ? "not-allowed" : "pointer"};
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
 `;
 
 export default Button;

@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { ThemeValue } from "../../../providers/ThemeContextProvider";
 import ProfilePhoto from "../../profile/profilePhoto/ProfilePhoto";
 import Content from "../../utilities/Content";
-import ProfileNameHeadline from "../../profile/ProfileNameHeadline";
+import ProfileName from "../../profile/ProfileName";
 import { ApolloClient } from "@apollo/client";
 import EntirePageLoading from "../../utilities/entirePage/EntirePageLoading";
 
@@ -58,7 +58,7 @@ function ProfileDetail({
       {loading && <EntirePageLoading />}
       <Profile>
         <ProfilePhoto user={user} size="large" />
-        <ProfileNameHeadline user={user} />
+        <ProfileName user={user} withHeadline />
       </Profile>
       <RingLink to="/in/asfdsafd">View Profile</RingLink>
       <Line />

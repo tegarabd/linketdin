@@ -11,15 +11,15 @@ const Wrapper = styled.div`
   }
 `;
 
-function ProfileNameHeadline({ user }: { user: User | any }) {
+function ProfileName({ user, withHeadline }: { user: User | any; withHeadline?: boolean }) {
   return (
     <Wrapper>
       <h4>{`${user.firstName || ""} ${user.lastName || ""} ${
         user.additionalName || ""
       }`}</h4>
-      <p>{user.headline}</p>
+      {withHeadline && <p>{user.headline}</p>}
     </Wrapper>
   );
 }
 
-export default ProfileNameHeadline;
+export default ProfileName;

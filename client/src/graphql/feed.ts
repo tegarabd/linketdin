@@ -17,6 +17,37 @@ export const FEEDS = gql`
       videoUrl
       comments(offset: 0, limit: -1) {
         id
+        commenter {
+          id
+          firstName
+          lastName
+          additionalName
+          profilePhotoUrl
+        }
+        text
+        likes {
+          id
+        }
+        post {
+          id
+        }
+        replies(offset: 0, limit: -1) {
+          id
+          commenter {
+            id
+            firstName
+            lastName
+            additionalName
+            profilePhotoUrl
+          }
+          text
+          likes {
+            id
+          }
+          post {
+            id
+          }
+        }
       }
       sends {
         id

@@ -14,7 +14,7 @@
   --font-dimmed-light: rgba(0, 0, 0, 0.6);
   --error-light: #ac3737;
   --overlay-light: rgba(243, 242, 239, 0.5);
-  --shadow-light: rgba(0, 0, 0, 0.2);
+  --shadow-light: rgba(90, 90, 90, 0.1);
 
   --primary-dark: #000000;
   --secondary-dark: #1d2226;
@@ -23,7 +23,7 @@
   --font-dimmed-dark: rgba(255, 255, 255, 0.6);
   --error-dark: #be5858;
   --overlay-dark: rgb(0, 0, 0, 0.5);
-  --shadow-dark: rgba(255, 255, 255, 0.2);
+  --shadow-dark: rgba(255, 255, 255, 0.1);
 
   --layout-none-max-width: 576px;
   --layout-md-max-width: 720px;

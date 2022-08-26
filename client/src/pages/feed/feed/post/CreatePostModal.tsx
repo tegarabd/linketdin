@@ -3,7 +3,7 @@ import React, { ChangeEventHandler, useState } from "react";
 import styled from "styled-components";
 import InputWithIcon from "../../../../components/form/InputWithIcon";
 import Textarea from "../../../../components/form/Textarea";
-import ProfileNameHeadline from "../../../../components/profile/ProfileNameHeadline";
+import ProfileName from "../../../../components/profile/ProfileName";
 import ProfilePhoto from "../../../../components/profile/profilePhoto/ProfilePhoto";
 import EntirePageModal from "../../../../components/utilities/entirePage/EntirePageModal";
 import { USER_PROFILE } from "../../../../graphql/user";
@@ -114,7 +114,7 @@ function CreatePostModal({ onClose }: { onClose: VoidFunction }) {
         {data && (
           <Profile>
             <ProfilePhoto user={data.user} size="large" />
-            <ProfileNameHeadline user={data.user} />
+            <ProfileName user={data.user} />
           </Profile>
         )}
         <Textarea
