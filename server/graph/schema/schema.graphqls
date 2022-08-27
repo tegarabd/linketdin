@@ -11,6 +11,10 @@ scalar Time
 type Query {
   user(id: String!): User! @goField(forceResolver: true) @authenticated
   postFeeds(userId: String!, limit: Int!, offset: Int!): [Post!]! @goField(forceResolver: true) @authenticated
+  post(postId: String!): Post! @goField(forceResolver: true) @authenticated
+  comment(commentId: String!): Comment! @goField(forceResolver: true) @authenticated
+  postComments(postId: String!, limit: Int!, offset: Int!): [Comment!]! @goField(forceResolver: true) @authenticated
+  commentReplies(commentId: String!, limit: Int!, offset: Int!): [Comment!]! @goField(forceResolver: true) @authenticated
   searchPost(query: String!, limit: Int!, offset: Int!): [Post!]! @goField(forceResolver: true) @authenticated
   searchUser(query: String!, limit: Int!, offset: Int!): [User!]! @goField(forceResolver: true) @authenticated
   searchConnectedUser(userId: String!, query: String!): [User!]! @goField(forceResolver: true) @authenticated

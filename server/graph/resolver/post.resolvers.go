@@ -16,8 +16,8 @@ func (r *postResolver) Poster(ctx context.Context, obj *model.Post) (*model.User
 }
 
 // Comments is the resolver for the comments field.
-func (r *postResolver) Comments(ctx context.Context, obj *model.Post, offset int, limit int) ([]*model.Comment, error) {
-	return repository.GetPostComments(ctx, obj, limit, offset)
+func (r *postResolver) Comments(ctx context.Context, obj *model.Post, offset int, limit int, all bool) ([]*model.Comment, error) {
+	return repository.GetPostComments(ctx, obj, limit, offset, all)
 }
 
 // Sends is the resolver for the sends field.

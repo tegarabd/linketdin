@@ -71,6 +71,26 @@ func (r *queryResolver) PostFeeds(ctx context.Context, userID string, limit int,
 	return repository.GetPostFeed(ctx, userID, limit, offset)
 }
 
+// Post is the resolver for the post field.
+func (r *queryResolver) Post(ctx context.Context, postID string) (*model.Post, error) {
+	return repository.GetPostById(ctx, postID)
+}
+
+// Comment is the resolver for the comment field.
+func (r *queryResolver) Comment(ctx context.Context, commentID string) (*model.Comment, error) {
+	return repository.GetCommentById(ctx, commentID)
+}
+
+// PostComments is the resolver for the postComments field.
+func (r *queryResolver) PostComments(ctx context.Context, postID string, limit int, offset int) ([]*model.Comment, error) {
+	return repository.GetPostComments(ctx, &model.Post{ID: postID}, limit, offset, true)
+}
+
+// CommentReplies is the resolver for the commentReplies field.
+func (r *queryResolver) CommentReplies(ctx context.Context, commentID string, limit int, offset int) ([]*model.Comment, error) {
+	return repository.GetCommentReplies(ctx, &model.Comment{ID: commentID}, limit, offset)
+}
+
 // SearchPost is the resolver for the searchPost field.
 func (r *queryResolver) SearchPost(ctx context.Context, query string, limit int, offset int) ([]*model.Post, error) {
 	if strings.HasPrefix(query, "#") {

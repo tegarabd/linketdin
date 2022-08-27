@@ -3,7 +3,7 @@ import React, { ChangeEventHandler, FormEventHandler, useState } from "react";
 import styled from "styled-components";
 import InputCapsule from "../../../../../components/form/InputCapsule";
 import ProfilePhoto from "../../../../../components/profile/profilePhoto/ProfilePhoto";
-import { COMMENT_POST } from "../../../../../graphql/post";
+import { COMMENT_POST, POST, POST_COMMENTS } from "../../../../../graphql/post";
 import { USER_PROFILE } from "../../../../../graphql/user";
 import { useJwt } from "../../../../../hooks/useJwt";
 
@@ -28,33 +28,16 @@ function CreateComment({
 
   const [text, setText] = useState("");
   const [comment] = useMutation(COMMENT_POST, {
-    update(
-      cache,
+    refetchQueries: [
       {
-        data: {
-          post: { comment },
-        },
-      }
-    ) {
-      cache.modify({
-        fields: {
-          feeds(existingFeeds = []) {
-            const newFeed = cache.writeFragment({
-              data: comment,
-              fragment: gql`
-                fragment CreatePost on Post {
-                  id
-                  comments {
-                    replies
-                  }
-                }
-              `,
-            });
-            return [...existingFeeds, newFeed];
-          },
-        },
-      });
-    },
+        query: POST,
+        variables: { postId },
+      },
+      {
+        query: POST_COMMENTS,
+        variables: { postId, limit: -1, offset: 0 },
+      },
+    ],
   });
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {

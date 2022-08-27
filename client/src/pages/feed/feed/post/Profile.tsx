@@ -11,7 +11,7 @@ const Wrapper = styled.div`
   margin-bottom: 0.5rem;
 `;
 
-function ProfileSection({ poster }: { poster: User }) {
+function Profile({ poster }: { poster: User }) {
   return (
     <Wrapper>
       <ProfilePhoto user={poster} size="large" />
@@ -20,4 +20,4 @@ function ProfileSection({ poster }: { poster: User }) {
   );
 }
 
-export default ProfileSection;
+export default Profile;

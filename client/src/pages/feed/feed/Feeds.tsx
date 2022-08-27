@@ -1,10 +1,9 @@
 import { useQuery } from "@apollo/client";
-import React from "react";
 import styled from "styled-components";
 import Line from "../../../components/utilities/Line";
 import { FEEDS } from "../../../graphql/feed";
 import { useJwt } from "../../../hooks/useJwt";
-import CreatePost from "./post/CreatePost";
+import CreatePost from "./post/create/CreatePost";
 import Feed from "./Feed";
 
 const Wrapper = styled.div`

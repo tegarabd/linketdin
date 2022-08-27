@@ -71,7 +71,7 @@ func (r *authMutationResolver) VerifyForgotPasswordEmail(ctx context.Context, ob
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, &gqlerror.Error{
-				Message:    "Email not registered",
+				Message: "Email not registered",
 			}
 		}
 		return nil, err

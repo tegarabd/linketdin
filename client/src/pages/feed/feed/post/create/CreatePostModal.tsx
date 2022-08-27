@@ -1,21 +1,21 @@
 import { useMutation, useQuery } from "@apollo/client";
 import React, { ChangeEventHandler, useState } from "react";
 import styled from "styled-components";
-import InputWithIcon from "../../../../components/form/InputWithIcon";
-import Textarea from "../../../../components/form/Textarea";
-import ProfileName from "../../../../components/profile/ProfileName";
-import ProfilePhoto from "../../../../components/profile/profilePhoto/ProfilePhoto";
-import EntirePageModal from "../../../../components/utilities/entirePage/EntirePageModal";
-import { USER_PROFILE } from "../../../../graphql/user";
-import { useJwt } from "../../../../hooks/useJwt";
-import { ReactComponent as ImageIcon } from "../../../../assets/image-icon.svg";
-import { ReactComponent as VideoIcon } from "../../../../assets/video-icon.svg";
-import { ReactComponent as CrossIcon } from "../../../../assets/cross-icon.svg";
-import ButtonSecondary from "../../../../components/utilities/button/ButtonSecondary";
-import ButtonPrimary from "../../../../components/utilities/button/ButtonPrimary";
-import { CREATE_POST } from "../../../../graphql/post";
-import EntirePageLoading from "../../../../components/utilities/entirePage/EntirePageLoading";
-import uploadPostAttachment from "../../../../firebase/uploadPostAttachment";
+import InputWithIcon from "../../../../../components/form/InputWithIcon";
+import Textarea from "../../../../../components/form/Textarea";
+import ProfileName from "../../../../../components/profile/ProfileName";
+import ProfilePhoto from "../../../../../components/profile/profilePhoto/ProfilePhoto";
+import EntirePageModal from "../../../../../components/utilities/entirePage/EntirePageModal";
+import { USER_PROFILE } from "../../../../../graphql/user";
+import { useJwt } from "../../../../../hooks/useJwt";
+import { ReactComponent as ImageIcon } from "../../../../../assets/image-icon.svg";
+import { ReactComponent as VideoIcon } from "../../../../../assets/video-icon.svg";
+import { ReactComponent as CrossIcon } from "../../../../../assets/cross-icon.svg";
+import ButtonSecondary from "../../../../../components/utilities/button/ButtonSecondary";
+import ButtonPrimary from "../../../../../components/utilities/button/ButtonPrimary";
+import { CREATE_POST } from "../../../../../graphql/post";
+import EntirePageLoading from "../../../../../components/utilities/entirePage/EntirePageLoading";
+import uploadPostAttachment from "../../../../../firebase/uploadPostAttachment";
 import { uuidv4 } from "@firebase/util";
 
 const Profile = styled.div`

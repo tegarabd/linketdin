@@ -1,7 +1,9 @@
-import React from "react";
+import { useQuery } from "@apollo/client";
 import styled from "styled-components";
-import { Post } from "../../../../../types/post";
+import { POST_COMMENTS } from "../../../../../graphql/post";
+import { Comment as CommentType } from "../../../../../types/comment";
 import Comment from "./Comment";
+import Comments from "./Comments";
 import CreateComment from "./CreateComment";
 
 const Wrapper = styled.div`
@@ -10,13 +12,31 @@ const Wrapper = styled.div`
   gap: 0.5rem;
 `;
 
-function CommentSection({ post }: { post: Post }) {
+function CommentSection({ postId }: { postId: string }) {
+  const { data, fetchMore } = useQuery(POST_COMMENTS, {
+    variables: {
+      postId,
+      limit: 2,
+      offset: 0,
+    },
+  });
+
   return (
     <Wrapper>
-      <CreateComment postId={post.id} />
-      {post.comments.map((comment) => (
-        <Comment key={comment.id} comment={comment} depth={1} />
-      ))}
+      <CreateComment postId={postId} />
+      {data && (
+        <Comments
+          postId={postId}
+          entries={data.postComments}
+          onLoadMore={() => {
+            fetchMore({
+              variables: {
+                offset: data.postComments.length,
+              },
+            });
+          }}
+        />
+      )}
     </Wrapper>
   );
 }

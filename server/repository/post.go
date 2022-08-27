@@ -72,15 +72,26 @@ func GetPostFeed(ctx context.Context, userId string, limit int, offset int) ([]*
 	return postFeeds, nil
 }
 
-func GetPostComments(ctx context.Context, post *model.Post, limit int, offset int)  ([]*model.Comment, error) {
+func GetPostComments(ctx context.Context, post *model.Post, limit int, offset int, all bool)  ([]*model.Comment, error) {
 	db := database.GetDB()
 
 	var comments []*model.Comment
-	if err := db.Model(&post).Limit(limit).Offset(offset).Where("replied_to_id IS NULL").Association("Comments").Find(&comments); err != nil {
-		return nil, err
+
+	if all {
+		if err := db.Model(&post).Limit(limit).Offset(offset).Association("Comments").Find(&comments); err != nil {
+			return nil, err
+		}
+
+		return comments, nil
+	} else {
+		if err := db.Model(&post).Limit(limit).Offset(offset).Where("replied_to_id IS NULL").Association("Comments").Find(&comments); err != nil {
+			return nil, err
+		}
+
+		return comments, nil
 	}
 
-	return comments, nil
+	
 }
 
 func GetPostSends(ctx context.Context, post *model.Post)  ([]*model.User, error) {

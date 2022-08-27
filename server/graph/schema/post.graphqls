@@ -4,7 +4,7 @@ type Post {
   text: String!
   photoUrl: String
   videoUrl: String
-  comments(offset: Int!, limit: Int!): [Comment!] @goField(forceResolver: true)
+  comments(offset: Int!, limit: Int!, all: Boolean!): [Comment!] @goField(forceResolver: true)
   sends: [User!] @goField(forceResolver: true)
   likes: [User!] @goField(forceResolver: true)
   tags: [Tag!]! @goField(forceResolver: true)

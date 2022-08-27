@@ -1,10 +1,10 @@
 import { useQuery } from "@apollo/client";
 import React, { useState } from "react";
 import styled from "styled-components";
-import ProfilePhoto from "../../../../components/profile/profilePhoto/ProfilePhoto";
-import Content from "../../../../components/utilities/Content";
-import { USER_PROFILE } from "../../../../graphql/user";
-import { useJwt } from "../../../../hooks/useJwt";
+import ProfilePhoto from "../../../../../components/profile/profilePhoto/ProfilePhoto";
+import Content from "../../../../../components/utilities/Content";
+import { USER_PROFILE } from "../../../../../graphql/user";
+import { useJwt } from "../../../../../hooks/useJwt";
 import CreatePostModal from "./CreatePostModal";
 
 const Wrapper = styled(Content)`

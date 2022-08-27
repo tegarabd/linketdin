@@ -1,13 +1,11 @@
-import { gql, useMutation } from "@apollo/client";
-import React, { useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import ProfileName from "../../../../../components/profile/ProfileName";
 import ProfilePhoto from "../../../../../components/profile/profilePhoto/ProfilePhoto";
-import { LIKE_COMMENT } from "../../../../../graphql/comment";
-import { useJwt } from "../../../../../hooks/useJwt";
 import { Comment as CommentType } from "../../../../../types/comment";
-import { Post } from "../../../../../types/post";
+import Counter from "./Counter";
 import CreateComment from "./CreateComment";
+import Replies from "./Replies";
 
 const Wrapper = styled.div`
   display: grid;
@@ -30,62 +28,17 @@ const Body = styled.div`
   flex-direction: column;
 `;
 
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-`;
+function Comment({
+  comment,
+  postId,
+}: {
+  comment: CommentType;
+  postId: string;
+}) {
+  const [createReplyShowed, setCreateReplyShowed] = useState(false);
 
-const Button = styled.button`
-  background-color: transparent;
-  cursor: pointer;
-  text-align: left;
-`;
-
-function Comment({ comment, depth }: { comment: CommentType; depth: number }) {
-  const { sub } = useJwt();
-  const [replyOpened, setReplyOpened] = useState(false);
-
-  const [like] = useMutation(LIKE_COMMENT, {
-    update(
-      cache,
-      {
-        data: {
-          comment: { like: post },
-        },
-      }
-    ) {
-      cache.modify({
-        fields: {
-          feeds(existingFeeds = []) {
-            const newFeed = cache.writeFragment({
-              data: post,
-              fragment: gql`
-                fragment CreatePost on Post {
-                  id
-                  comments {
-                    replies
-                  }
-                }
-              `,
-            });
-            return [...existingFeeds, newFeed];
-          },
-        },
-      });
-    },
-  });
-
-  const handleLike = () => {
-    like({
-      variables: {
-        input: {
-          likerId: sub,
-          commentId: comment.id,
-        },
-      },
-    });
+  const showCreateReply = () => {
+    setCreateReplyShowed(true);
   };
 
   return (
@@ -96,26 +49,12 @@ function Comment({ comment, depth }: { comment: CommentType; depth: number }) {
           <ProfileName user={comment.commenter} />
           <p>{comment.text}</p>
         </Body>
-        <ButtonGroup>
-          <Button onClick={handleLike}>Like • {comment.likes.length}</Button>
-          {depth < 2 && (
-            <>
-              |
-              <Button onClick={() => setReplyOpened(true)}>
-                Reply • {comment.replies.length}
-              </Button>
-            </>
-          )}
-        </ButtonGroup>
-        {comment.replies?.map((reply) => (
-          <Comment key={reply.id} comment={reply} depth={depth + 1} />
-        ))}
-        {replyOpened && (
-          <CreateComment
-            postId={comment.post.id}
-            repliedToCommentId={comment.id}
-          />
-        )}
+        <Counter
+          commentId={comment.id}
+          onReplyButtonClicked={showCreateReply}
+        />
+        <Replies commentId={comment.id} postId={postId} />
+        {createReplyShowed && <CreateComment postId={postId} repliedToCommentId={comment.id} />}
       </Content>
     </Wrapper>
   );
