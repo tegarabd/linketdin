@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Content from "../../../../components/utilities/Content";
 import { Post as PostType } from "../../../../types/post";
@@ -21,7 +22,9 @@ function Post({ post }: { post: PostType }) {
   return (
     <Wrapper>
       <Padding>
-        <Profile poster={post.poster} />
+        <Link to={`/in/${post.poster.id}`} >
+          <Profile poster={post.poster} />
+        </Link>
         <p>{post.text}</p>
       </Padding>
       {post.photoUrl && <img src={post.photoUrl} />}

@@ -5,6 +5,7 @@ import { ReactComponent as CrossIcon } from "../../../assets/cross-icon.svg";
 import Content from "../Content";
 import Line from "../Line";
 import ButtonSecondary from "../button/ButtonSecondary";
+import { ReactNode } from "react";
 
 const Wrapper = styled(Content)`
   width: 35rem;
@@ -24,7 +25,7 @@ function EntirePageModal({
   title,
   onClose,
 }: {
-  children: JSX.Element;
+  children: ReactNode | ReactNode[];
   position: string;
   title: string;
   onClose: VoidFunction;

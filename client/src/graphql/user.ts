@@ -4,6 +4,7 @@ export const USER_PROFILE = gql`
   query userProfile($id: String!) {
     user(id: $id) {
       id
+      email
       firstName
       lastName
       additionalName
@@ -11,7 +12,9 @@ export const USER_PROFILE = gql`
       headline
       backgroundPhotoUrl
       pronouns
-      profileViews
+      profileViews {
+        id
+      }
       location {
         city
         region
@@ -26,6 +29,7 @@ export const USER_PROFILE = gql`
 export const USER_EXPERIENCES = gql`
   query userExperiences($id: String!) {
     user(id: $id) {
+      id
       experiences {
         id
         title
@@ -46,6 +50,52 @@ export const USER_EXPERIENCES = gql`
         }
         industry
         headline
+      }
+    }
+  }
+`;
+
+export const USER_EDUCATIONS = gql`
+  query userEducations($id: String!) {
+    user(id: $id) {
+      id
+      educations {
+        id
+        school
+        degree
+        field
+        startDate {
+          month
+          year
+        }
+        endDate {
+          month
+          year
+        }
+        grade
+        activities
+        description
+      }
+    }
+  }
+`;
+
+export const USER_BLOCKED = gql`
+  query userBlocked($id: String!) {
+    user(id: $id) {
+      id
+      blocked {
+        id
+      }
+    }
+  }
+`;
+
+export const UPDATE_USER_PROFILE_PHOTO = gql`
+  mutation updateProfilePhoto($id: ID!, $url: String!) {
+    user {
+      updateProfilePhoto(input: { userId: $id, profilePhotoUrl: $url }) {
+        id
       }
     }
   }

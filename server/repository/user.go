@@ -298,15 +298,26 @@ func GetUserMightKnow(ctx context.Context, user *model.User) ([]*model.User, err
 	return mightKnow, nil
 }
 
-func ViewUser(ctx context.Context, id string) (*model.User, error) {
+func GetUserProfileViews(ctx context.Context, user *model.User) ([]*model.User, error) {
 	db := database.GetDB()
 
-	user, err := GetUserByID(ctx, id)
+	profileViews := []*model.User{}
+	if err := db.Raw("SELECT * FROM user_profile_views upv JOIN users u ON upv.user_id = u.id WHERE profile_view_id = ?", user.ID).Find(&profileViews).Error; err != nil {
+		return nil, err
+	}
+
+	return profileViews, nil
+}
+
+func ViewUser(ctx context.Context, input *model.ViewUser) (*model.User, error) {
+	db := database.GetDB()
+
+	user, err := GetUserByID(ctx, input.ViewerID)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := db.Model(&user).Update("profile_views", gorm.Expr("profile_views + ?", 1)).Error; err != nil {
+	if err := db.Model(&user).Association("ProfileViews").Append(&model.User{ID: input.ViewedUserID}); err != nil {
 		return nil, err
 	}
 
@@ -322,6 +333,21 @@ func UpdateUser(ctx context.Context, input *model.UpdateUser) (*model.User, erro
 	}
 
 	if err := db.Model(&user).Updates(input).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func UpdateUserProfilePhoto(ctx context.Context, input *model.UpdateProfilePhoto) (*model.User, error) {
+	db := database.GetDB()
+
+	user, err := GetUserByID(ctx, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(&user).Update("profile_photo_url", input.ProfilePhotoURL).Error; err != nil {
 		return nil, err
 	}
 

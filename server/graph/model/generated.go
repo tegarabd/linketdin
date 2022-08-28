@@ -254,30 +254,30 @@ type UpdateExperience struct {
 	Headline       *string `json:"headline"`
 }
 
+type UpdateProfilePhoto struct {
+	UserID          string `json:"userId"`
+	ProfilePhotoURL string `json:"profilePhotoUrl"`
+}
+
 type UpdateUser struct {
-	UserID             string  `json:"userId"`
-	Email              *string `json:"email"`
-	FirstName          *string `json:"firstName"`
-	LastName           *string `json:"lastName"`
-	AdditionalName     *string `json:"additionalName"`
-	ProfilePhotoURL    *string `json:"profilePhotoUrl"`
-	BackgroundPhotoURL *string `json:"backgroundPhotoUrl"`
-	Headline           *string `json:"headline"`
-	Pronouns           *string `json:"pronouns"`
-	ProfileLink        *string `json:"profileLink"`
-	About              *string `json:"about"`
-	LocationCity       *string `json:"locationCity"`
-	LocationRegion     *string `json:"locationRegion"`
-	IsActive           *bool   `json:"isActive"`
+	UserID         string `json:"userId"`
+	FirstName      string `json:"firstName"`
+	LastName       string `json:"lastName"`
+	AdditionalName string `json:"additionalName"`
+	Pronouns       string `json:"pronouns"`
+	About          string `json:"about"`
+	LocationCity   string `json:"locationCity"`
+	LocationRegion string `json:"locationRegion"`
 }
 
 type UserMutation struct {
-	View     *User `json:"view"`
-	Follow   *User `json:"follow"`
-	UnFollow *User `json:"unFollow"`
-	Block    *User `json:"block"`
-	UnBlock  *User `json:"unBlock"`
-	Update   *User `json:"update"`
+	View               *User `json:"view"`
+	Follow             *User `json:"follow"`
+	UnFollow           *User `json:"unFollow"`
+	Block              *User `json:"block"`
+	UnBlock            *User `json:"unBlock"`
+	Update             *User `json:"update"`
+	UpdateProfilePhoto *User `json:"updateProfilePhoto"`
 }
 
 type ViewUser struct {

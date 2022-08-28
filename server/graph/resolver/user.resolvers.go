@@ -17,6 +17,11 @@ func (r *userResolver) Headline(ctx context.Context, obj *model.User) (*string, 
 	return repository.GetUserHeadline(ctx, obj)
 }
 
+// ProfileViews is the resolver for the profileViews field.
+func (r *userResolver) ProfileViews(ctx context.Context, obj *model.User) ([]*model.User, error) {
+	return repository.GetUserProfileViews(ctx, obj)
+}
+
 // Experiences is the resolver for the experiences field.
 func (r *userResolver) Experiences(ctx context.Context, obj *model.User) ([]*model.Experience, error) {
 	return repository.GetUserExperiences(ctx, obj)
@@ -79,7 +84,7 @@ func (r *userMutationResolver) View(ctx context.Context, obj *model.UserMutation
 			Message: "Viewed self",
 		}
 	}
-	return repository.ViewUser(ctx, input.ViewedUserID)
+	return repository.ViewUser(ctx, input)
 }
 
 // Follow is the resolver for the follow field.
@@ -105,6 +110,11 @@ func (r *userMutationResolver) UnBlock(ctx context.Context, obj *model.UserMutat
 // Update is the resolver for the update field.
 func (r *userMutationResolver) Update(ctx context.Context, obj *model.UserMutation, input *model.UpdateUser) (*model.User, error) {
 	return repository.UpdateUser(ctx, input)
+}
+
+// UpdateProfilePhoto is the resolver for the updateProfilePhoto field.
+func (r *userMutationResolver) UpdateProfilePhoto(ctx context.Context, obj *model.UserMutation, input *model.UpdateProfilePhoto) (*model.User, error) {
+	return repository.UpdateUserProfilePhoto(ctx, input)
 }
 
 // User returns generated.UserResolver implementation.

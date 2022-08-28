@@ -11,8 +11,8 @@ type User {
   profileLink: String!
   about: String
   location: Location
-  profileViews: Int!
   isActive: Boolean!
+  profileViews: [User!] @goField(forceResolver: true)
   experiences: [Experience!] @goField(forceResolver: true)
   educations: [Education!] @goField(forceResolver: true)
   connections: [User!] @goField(forceResolver: true)
@@ -33,23 +33,23 @@ type UserMutation {
   block(input: BlockUser): User! @goField(forceResolver: true)
   unBlock(input: BlockUser): User! @goField(forceResolver: true)
   update(input: UpdateUser): User! @goField(forceResolver: true)
+  updateProfilePhoto(input: UpdateProfilePhoto): User! @goField(forceResolver: true)
 }
 
 input UpdateUser {
   userId: ID!
-  email: String
-  firstName: String
-  lastName: String
-  additionalName: String
-  profilePhotoUrl: String
-  backgroundPhotoUrl: String
-  headline: String
-  pronouns: String
-  profileLink: String
-  about: String
-  locationCity: String
-  locationRegion: String
-  isActive: Boolean
+  firstName: String!
+  lastName: String!
+  additionalName: String!
+  pronouns: String!
+  about: String!
+  locationCity: String!
+  locationRegion: String!
+}
+
+input UpdateProfilePhoto {
+  userId: ID!
+  profilePhotoUrl: String!
 }
 
 input ViewUser {

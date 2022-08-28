@@ -105,6 +105,7 @@ function CreatePostModal({ onClose }: { onClose: VoidFunction }) {
     });
 
     setLoading(false);
+    onClose();
   };
 
   return (

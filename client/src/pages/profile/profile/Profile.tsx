@@ -1,11 +1,12 @@
 import { useQuery } from "@apollo/client";
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import ProfileName from "../../../components/profile/ProfileName";
 import ProfilePhoto from "../../../components/profile/profilePhoto/ProfilePhoto";
 import Content from "../../../components/utilities/Content";
 import { USER_PROFILE } from "../../../graphql/user";
+import ProfilePhotoDetail from "./ProfilePhotoDetail";
 
 const Wrapper = styled(Content)`
   padding: 0;
@@ -24,6 +25,7 @@ const ProfileImg = styled.div`
   position: absolute;
   left: 2rem;
   top: 4rem;
+  cursor: pointer;
 `;
 
 const ProfileDescription = styled.div`
@@ -42,6 +44,17 @@ function Profile() {
   const { userId } = useParams();
   const { data } = useQuery(USER_PROFILE, { variables: { id: userId } });
 
+  const [profilePhotoDetailOpened, setProfilePhotoDetailOpened] =
+    useState(false);
+
+  const openProfilePhotoDetail = () => {
+    setProfilePhotoDetailOpened(true);
+  };
+
+  const closeProfilePhotoDetail = () => {
+    setProfilePhotoDetailOpened(false);
+  };
+
   return (
     <Wrapper>
       {data && (
@@ -53,8 +66,9 @@ function Profile() {
             }
             alt=""
           />
-          <ProfileImg>
+          <ProfileImg onClick={openProfilePhotoDetail}>
             <ProfilePhoto user={data.user} size="extra-large" />
+            {profilePhotoDetailOpened && <ProfilePhotoDetail user={data.user} onClose={closeProfilePhotoDetail}  />}
           </ProfileImg>
           <ProfileDescription>
             <ProfileName
@@ -66,7 +80,7 @@ function Profile() {
             {data.user.location.city && (
               <p>{`${data.user.location.city}, ${data.user.location.region}`}</p>
             )}
-            <p>{data.user.profileViews} Profile views</p>
+            <p>{data.user.profileViews.length} Profile views</p>
           </ProfileDescription>
         </>
       )}

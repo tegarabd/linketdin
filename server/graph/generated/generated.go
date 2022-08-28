@@ -298,12 +298,13 @@ type ComplexityRoot struct {
 	}
 
 	UserMutation struct {
-		Block    func(childComplexity int, input *model.BlockUser) int
-		Follow   func(childComplexity int, input *model.FollowUser) int
-		UnBlock  func(childComplexity int, input *model.BlockUser) int
-		UnFollow func(childComplexity int, input *model.FollowUser) int
-		Update   func(childComplexity int, input *model.UpdateUser) int
-		View     func(childComplexity int, input *model.ViewUser) int
+		Block              func(childComplexity int, input *model.BlockUser) int
+		Follow             func(childComplexity int, input *model.FollowUser) int
+		UnBlock            func(childComplexity int, input *model.BlockUser) int
+		UnFollow           func(childComplexity int, input *model.FollowUser) int
+		Update             func(childComplexity int, input *model.UpdateUser) int
+		UpdateProfilePhoto func(childComplexity int, input *model.UpdateProfilePhoto) int
+		View               func(childComplexity int, input *model.ViewUser) int
 	}
 }
 
@@ -410,6 +411,7 @@ type QueryResolver interface {
 type UserResolver interface {
 	Headline(ctx context.Context, obj *model.User) (*string, error)
 
+	ProfileViews(ctx context.Context, obj *model.User) ([]*model.User, error)
 	Experiences(ctx context.Context, obj *model.User) ([]*model.Experience, error)
 	Educations(ctx context.Context, obj *model.User) ([]*model.Education, error)
 	Connections(ctx context.Context, obj *model.User) ([]*model.User, error)
@@ -429,6 +431,7 @@ type UserMutationResolver interface {
 	Block(ctx context.Context, obj *model.UserMutation, input *model.BlockUser) (*model.User, error)
 	UnBlock(ctx context.Context, obj *model.UserMutation, input *model.BlockUser) (*model.User, error)
 	Update(ctx context.Context, obj *model.UserMutation, input *model.UpdateUser) (*model.User, error)
+	UpdateProfilePhoto(ctx context.Context, obj *model.UserMutation, input *model.UpdateProfilePhoto) (*model.User, error)
 }
 
 type executableSchema struct {
@@ -1732,6 +1735,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserMutation.Update(childComplexity, args["input"].(*model.UpdateUser)), true
 
+	case "UserMutation.updateProfilePhoto":
+		if e.complexity.UserMutation.UpdateProfilePhoto == nil {
+			break
+		}
+
+		args, err := ec.field_UserMutation_updateProfilePhoto_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.UserMutation.UpdateProfilePhoto(childComplexity, args["input"].(*model.UpdateProfilePhoto)), true
+
 	case "UserMutation.view":
 		if e.complexity.UserMutation.View == nil {
 			break
@@ -1779,6 +1794,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSharePost,
 		ec.unmarshalInputUpdateEducation,
 		ec.unmarshalInputUpdateExperience,
+		ec.unmarshalInputUpdateProfilePhoto,
 		ec.unmarshalInputUpdateUser,
 		ec.unmarshalInputViewUser,
 	)
@@ -2238,8 +2254,8 @@ type Mutation {
   profileLink: String!
   about: String
   location: Location
-  profileViews: Int!
   isActive: Boolean!
+  profileViews: [User!] @goField(forceResolver: true)
   experiences: [Experience!] @goField(forceResolver: true)
   educations: [Education!] @goField(forceResolver: true)
   connections: [User!] @goField(forceResolver: true)
@@ -2260,23 +2276,23 @@ type UserMutation {
   block(input: BlockUser): User! @goField(forceResolver: true)
   unBlock(input: BlockUser): User! @goField(forceResolver: true)
   update(input: UpdateUser): User! @goField(forceResolver: true)
+  updateProfilePhoto(input: UpdateProfilePhoto): User! @goField(forceResolver: true)
 }
 
 input UpdateUser {
   userId: ID!
-  email: String
-  firstName: String
-  lastName: String
-  additionalName: String
-  profilePhotoUrl: String
-  backgroundPhotoUrl: String
-  headline: String
-  pronouns: String
-  profileLink: String
-  about: String
-  locationCity: String
-  locationRegion: String
-  isActive: Boolean
+  firstName: String!
+  lastName: String!
+  additionalName: String!
+  pronouns: String!
+  about: String!
+  locationCity: String!
+  locationRegion: String!
+}
+
+input UpdateProfilePhoto {
+  userId: ID!
+  profilePhotoUrl: String!
 }
 
 input ViewUser {
@@ -3071,6 +3087,21 @@ func (ec *executionContext) field_UserMutation_unFollow_args(ctx context.Context
 	return args, nil
 }
 
+func (ec *executionContext) field_UserMutation_updateProfilePhoto_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.UpdateProfilePhoto
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOUpdateProfilePhoto2ᚖserverᚋgraphᚋmodelᚐUpdateProfilePhoto(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_UserMutation_update_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3599,10 +3630,10 @@ func (ec *executionContext) fieldContext_AuthMutation_activate(ctx context.Conte
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -3875,10 +3906,10 @@ func (ec *executionContext) fieldContext_AuthMutation_verifyForgotPasswordCode(c
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -3982,10 +4013,10 @@ func (ec *executionContext) fieldContext_AuthMutation_resetPassword(ctx context.
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -4199,10 +4230,10 @@ func (ec *executionContext) fieldContext_Comment_commenter(ctx context.Context, 
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -4336,10 +4367,10 @@ func (ec *executionContext) fieldContext_Comment_likes(ctx context.Context, fiel
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -4662,10 +4693,10 @@ func (ec *executionContext) fieldContext_ConnectInvitation_from(ctx context.Cont
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -4758,10 +4789,10 @@ func (ec *executionContext) fieldContext_ConnectInvitation_to(ctx context.Contex
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -5263,10 +5294,10 @@ func (ec *executionContext) fieldContext_Education_user(ctx context.Context, fie
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -5986,10 +6017,10 @@ func (ec *executionContext) fieldContext_Experience_user(ctx context.Context, fi
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -7288,10 +7319,10 @@ func (ec *executionContext) fieldContext_Message_sender(ctx context.Context, fie
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -7384,10 +7415,10 @@ func (ec *executionContext) fieldContext_Message_receiver(ctx context.Context, f
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -7770,6 +7801,8 @@ func (ec *executionContext) fieldContext_Mutation_user(ctx context.Context, fiel
 				return ec.fieldContext_UserMutation_unBlock(ctx, field)
 			case "update":
 				return ec.fieldContext_UserMutation_update(ctx, field)
+			case "updateProfilePhoto":
+				return ec.fieldContext_UserMutation_updateProfilePhoto(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserMutation", field.Name)
 		},
@@ -8448,10 +8481,10 @@ func (ec *executionContext) fieldContext_Notification_from(ctx context.Context, 
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -8741,10 +8774,10 @@ func (ec *executionContext) fieldContext_Post_poster(ctx context.Context, field 
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -9028,10 +9061,10 @@ func (ec *executionContext) fieldContext_Post_sends(ctx context.Context, field g
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -9121,10 +9154,10 @@ func (ec *executionContext) fieldContext_Post_likes(ctx context.Context, field g
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -9716,10 +9749,10 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -10407,10 +10440,10 @@ func (ec *executionContext) fieldContext_Query_searchUser(ctx context.Context, f
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -10534,10 +10567,10 @@ func (ec *executionContext) fieldContext_Query_searchConnectedUser(ctx context.C
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -11528,50 +11561,6 @@ func (ec *executionContext) fieldContext_User_location(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _User_profileViews(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_profileViews(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ProfileViews, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_profileViews(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _User_isActive(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_isActive(ctx, field)
 	if err != nil {
@@ -11611,6 +11600,99 @@ func (ec *executionContext) fieldContext_User_isActive(ctx context.Context, fiel
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_profileViews(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_profileViews(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().ProfileViews(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚕᚖserverᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_profileViews(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "additionalName":
+				return ec.fieldContext_User_additionalName(ctx, field)
+			case "profilePhotoUrl":
+				return ec.fieldContext_User_profilePhotoUrl(ctx, field)
+			case "backgroundPhotoUrl":
+				return ec.fieldContext_User_backgroundPhotoUrl(ctx, field)
+			case "headline":
+				return ec.fieldContext_User_headline(ctx, field)
+			case "pronouns":
+				return ec.fieldContext_User_pronouns(ctx, field)
+			case "profileLink":
+				return ec.fieldContext_User_profileLink(ctx, field)
+			case "about":
+				return ec.fieldContext_User_about(ctx, field)
+			case "location":
+				return ec.fieldContext_User_location(ctx, field)
+			case "isActive":
+				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
+			case "experiences":
+				return ec.fieldContext_User_experiences(ctx, field)
+			case "educations":
+				return ec.fieldContext_User_educations(ctx, field)
+			case "connections":
+				return ec.fieldContext_User_connections(ctx, field)
+			case "followers":
+				return ec.fieldContext_User_followers(ctx, field)
+			case "following":
+				return ec.fieldContext_User_following(ctx, field)
+			case "posts":
+				return ec.fieldContext_User_posts(ctx, field)
+			case "invitations":
+				return ec.fieldContext_User_invitations(ctx, field)
+			case "notifications":
+				return ec.fieldContext_User_notifications(ctx, field)
+			case "messages":
+				return ec.fieldContext_User_messages(ctx, field)
+			case "userMightKnow":
+				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -11804,10 +11886,10 @@ func (ec *executionContext) fieldContext_User_connections(ctx context.Context, f
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -11897,10 +11979,10 @@ func (ec *executionContext) fieldContext_User_followers(ctx context.Context, fie
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -11990,10 +12072,10 @@ func (ec *executionContext) fieldContext_User_following(ctx context.Context, fie
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -12305,10 +12387,10 @@ func (ec *executionContext) fieldContext_User_userMightKnow(ctx context.Context,
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -12398,10 +12480,10 @@ func (ec *executionContext) fieldContext_User_blocked(ctx context.Context, field
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -12494,10 +12576,10 @@ func (ec *executionContext) fieldContext_UserMutation_view(ctx context.Context, 
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -12601,10 +12683,10 @@ func (ec *executionContext) fieldContext_UserMutation_follow(ctx context.Context
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -12708,10 +12790,10 @@ func (ec *executionContext) fieldContext_UserMutation_unFollow(ctx context.Conte
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -12815,10 +12897,10 @@ func (ec *executionContext) fieldContext_UserMutation_block(ctx context.Context,
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -12922,10 +13004,10 @@ func (ec *executionContext) fieldContext_UserMutation_unBlock(ctx context.Contex
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -13029,10 +13111,10 @@ func (ec *executionContext) fieldContext_UserMutation_update(ctx context.Context
 				return ec.fieldContext_User_about(ctx, field)
 			case "location":
 				return ec.fieldContext_User_location(ctx, field)
-			case "profileViews":
-				return ec.fieldContext_User_profileViews(ctx, field)
 			case "isActive":
 				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
 			case "experiences":
 				return ec.fieldContext_User_experiences(ctx, field)
 			case "educations":
@@ -13067,6 +13149,113 @@ func (ec *executionContext) fieldContext_UserMutation_update(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_UserMutation_update_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserMutation_updateProfilePhoto(ctx context.Context, field graphql.CollectedField, obj *model.UserMutation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserMutation_updateProfilePhoto(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UserMutation().UpdateProfilePhoto(rctx, obj, fc.Args["input"].(*model.UpdateProfilePhoto))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖserverᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserMutation_updateProfilePhoto(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserMutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "additionalName":
+				return ec.fieldContext_User_additionalName(ctx, field)
+			case "profilePhotoUrl":
+				return ec.fieldContext_User_profilePhotoUrl(ctx, field)
+			case "backgroundPhotoUrl":
+				return ec.fieldContext_User_backgroundPhotoUrl(ctx, field)
+			case "headline":
+				return ec.fieldContext_User_headline(ctx, field)
+			case "pronouns":
+				return ec.fieldContext_User_pronouns(ctx, field)
+			case "profileLink":
+				return ec.fieldContext_User_profileLink(ctx, field)
+			case "about":
+				return ec.fieldContext_User_about(ctx, field)
+			case "location":
+				return ec.fieldContext_User_location(ctx, field)
+			case "isActive":
+				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
+			case "experiences":
+				return ec.fieldContext_User_experiences(ctx, field)
+			case "educations":
+				return ec.fieldContext_User_educations(ctx, field)
+			case "connections":
+				return ec.fieldContext_User_connections(ctx, field)
+			case "followers":
+				return ec.fieldContext_User_followers(ctx, field)
+			case "following":
+				return ec.fieldContext_User_following(ctx, field)
+			case "posts":
+				return ec.fieldContext_User_posts(ctx, field)
+			case "invitations":
+				return ec.fieldContext_User_invitations(ctx, field)
+			case "notifications":
+				return ec.fieldContext_User_notifications(ctx, field)
+			case "messages":
+				return ec.fieldContext_User_messages(ctx, field)
+			case "userMightKnow":
+				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_UserMutation_updateProfilePhoto_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -16226,14 +16415,14 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj interface{}) (model.UpdateUser, error) {
-	var it model.UpdateUser
+func (ec *executionContext) unmarshalInputUpdateProfilePhoto(ctx context.Context, obj interface{}) (model.UpdateProfilePhoto, error) {
+	var it model.UpdateProfilePhoto
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "email", "firstName", "lastName", "additionalName", "profilePhotoUrl", "backgroundPhotoUrl", "headline", "pronouns", "profileLink", "about", "locationCity", "locationRegion", "isActive"}
+	fieldsInOrder := [...]string{"userId", "profilePhotoUrl"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -16248,11 +16437,39 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
-		case "email":
+		case "profilePhotoUrl":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-			it.Email, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profilePhotoUrl"))
+			it.ProfilePhotoURL, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj interface{}) (model.UpdateUser, error) {
+	var it model.UpdateUser
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"userId", "firstName", "lastName", "additionalName", "pronouns", "about", "locationCity", "locationRegion"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "userId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			it.UserID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16260,7 +16477,7 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
-			it.FirstName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.FirstName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16268,7 +16485,7 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
-			it.LastName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.LastName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16276,31 +16493,7 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("additionalName"))
-			it.AdditionalName, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "profilePhotoUrl":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profilePhotoUrl"))
-			it.ProfilePhotoURL, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "backgroundPhotoUrl":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("backgroundPhotoUrl"))
-			it.BackgroundPhotoURL, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "headline":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("headline"))
-			it.Headline, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.AdditionalName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16308,15 +16501,7 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pronouns"))
-			it.Pronouns, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "profileLink":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profileLink"))
-			it.ProfileLink, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Pronouns, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16324,7 +16509,7 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("about"))
-			it.About, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.About, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16332,7 +16517,7 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("locationCity"))
-			it.LocationCity, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.LocationCity, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16340,15 +16525,7 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("locationRegion"))
-			it.LocationRegion, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "isActive":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isActive"))
-			it.IsActive, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			it.LocationRegion, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -18618,13 +18795,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 
 			out.Values[i] = ec._User_location(ctx, field, obj)
 
-		case "profileViews":
-
-			out.Values[i] = ec._User_profileViews(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "isActive":
 
 			out.Values[i] = ec._User_isActive(ctx, field, obj)
@@ -18632,6 +18802,23 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "profileViews":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_profileViews(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "experiences":
 			field := field
 
@@ -18950,6 +19137,26 @@ func (ec *executionContext) _UserMutation(ctx context.Context, sel ast.Selection
 					}
 				}()
 				res = ec._UserMutation_update(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "updateProfilePhoto":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserMutation_updateProfilePhoto(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -20746,6 +20953,14 @@ func (ec *executionContext) unmarshalOUpdateExperience2ᚖserverᚋgraphᚋmodel
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputUpdateExperience(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUpdateProfilePhoto2ᚖserverᚋgraphᚋmodelᚐUpdateProfilePhoto(ctx context.Context, v interface{}) (*model.UpdateProfilePhoto, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateProfilePhoto(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -16,8 +16,8 @@ type User struct {
 	ProfileLink        string               `json:"profileLink"`
 	About              *string              `json:"about"`
 	Location           *Location            `json:"location" gorm:"embedded"`
-	ProfileViews       int                  `json:"profileViews"`
 	IsActive           bool                 `json:"isActive"`
+	ProfileViews       []*User              `json:"profileViews" gorm:"many2many:user_profile_views"`
 	Experiences        []*Experience        `json:"experiences"`
 	Educations         []*Education         `json:"educations"`
 	Connections        []*User              `json:"connections" gorm:"many2many:user_connections"`

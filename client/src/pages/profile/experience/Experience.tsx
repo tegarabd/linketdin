@@ -7,14 +7,15 @@ import { Experience as ExperienceType } from "../../../types/experience";
 
 const Wrapper = styled(Content)`
   padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 `;
 
 const List = styled.div`
   & > div {
+    padding-top: 0.5rem;
     border-top: 1px solid ${(props) => props.theme.shadow};
-  }
-  &:nth-child(1) {
-    border-top: none;
   }
 `;
 
@@ -51,7 +52,7 @@ function Experience() {
       <List>
         {data &&
           data.user.experiences.map((experience: ExperienceType) => (
-            <Item experience={experience} />
+            <Item key={experience.id} experience={experience} />
           ))}
       </List>
     </Wrapper>
