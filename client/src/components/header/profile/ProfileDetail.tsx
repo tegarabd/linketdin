@@ -30,7 +30,6 @@ const Wrapper = styled(Content)`
 const Profile = styled.div`
   display: grid;
   grid-template-columns: 3.5rem auto;
-  height: 3.5rem;
 `;
 
 function ProfileDetail({

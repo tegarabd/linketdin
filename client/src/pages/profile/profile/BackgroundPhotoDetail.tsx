@@ -1,23 +1,19 @@
 import { useMutation } from "@apollo/client";
-import { uuidv4 } from "@firebase/util";
 import React, { ChangeEventHandler, useRef, useState } from "react";
-import styled from "styled-components";
-import ProfilePhoto from "../../../components/profile/profilePhoto/ProfilePhoto";
-import ButtonTertiary from "../../../components/utilities/button/ButtonTertiary";
-import EntirePageLoading from "../../../components/utilities/entirePage/EntirePageLoading";
 import EntirePageModal from "../../../components/utilities/entirePage/EntirePageModal";
-import uploadProfilePhoto from "../../../firebase/uploadProfilePhoto";
-import { UPDATE_USER_PROFILE_PHOTO, USER_PROFILE } from "../../../graphql/user";
+import uploadBackgroundPhoto from "../../../firebase/uploadBackgroundPhoto";
+import {
+  UPDATE_USER_BACKGROUND_PHOTO,
+  USER_PROFILE,
+} from "../../../graphql/user";
 import { useJwt } from "../../../hooks/useJwt";
-import { useScroll } from "../../../hooks/useScroll";
 import { User } from "../../../types/user";
 import { useProfile } from "../ProfileContextProvider";
-
-const Wrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
+import { uuidv4 } from "@firebase/util";
+import styled from "styled-components";
+import ButtonTertiary from "../../../components/utilities/button/ButtonTertiary";
+import EntirePageLoading from "../../../components/utilities/entirePage/EntirePageLoading";
+import { useScroll } from "../../../hooks/useScroll";
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -25,14 +21,12 @@ const ButtonGroup = styled.div`
 `;
 
 const Img = styled.img`
-  width: 10rem;
+  width: 100%;
   height: 10rem;
-  border-radius: 50%;
-  border: 0.25rem solid ${(props) => props.theme.secondary};
   object-fit: cover;
 `;
 
-function ProfilePhotoDetail({
+function BackgroundPhotoDetail({
   user,
   onClose,
 }: {
@@ -46,7 +40,7 @@ function ProfilePhotoDetail({
   const [file, setFile] = useState<File>(null!);
   const [url, setUrl] = useState<string>(null!);
   const [loading, setLoading] = useState(false);
-  const [update] = useMutation(UPDATE_USER_PROFILE_PHOTO, {
+  const [update] = useMutation(UPDATE_USER_BACKGROUND_PHOTO, {
     refetchQueries: [{ query: USER_PROFILE, variables: { id: sub } }],
   });
 
@@ -59,7 +53,7 @@ function ProfilePhotoDetail({
 
   const handleApply = async () => {
     setLoading(true);
-    const url = await uploadProfilePhoto(file, `${user.email}-${uuidv4()}`);
+    const url = await uploadBackgroundPhoto(file, `${user.email}-${uuidv4()}`);
 
     await update({
       variables: {
@@ -75,21 +69,21 @@ function ProfilePhotoDetail({
 
   return (
     <EntirePageModal
-      title="Profile Photo"
-      position="top"
+      title="Background Photo"
       onClose={onClose}
+      position="top"
     >
-      {loading && <EntirePageLoading />}
-      <Wrapper>
-        {file ? (
-          <Img src={url} />
-        ) : (
-          <ProfilePhoto
-            user={user}
-            size="extra-large"
-          />
-        )}
-      </Wrapper>
+      {file ? (
+        <Img src={url} />
+      ) : (
+        <Img
+          src={
+            user.backgroundPhotoUrl ||
+            "https://static-exp1.licdn.com/sc/h/55k1z8997gh8dwtihm11aajyq"
+          }
+        />
+      )}
+
       {canModify && (
         <ButtonGroup>
           <ButtonTertiary onClick={() => inputRef.current.click()}>
@@ -111,8 +105,9 @@ function ProfilePhotoDetail({
           </ButtonTertiary>
         </ButtonGroup>
       )}
+      {loading && <EntirePageLoading />}
     </EntirePageModal>
   );
 }
 
-export default ProfilePhotoDetail;
+export default BackgroundPhotoDetail;

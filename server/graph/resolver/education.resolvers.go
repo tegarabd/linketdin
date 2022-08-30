@@ -15,6 +15,32 @@ func (r *educationResolver) User(ctx context.Context, obj *model.Education) (*mo
 	return repository.GetUserByID(ctx, obj.UserID)
 }
 
+// StartDate is the resolver for the startDate field.
+func (r *educationResolver) StartDate(ctx context.Context, obj *model.Education) (*model.Date, error) {
+	education, err := repository.GetEducationById(ctx, obj.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Date{
+		Month: education.StartDate.StartMonth,
+		Year:  education.StartDate.StartYear,
+	}, err
+}
+
+// EndDate is the resolver for the endDate field.
+func (r *educationResolver) EndDate(ctx context.Context, obj *model.Education) (*model.Date, error) {
+	education, err := repository.GetEducationById(ctx, obj.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Date{
+		Month: education.EndDate.EndMonth,
+		Year:  education.EndDate.EndYear,
+	}, err
+}
+
 // Create is the resolver for the create field.
 func (r *educationMutationResolver) Create(ctx context.Context, obj *model.EducationMutation, input *model.CreateEducation) (*model.Education, error) {
 	return repository.CreateEducation(ctx, input)

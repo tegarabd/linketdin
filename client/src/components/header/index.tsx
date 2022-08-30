@@ -10,9 +10,10 @@ const HeaderWrapper = styled.header`
   justify-content: center;
   padding: 0 1rem;
   height: var(--header-height);
-  border-bottom: 1px solid ${props => props.theme.shadow};
+  border-bottom: 1px solid ${(props) => props.theme.shadow};
   position: sticky;
   top: 0;
+  z-index: 2;
 `;
 
 const HeaderContent = styled.div`

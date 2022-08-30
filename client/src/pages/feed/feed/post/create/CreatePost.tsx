@@ -1,5 +1,6 @@
 import { useQuery } from "@apollo/client";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import ProfilePhoto from "../../../../../components/profile/profilePhoto/ProfilePhoto";
 import Content from "../../../../../components/utilities/Content";
@@ -32,17 +33,22 @@ function CreatePost() {
 
   const openModal = () => {
     setModalOpened(true);
-    document.documentElement.style.setProperty("overflow-y", "hidden");
   };
 
   const closeModal = () => {
     setModalOpened(false);
-    document.documentElement.style.setProperty("overflow-y", "auto");
   };
 
   return (
     <Wrapper>
-      {data && <ProfilePhoto user={data.user} size="large" />}
+      {data && (
+        <Link to={`/in/${data.user.id}`}>
+          <ProfilePhoto
+            user={data.user}
+            size="large"
+          />
+        </Link>
+      )}
       <ButtonCapsule onClick={openModal}>Start a post</ButtonCapsule>
       {modalOpened && <CreatePostModal onClose={closeModal} />}
     </Wrapper>

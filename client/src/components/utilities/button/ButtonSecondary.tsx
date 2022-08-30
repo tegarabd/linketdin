@@ -1,17 +1,22 @@
 import styled from "styled-components";
 
 const ButtonSecondary = styled.button`
-  border-radius: 50%;
+  cursor: pointer;
+  padding: 0 2rem;
+  border-radius: 100vw;
+  border: 1px solid ${(props) => props.theme.accent};
+  font-weight: 500;
+  color: ${(props) => props.theme.accent};
+  text-align: center;
+  min-height: 2rem;
+  min-width: 10rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
-  width: 2rem;
-  height: 2rem;
-  transition: 300ms;
+  gap: 0.5rem;
 
   &:hover {
-    background-color: ${(props) => props.theme.shadow};
+    border-width: 0.125rem;
   }
 `;
 

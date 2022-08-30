@@ -1,6 +1,10 @@
-import { FC } from "react";
+import { useMutation } from "@apollo/client";
+import { FC, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Content from "../../components/utilities/Content";
+import { USER_PROFILE, VIEW_USER } from "../../graphql/user";
+import { useJwt } from "../../hooks/useJwt";
 import MainSideLayout from "../../layouts/MainSideLayout";
 import EducationType from "./education/Education";
 import Experience from "./experience/Experience";
@@ -18,7 +22,12 @@ function ProfileSection({
 }: {
   children: JSX.Element | JSX.Element[];
 }) {
+  const { userId } = useParams();
+  const { sub } = useJwt();
   const { canView } = useProfile();
+  const [viewUser] = useMutation(VIEW_USER, {
+    refetchQueries: [{ query: USER_PROFILE, variables: { id: userId } }],
+  });
 
   if (!canView) {
     return (
@@ -28,6 +37,15 @@ function ProfileSection({
       </h3>
     );
   }
+
+  useEffect(() => {
+    if (sub === userId) {
+      return;
+    }
+    viewUser({ variables: { viewerId: sub, viewedUserId: userId } });
+
+    return () => {};
+  }, []);
 
   return <Wrapper>{children}</Wrapper>;
 }

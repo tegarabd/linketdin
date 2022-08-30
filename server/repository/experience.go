@@ -33,13 +33,13 @@ func CreateExperience(ctx context.Context, input *model.CreateExperience) (*mode
 			City:   input.LocationCity,
 		},
 		IsActive:       input.IsActive,
-		StartDate:      &model.Date{
-			Month: input.StartDateMonth,
-			Year:  input.StartDateYear,
+		StartDate:      &model.StartDate{
+			StartMonth: input.StartDateMonth,
+			StartYear:  input.StartDateYear,
 		},
-		EndDate:        &model.Date{
-			Month: *input.EndDateMonth,
-			Year:  *input.EndDateYear,
+		EndDate:        &model.EndDate{
+			EndMonth: *input.EndDateMonth,
+			EndYear:  *input.EndDateYear,
 		},
 		Industry:       input.Industry,
 		Headline:       input.Headline,
@@ -60,7 +60,26 @@ func UpdateExperience(ctx context.Context, input *model.UpdateExperience) (*mode
 		return nil, err
 	}
 
-	if err := db.Model(&experince).Updates(input).Error; err != nil {
+	if err := db.Model(&experince).Updates(model.Experience{
+		Title:          input.Title,
+		EmploymentType: input.EmploymentType,
+		CompanyName:    input.CompanyName,
+		Location:       &model.Location{
+			Region: input.LocationRegion,
+			City:   input.LocationCity,
+		},
+		IsActive:       input.IsActive,
+		StartDate:      &model.StartDate{
+			StartMonth: input.StartDateMonth,
+			StartYear:  input.StartDateYear,
+		},
+		EndDate:        &model.EndDate{
+			EndMonth: input.EndDateMonth,
+			EndYear:  input.EndDateYear,
+		},
+		Industry:       input.Industry,
+		Headline:       &input.Headline,
+	}).Error; err != nil {
 		return nil, err
 	}
 

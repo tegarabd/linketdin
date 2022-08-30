@@ -6,12 +6,9 @@ interface Props {
 }
 
 const EntirePageOverlay = styled.div<Props>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100vh;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
   background-color: ${(props) =>
     props.followTheme ? props.theme.overlay : "rgba(0, 0, 0, 0.8)"};
   display: flex;

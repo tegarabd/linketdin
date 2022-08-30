@@ -117,6 +117,11 @@ func (r *userMutationResolver) UpdateProfilePhoto(ctx context.Context, obj *mode
 	return repository.UpdateUserProfilePhoto(ctx, input)
 }
 
+// UpdateBackgroundPhoto is the resolver for the updateBackgroundPhoto field.
+func (r *userMutationResolver) UpdateBackgroundPhoto(ctx context.Context, obj *model.UserMutation, input *model.UpdateBackgroundPhoto) (*model.User, error) {
+	return repository.UpdateUserBackgroundPhoto(ctx, input)
+}
+
 // User returns generated.UserResolver implementation.
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 

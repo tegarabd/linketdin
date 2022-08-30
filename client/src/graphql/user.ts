@@ -12,6 +12,7 @@ export const USER_PROFILE = gql`
       headline
       backgroundPhotoUrl
       pronouns
+      about
       profileViews {
         id
       }
@@ -20,6 +21,9 @@ export const USER_PROFILE = gql`
         region
       }
       connections {
+        id
+      }
+      followers {
         id
       }
     }
@@ -95,6 +99,47 @@ export const UPDATE_USER_PROFILE_PHOTO = gql`
   mutation updateProfilePhoto($id: ID!, $url: String!) {
     user {
       updateProfilePhoto(input: { userId: $id, profilePhotoUrl: $url }) {
+        id
+      }
+    }
+  }
+`;
+
+export const UPDATE_USER_BACKGROUND_PHOTO = gql`
+  mutation updateBackgroundPhoto($id: ID!, $url: String!) {
+    user {
+      updateBackgroundPhoto(input: { userId: $id, backgroundPhotoUrl: $url }) {
+        id
+      }
+    }
+  }
+`;
+
+export const UPDATE_USER = gql`
+  mutation updateUser($input: UpdateUser!) {
+    user {
+      update(input: $input) {
+        id
+      }
+    }
+  }
+`;
+
+export const VIEW_USER = gql`
+  mutation viewUser($viewerId: String!, $viewedUserId: String!) {
+    user {
+      view(input: { viewerId: $viewerId, viewedUserId: $viewedUserId }) {
+        id
+      }
+    }
+  }
+`;
+
+
+export const FOLLOW_USER = gql`
+  mutation followUser($input: FollowUser!) {
+    user {
+      follow(input: $input) {
         id
       }
     }

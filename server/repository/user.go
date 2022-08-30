@@ -135,7 +135,7 @@ func GetUserHeadline(ctx context.Context, user *model.User) (*string, error) {
 	var headline strings.Builder
 	for _, experience := range experiences {
 		if experience.Headline != nil {
-			headline.WriteString(*experience.Headline + "\n")
+			headline.WriteString(*experience.Headline + "#")
 		}
 	}
 
@@ -332,7 +332,17 @@ func UpdateUser(ctx context.Context, input *model.UpdateUser) (*model.User, erro
 		return nil, err
 	}
 
-	if err := db.Model(&user).Updates(input).Error; err != nil {
+	if err := db.Model(&user).Updates(model.User{
+		FirstName:          input.FirstName,
+		LastName:           input.LastName,
+		AdditionalName:     &input.AdditionalName,
+		Pronouns:           &input.Pronouns,
+		About:              &input.About,
+		Location:           &model.Location{
+			Region: input.LocationRegion,
+			City:   input.LocationCity,
+		},
+	}).Error; err != nil {
 		return nil, err
 	}
 
@@ -348,6 +358,21 @@ func UpdateUserProfilePhoto(ctx context.Context, input *model.UpdateProfilePhoto
 	}
 
 	if err := db.Model(&user).Update("profile_photo_url", input.ProfilePhotoURL).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func UpdateUserBackgroundPhoto(ctx context.Context, input *model.UpdateBackgroundPhoto) (*model.User, error) {
+	db := database.GetDB()
+
+	user, err := GetUserByID(ctx, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(&user).Update("background_photo_url", input.BackgroundPhotoURL).Error; err != nil {
 		return nil, err
 	}
 

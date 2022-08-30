@@ -17,6 +17,7 @@ import { CREATE_POST } from "../../../../../graphql/post";
 import EntirePageLoading from "../../../../../components/utilities/entirePage/EntirePageLoading";
 import uploadPostAttachment from "../../../../../firebase/uploadPostAttachment";
 import { uuidv4 } from "@firebase/util";
+import { useScroll } from "../../../../../hooks/useScroll";
 
 const Profile = styled.div`
   display: flex;
@@ -52,6 +53,7 @@ const AbsoluteButtonClose = styled(ButtonSecondary)`
 `;
 
 function CreatePostModal({ onClose }: { onClose: VoidFunction }) {
+  const { makeWindowScrollable } = useScroll();
   const { sub } = useJwt();
   const { data } = useQuery(USER_PROFILE, { variables: { id: sub } });
   const [file, setFile] = useState<File>(null!);
@@ -105,16 +107,24 @@ function CreatePostModal({ onClose }: { onClose: VoidFunction }) {
     });
 
     setLoading(false);
+    makeWindowScrollable();
     onClose();
   };
 
   return (
-    <EntirePageModal onClose={onClose} title="Create a post" position="top">
+    <EntirePageModal
+      onClose={onClose}
+      title="Create a post"
+      position="top"
+    >
       <>
         {loading && <EntirePageLoading />}
         {data && (
           <Profile>
-            <ProfilePhoto user={data.user} size="large" />
+            <ProfilePhoto
+              user={data.user}
+              size="large"
+            />
             <ProfileName user={data.user} />
           </Profile>
         )}
@@ -132,7 +142,10 @@ function CreatePostModal({ onClose }: { onClose: VoidFunction }) {
         )}
         {file && file.type.startsWith("video") && (
           <Preview>
-            <Video src={source} controls />
+            <Video
+              src={source}
+              controls
+            />
             <AbsoluteButtonClose onClick={removeFile}>
               <CrossIcon />
             </AbsoluteButtonClose>
@@ -158,7 +171,10 @@ function CreatePostModal({ onClose }: { onClose: VoidFunction }) {
               onChange={handleFileChange}
             />
           </FileButtonWrapper>
-          <ButtonPrimary disabled={text === ""} onClick={uploadPost}>
+          <ButtonPrimary
+            disabled={text === ""}
+            onClick={uploadPost}
+          >
             Post
           </ButtonPrimary>
         </OperationWrapper>

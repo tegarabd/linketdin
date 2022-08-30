@@ -4,8 +4,9 @@ import EntirePageOverlay from "./EntirePageOverlay";
 import { ReactComponent as CrossIcon } from "../../../assets/cross-icon.svg";
 import Content from "../Content";
 import Line from "../Line";
-import ButtonSecondary from "../button/ButtonSecondary";
 import { ReactNode } from "react";
+import ButtonTertiary from "../button/ButtonTertiary";
+import { useScroll } from "../../../hooks/useScroll";
 
 const Wrapper = styled(Content)`
   width: 35rem;
@@ -17,6 +18,7 @@ const Wrapper = styled(Content)`
 const Upper = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
 `;
 
 function EntirePageModal({
@@ -30,14 +32,25 @@ function EntirePageModal({
   title: string;
   onClose: VoidFunction;
 }) {
+  const { makeWindowScrollable, makeWindowUnscrollable } = useScroll();
+  makeWindowUnscrollable();
+
+  const close = () => {
+    makeWindowScrollable();
+    onClose();
+  };
+
   return ReactDOM.createPortal(
-    <EntirePageOverlay onClick={onClose} position={position}>
+    <EntirePageOverlay
+      onClick={close}
+      position={position}
+    >
       <Wrapper onClick={(event) => event.stopPropagation()}>
         <Upper>
           <h3>{title}</h3>
-          <ButtonSecondary onClick={onClose}>
+          <ButtonTertiary onClick={close}>
             <CrossIcon />
-          </ButtonSecondary>
+          </ButtonTertiary>
         </Upper>
         <Line />
         {children}

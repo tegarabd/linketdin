@@ -43,7 +43,22 @@ func UpdateEducation(ctx context.Context, input *model.UpdateEducation) (*model.
 		return nil, err
 	}
 
-	if err := db.Model(&education).Updates(input).Error; err != nil {
+	if err := db.Model(&education).Updates(model.Education{
+		School:      input.School,
+		Degree:      input.Degree,
+		Field:       input.Field,
+		StartDate:   &model.StartDate{
+			StartMonth: input.StartDateMonth,
+			StartYear:  input.StartDateYear,
+		},
+		EndDate:     &model.EndDate{
+			EndMonth: input.EndDateMonth,
+			EndYear:  input.EndDateYear,
+		},
+		Grade:       &input.Grade,
+		Activities:  &input.Activities,
+		Description: &input.Description,
+	}).Error; err != nil {
 		return nil, err
 	}
 

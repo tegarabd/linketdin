@@ -298,13 +298,14 @@ type ComplexityRoot struct {
 	}
 
 	UserMutation struct {
-		Block              func(childComplexity int, input *model.BlockUser) int
-		Follow             func(childComplexity int, input *model.FollowUser) int
-		UnBlock            func(childComplexity int, input *model.BlockUser) int
-		UnFollow           func(childComplexity int, input *model.FollowUser) int
-		Update             func(childComplexity int, input *model.UpdateUser) int
-		UpdateProfilePhoto func(childComplexity int, input *model.UpdateProfilePhoto) int
-		View               func(childComplexity int, input *model.ViewUser) int
+		Block                 func(childComplexity int, input *model.BlockUser) int
+		Follow                func(childComplexity int, input *model.FollowUser) int
+		UnBlock               func(childComplexity int, input *model.BlockUser) int
+		UnFollow              func(childComplexity int, input *model.FollowUser) int
+		Update                func(childComplexity int, input *model.UpdateUser) int
+		UpdateBackgroundPhoto func(childComplexity int, input *model.UpdateBackgroundPhoto) int
+		UpdateProfilePhoto    func(childComplexity int, input *model.UpdateProfilePhoto) int
+		View                  func(childComplexity int, input *model.ViewUser) int
 	}
 }
 
@@ -340,6 +341,9 @@ type ConnectionMutationResolver interface {
 }
 type EducationResolver interface {
 	User(ctx context.Context, obj *model.Education) (*model.User, error)
+
+	StartDate(ctx context.Context, obj *model.Education) (*model.Date, error)
+	EndDate(ctx context.Context, obj *model.Education) (*model.Date, error)
 }
 type EducationMutationResolver interface {
 	Create(ctx context.Context, obj *model.EducationMutation, input *model.CreateEducation) (*model.Education, error)
@@ -348,6 +352,9 @@ type EducationMutationResolver interface {
 }
 type ExperienceResolver interface {
 	User(ctx context.Context, obj *model.Experience) (*model.User, error)
+
+	StartDate(ctx context.Context, obj *model.Experience) (*model.Date, error)
+	EndDate(ctx context.Context, obj *model.Experience) (*model.Date, error)
 }
 type ExperienceMutationResolver interface {
 	Create(ctx context.Context, obj *model.ExperienceMutation, input *model.CreateExperience) (*model.Experience, error)
@@ -432,6 +439,7 @@ type UserMutationResolver interface {
 	UnBlock(ctx context.Context, obj *model.UserMutation, input *model.BlockUser) (*model.User, error)
 	Update(ctx context.Context, obj *model.UserMutation, input *model.UpdateUser) (*model.User, error)
 	UpdateProfilePhoto(ctx context.Context, obj *model.UserMutation, input *model.UpdateProfilePhoto) (*model.User, error)
+	UpdateBackgroundPhoto(ctx context.Context, obj *model.UserMutation, input *model.UpdateBackgroundPhoto) (*model.User, error)
 }
 
 type executableSchema struct {
@@ -1735,6 +1743,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserMutation.Update(childComplexity, args["input"].(*model.UpdateUser)), true
 
+	case "UserMutation.updateBackgroundPhoto":
+		if e.complexity.UserMutation.UpdateBackgroundPhoto == nil {
+			break
+		}
+
+		args, err := ec.field_UserMutation_updateBackgroundPhoto_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.UserMutation.UpdateBackgroundPhoto(childComplexity, args["input"].(*model.UpdateBackgroundPhoto)), true
+
 	case "UserMutation.updateProfilePhoto":
 		if e.complexity.UserMutation.UpdateProfilePhoto == nil {
 			break
@@ -1792,6 +1812,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRejectInvitation,
 		ec.unmarshalInputResetPassword,
 		ec.unmarshalInputSharePost,
+		ec.unmarshalInputUpdateBackgroundPhoto,
 		ec.unmarshalInputUpdateEducation,
 		ec.unmarshalInputUpdateExperience,
 		ec.unmarshalInputUpdateProfilePhoto,
@@ -2019,16 +2040,16 @@ input CreateEducation {
 
 input UpdateEducation {
   educationId: String!
-  school: String
-  degree: String
-  field: String
-  startDateMonth: String
-  startDateYear: Int
-  endDateMonth: String
-  endDateYear: Int
-  grade: Float
-  activities: String
-  description: String
+  school: String!
+  degree: String!
+  field: String!
+  startDateMonth: String!
+  startDateYear: Int!
+  endDateMonth: String!
+  endDateYear: Int!
+  grade: Float!
+  activities: String!
+  description: String!
 }
 
 input DeleteEducation {
@@ -2072,18 +2093,18 @@ input CreateExperience {
 
 input UpdateExperience {
   experienceId: String!
-  title: String
-  employmentType: String
-  companyName: String
-  isActive: Boolean
-  locationCity: String
-  locationRegion: String
-  startDateMonth: String
-  startDateYear: Int
-  endDateMonth: String
-  endDateYear: Int
-  industry: String
-  headline: String
+  title: String!
+  employmentType: String!
+  companyName: String!
+  isActive: Boolean!
+  locationCity: String!
+  locationRegion: String!
+  startDateMonth: String!
+  startDateYear: Int!
+  endDateMonth: String!
+  endDateYear: Int!
+  industry: String!
+  headline: String!
 }
 
 input DeleteExperience {
@@ -2277,6 +2298,7 @@ type UserMutation {
   unBlock(input: BlockUser): User! @goField(forceResolver: true)
   update(input: UpdateUser): User! @goField(forceResolver: true)
   updateProfilePhoto(input: UpdateProfilePhoto): User! @goField(forceResolver: true)
+  updateBackgroundPhoto(input: UpdateBackgroundPhoto): User! @goField(forceResolver: true)
 }
 
 input UpdateUser {
@@ -2293,6 +2315,11 @@ input UpdateUser {
 input UpdateProfilePhoto {
   userId: ID!
   profilePhotoUrl: String!
+}
+
+input UpdateBackgroundPhoto {
+  userId: ID!
+  backgroundPhotoUrl: String!
 }
 
 input ViewUser {
@@ -3079,6 +3106,21 @@ func (ec *executionContext) field_UserMutation_unFollow_args(ctx context.Context
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalOFollowUser2ᚖserverᚋgraphᚋmodelᚐFollowUser(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_UserMutation_updateBackgroundPhoto_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.UpdateBackgroundPhoto
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOUpdateBackgroundPhoto2ᚖserverᚋgraphᚋmodelᚐUpdateBackgroundPhoto(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5473,7 +5515,7 @@ func (ec *executionContext) _Education_startDate(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.StartDate, nil
+		return ec.resolvers.Education().StartDate(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5494,8 +5536,8 @@ func (ec *executionContext) fieldContext_Education_startDate(ctx context.Context
 	fc = &graphql.FieldContext{
 		Object:     "Education",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "month":
@@ -5523,7 +5565,7 @@ func (ec *executionContext) _Education_endDate(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.EndDate, nil
+		return ec.resolvers.Education().EndDate(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5541,8 +5583,8 @@ func (ec *executionContext) fieldContext_Education_endDate(ctx context.Context, 
 	fc = &graphql.FieldContext{
 		Object:     "Education",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "month":
@@ -6290,7 +6332,7 @@ func (ec *executionContext) _Experience_startDate(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.StartDate, nil
+		return ec.resolvers.Experience().StartDate(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6311,8 +6353,8 @@ func (ec *executionContext) fieldContext_Experience_startDate(ctx context.Contex
 	fc = &graphql.FieldContext{
 		Object:     "Experience",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "month":
@@ -6340,7 +6382,7 @@ func (ec *executionContext) _Experience_endDate(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.EndDate, nil
+		return ec.resolvers.Experience().EndDate(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6358,8 +6400,8 @@ func (ec *executionContext) fieldContext_Experience_endDate(ctx context.Context,
 	fc = &graphql.FieldContext{
 		Object:     "Experience",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "month":
@@ -7803,6 +7845,8 @@ func (ec *executionContext) fieldContext_Mutation_user(ctx context.Context, fiel
 				return ec.fieldContext_UserMutation_update(ctx, field)
 			case "updateProfilePhoto":
 				return ec.fieldContext_UserMutation_updateProfilePhoto(ctx, field)
+			case "updateBackgroundPhoto":
+				return ec.fieldContext_UserMutation_updateBackgroundPhoto(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserMutation", field.Name)
 		},
@@ -13262,6 +13306,113 @@ func (ec *executionContext) fieldContext_UserMutation_updateProfilePhoto(ctx con
 	return fc, nil
 }
 
+func (ec *executionContext) _UserMutation_updateBackgroundPhoto(ctx context.Context, field graphql.CollectedField, obj *model.UserMutation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserMutation_updateBackgroundPhoto(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UserMutation().UpdateBackgroundPhoto(rctx, obj, fc.Args["input"].(*model.UpdateBackgroundPhoto))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖserverᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserMutation_updateBackgroundPhoto(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserMutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "additionalName":
+				return ec.fieldContext_User_additionalName(ctx, field)
+			case "profilePhotoUrl":
+				return ec.fieldContext_User_profilePhotoUrl(ctx, field)
+			case "backgroundPhotoUrl":
+				return ec.fieldContext_User_backgroundPhotoUrl(ctx, field)
+			case "headline":
+				return ec.fieldContext_User_headline(ctx, field)
+			case "pronouns":
+				return ec.fieldContext_User_pronouns(ctx, field)
+			case "profileLink":
+				return ec.fieldContext_User_profileLink(ctx, field)
+			case "about":
+				return ec.fieldContext_User_about(ctx, field)
+			case "location":
+				return ec.fieldContext_User_location(ctx, field)
+			case "isActive":
+				return ec.fieldContext_User_isActive(ctx, field)
+			case "profileViews":
+				return ec.fieldContext_User_profileViews(ctx, field)
+			case "experiences":
+				return ec.fieldContext_User_experiences(ctx, field)
+			case "educations":
+				return ec.fieldContext_User_educations(ctx, field)
+			case "connections":
+				return ec.fieldContext_User_connections(ctx, field)
+			case "followers":
+				return ec.fieldContext_User_followers(ctx, field)
+			case "following":
+				return ec.fieldContext_User_following(ctx, field)
+			case "posts":
+				return ec.fieldContext_User_posts(ctx, field)
+			case "invitations":
+				return ec.fieldContext_User_invitations(ctx, field)
+			case "notifications":
+				return ec.fieldContext_User_notifications(ctx, field)
+			case "messages":
+				return ec.fieldContext_User_messages(ctx, field)
+			case "userMightKnow":
+				return ec.fieldContext_User_userMightKnow(ctx, field)
+			case "blocked":
+				return ec.fieldContext_User_blocked(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_UserMutation_updateBackgroundPhoto_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext___Directive_name(ctx, field)
 	if err != nil {
@@ -16183,6 +16334,42 @@ func (ec *executionContext) unmarshalInputSharePost(ctx context.Context, obj int
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateBackgroundPhoto(ctx context.Context, obj interface{}) (model.UpdateBackgroundPhoto, error) {
+	var it model.UpdateBackgroundPhoto
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"userId", "backgroundPhotoUrl"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "userId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			it.UserID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "backgroundPhotoUrl":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("backgroundPhotoUrl"))
+			it.BackgroundPhotoURL, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, obj interface{}) (model.UpdateEducation, error) {
 	var it model.UpdateEducation
 	asMap := map[string]interface{}{}
@@ -16209,7 +16396,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("school"))
-			it.School, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.School, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16217,7 +16404,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("degree"))
-			it.Degree, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Degree, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16225,7 +16412,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			it.Field, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Field, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16233,7 +16420,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDateMonth"))
-			it.StartDateMonth, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.StartDateMonth, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16241,7 +16428,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDateYear"))
-			it.StartDateYear, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.StartDateYear, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16249,7 +16436,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDateMonth"))
-			it.EndDateMonth, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.EndDateMonth, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16257,7 +16444,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDateYear"))
-			it.EndDateYear, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.EndDateYear, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16265,7 +16452,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("grade"))
-			it.Grade, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			it.Grade, err = ec.unmarshalNFloat2float64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16273,7 +16460,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("activities"))
-			it.Activities, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Activities, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16281,7 +16468,7 @@ func (ec *executionContext) unmarshalInputUpdateEducation(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16317,7 +16504,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
-			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16325,7 +16512,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employmentType"))
-			it.EmploymentType, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.EmploymentType, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16333,7 +16520,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("companyName"))
-			it.CompanyName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.CompanyName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16341,7 +16528,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isActive"))
-			it.IsActive, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			it.IsActive, err = ec.unmarshalNBoolean2bool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16349,7 +16536,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("locationCity"))
-			it.LocationCity, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.LocationCity, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16357,7 +16544,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("locationRegion"))
-			it.LocationRegion, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.LocationRegion, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16365,7 +16552,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDateMonth"))
-			it.StartDateMonth, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.StartDateMonth, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16373,7 +16560,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDateYear"))
-			it.StartDateYear, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.StartDateYear, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16381,7 +16568,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDateMonth"))
-			it.EndDateMonth, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.EndDateMonth, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16389,7 +16576,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDateYear"))
-			it.EndDateYear, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.EndDateYear, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16397,7 +16584,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("industry"))
-			it.Industry, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Industry, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16405,7 +16592,7 @@ func (ec *executionContext) unmarshalInputUpdateExperience(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("headline"))
-			it.Headline, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.Headline, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -17262,16 +17449,42 @@ func (ec *executionContext) _Education(ctx context.Context, sel ast.SelectionSet
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "startDate":
+			field := field
 
-			out.Values[i] = ec._Education_startDate(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Education_startDate(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "endDate":
+			field := field
 
-			out.Values[i] = ec._Education_endDate(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Education_endDate(ctx, field, obj)
+				return res
+			}
 
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "grade":
 
 			out.Values[i] = ec._Education_grade(ctx, field, obj)
@@ -17449,16 +17662,42 @@ func (ec *executionContext) _Experience(ctx context.Context, sel ast.SelectionSe
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "startDate":
+			field := field
 
-			out.Values[i] = ec._Experience_startDate(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Experience_startDate(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "endDate":
+			field := field
 
-			out.Values[i] = ec._Experience_endDate(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Experience_endDate(ctx, field, obj)
+				return res
+			}
 
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "industry":
 
 			out.Values[i] = ec._Experience_industry(ctx, field, obj)
@@ -19167,6 +19406,26 @@ func (ec *executionContext) _UserMutation(ctx context.Context, sel ast.Selection
 				return innerFunc(ctx)
 
 			})
+		case "updateBackgroundPhoto":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserMutation_updateBackgroundPhoto(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -19640,6 +19899,10 @@ func (ec *executionContext) marshalNConnectionMutation2ᚖserverᚋgraphᚋmodel
 	return ec._ConnectionMutation(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNDate2serverᚋgraphᚋmodelᚐDate(ctx context.Context, sel ast.SelectionSet, v model.Date) graphql.Marshaler {
+	return ec._Date(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNDate2ᚖserverᚋgraphᚋmodelᚐDate(ctx context.Context, sel ast.SelectionSet, v *model.Date) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -19704,6 +19967,21 @@ func (ec *executionContext) marshalNExperienceMutation2ᚖserverᚋgraphᚋmodel
 		return graphql.Null
 	}
 	return ec._ExperienceMutation(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) unmarshalNForgotPasswordCode2serverᚋgraphᚋmodelᚐForgotPasswordCode(ctx context.Context, v interface{}) (model.ForgotPasswordCode, error) {
@@ -20938,6 +21216,14 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOUpdateBackgroundPhoto2ᚖserverᚋgraphᚋmodelᚐUpdateBackgroundPhoto(ctx context.Context, v interface{}) (*model.UpdateBackgroundPhoto, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateBackgroundPhoto(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOUpdateEducation2ᚖserverᚋgraphᚋmodelᚐUpdateEducation(ctx context.Context, v interface{}) (*model.UpdateEducation, error) {

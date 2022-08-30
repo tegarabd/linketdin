@@ -10,8 +10,8 @@ type Education struct {
 	School      string   `json:"school"`
 	Degree      string   `json:"degree"`
 	Field       string   `json:"field"`
-	StartDate   *Date    `json:"startDate" gorm:"embedded"`
-	EndDate     *Date    `json:"endDate" gorm:"embedded"`
+	StartDate   *StartDate    `json:"startDate" gorm:"embedded"`
+	EndDate     *EndDate    `json:"endDate" gorm:"embedded"`
 	Grade       *float64 `json:"grade"`
 	Activities  *string  `json:"activities"`
 	Description *string  `json:"description"`

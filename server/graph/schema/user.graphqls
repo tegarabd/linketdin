@@ -34,6 +34,7 @@ type UserMutation {
   unBlock(input: BlockUser): User! @goField(forceResolver: true)
   update(input: UpdateUser): User! @goField(forceResolver: true)
   updateProfilePhoto(input: UpdateProfilePhoto): User! @goField(forceResolver: true)
+  updateBackgroundPhoto(input: UpdateBackgroundPhoto): User! @goField(forceResolver: true)
 }
 
 input UpdateUser {
@@ -50,6 +51,11 @@ input UpdateUser {
 input UpdateProfilePhoto {
   userId: ID!
   profilePhotoUrl: String!
+}
+
+input UpdateBackgroundPhoto {
+  userId: ID!
+  backgroundPhotoUrl: String!
 }
 
 input ViewUser {

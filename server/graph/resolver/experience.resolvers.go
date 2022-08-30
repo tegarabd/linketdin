@@ -15,6 +15,32 @@ func (r *experienceResolver) User(ctx context.Context, obj *model.Experience) (*
 	return repository.GetUserByID(ctx, obj.UserID)
 }
 
+// StartDate is the resolver for the startDate field.
+func (r *experienceResolver) StartDate(ctx context.Context, obj *model.Experience) (*model.Date, error) {
+	experience, err := repository.GetExperienceById(ctx, obj.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Date{
+		Month: experience.StartDate.StartMonth,
+		Year:  experience.StartDate.StartYear,
+	}, err
+}
+
+// EndDate is the resolver for the endDate field.
+func (r *experienceResolver) EndDate(ctx context.Context, obj *model.Experience) (*model.Date, error) {
+	experience, err := repository.GetExperienceById(ctx, obj.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Date{
+		Month: experience.EndDate.EndMonth,
+		Year:  experience.EndDate.EndYear,
+	}, err
+}
+
 // Create is the resolver for the create field.
 func (r *experienceMutationResolver) Create(ctx context.Context, obj *model.ExperienceMutation, input *model.CreateExperience) (*model.Experience, error) {
 	return repository.CreateExperience(ctx, input)

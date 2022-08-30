@@ -224,34 +224,39 @@ type Token struct {
 	Token string `json:"token"`
 }
 
+type UpdateBackgroundPhoto struct {
+	UserID             string `json:"userId"`
+	BackgroundPhotoURL string `json:"backgroundPhotoUrl"`
+}
+
 type UpdateEducation struct {
-	EducationID    string   `json:"educationId"`
-	School         *string  `json:"school"`
-	Degree         *string  `json:"degree"`
-	Field          *string  `json:"field"`
-	StartDateMonth *string  `json:"startDateMonth"`
-	StartDateYear  *int     `json:"startDateYear"`
-	EndDateMonth   *string  `json:"endDateMonth"`
-	EndDateYear    *int     `json:"endDateYear"`
-	Grade          *float64 `json:"grade"`
-	Activities     *string  `json:"activities"`
-	Description    *string  `json:"description"`
+	EducationID    string  `json:"educationId"`
+	School         string  `json:"school"`
+	Degree         string  `json:"degree"`
+	Field          string  `json:"field"`
+	StartDateMonth string  `json:"startDateMonth"`
+	StartDateYear  int     `json:"startDateYear"`
+	EndDateMonth   string  `json:"endDateMonth"`
+	EndDateYear    int     `json:"endDateYear"`
+	Grade          float64 `json:"grade"`
+	Activities     string  `json:"activities"`
+	Description    string  `json:"description"`
 }
 
 type UpdateExperience struct {
-	ExperienceID   string  `json:"experienceId"`
-	Title          *string `json:"title"`
-	EmploymentType *string `json:"employmentType"`
-	CompanyName    *string `json:"companyName"`
-	IsActive       *bool   `json:"isActive"`
-	LocationCity   *string `json:"locationCity"`
-	LocationRegion *string `json:"locationRegion"`
-	StartDateMonth *string `json:"startDateMonth"`
-	StartDateYear  *int    `json:"startDateYear"`
-	EndDateMonth   *string `json:"endDateMonth"`
-	EndDateYear    *int    `json:"endDateYear"`
-	Industry       *string `json:"industry"`
-	Headline       *string `json:"headline"`
+	ExperienceID   string `json:"experienceId"`
+	Title          string `json:"title"`
+	EmploymentType string `json:"employmentType"`
+	CompanyName    string `json:"companyName"`
+	IsActive       bool   `json:"isActive"`
+	LocationCity   string `json:"locationCity"`
+	LocationRegion string `json:"locationRegion"`
+	StartDateMonth string `json:"startDateMonth"`
+	StartDateYear  int    `json:"startDateYear"`
+	EndDateMonth   string `json:"endDateMonth"`
+	EndDateYear    int    `json:"endDateYear"`
+	Industry       string `json:"industry"`
+	Headline       string `json:"headline"`
 }
 
 type UpdateProfilePhoto struct {
@@ -271,13 +276,14 @@ type UpdateUser struct {
 }
 
 type UserMutation struct {
-	View               *User `json:"view"`
-	Follow             *User `json:"follow"`
-	UnFollow           *User `json:"unFollow"`
-	Block              *User `json:"block"`
-	UnBlock            *User `json:"unBlock"`
-	Update             *User `json:"update"`
-	UpdateProfilePhoto *User `json:"updateProfilePhoto"`
+	View                  *User `json:"view"`
+	Follow                *User `json:"follow"`
+	UnFollow              *User `json:"unFollow"`
+	Block                 *User `json:"block"`
+	UnBlock               *User `json:"unBlock"`
+	Update                *User `json:"update"`
+	UpdateProfilePhoto    *User `json:"updateProfilePhoto"`
+	UpdateBackgroundPhoto *User `json:"updateBackgroundPhoto"`
 }
 
 type ViewUser struct {

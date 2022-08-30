@@ -25,16 +25,16 @@ input CreateEducation {
 
 input UpdateEducation {
   educationId: String!
-  school: String
-  degree: String
-  field: String
-  startDateMonth: String
-  startDateYear: Int
-  endDateMonth: String
-  endDateYear: Int
-  grade: Float
-  activities: String
-  description: String
+  school: String!
+  degree: String!
+  field: String!
+  startDateMonth: String!
+  startDateYear: Int!
+  endDateMonth: String!
+  endDateYear: Int!
+  grade: Float!
+  activities: String!
+  description: String!
 }
 
 input DeleteEducation {

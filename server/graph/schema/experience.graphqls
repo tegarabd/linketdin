@@ -36,18 +36,18 @@ input CreateExperience {
 
 input UpdateExperience {
   experienceId: String!
-  title: String
-  employmentType: String
-  companyName: String
-  isActive: Boolean
-  locationCity: String
-  locationRegion: String
-  startDateMonth: String
-  startDateYear: Int
-  endDateMonth: String
-  endDateYear: Int
-  industry: String
-  headline: String
+  title: String!
+  employmentType: String!
+  companyName: String!
+  isActive: Boolean!
+  locationCity: String!
+  locationRegion: String!
+  startDateMonth: String!
+  startDateYear: Int!
+  endDateMonth: String!
+  endDateYear: Int!
+  industry: String!
+  headline: String!
 }
 
 input DeleteExperience {

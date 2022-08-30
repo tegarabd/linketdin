@@ -38,9 +38,18 @@ function ProfileName({
         {`${user.firstName || ""} ${user.lastName || ""} ${
           user.additionalName || ""
         }`}
-        {withPronouns && <span>{user.pronouns}</span>}
+        {withPronouns && <span>{user.pronouns && `(${user.pronouns})`}</span>}
       </h4>
-      {withHeadline && <p>{user.headline}</p>}
+      {withHeadline && (
+        <ul>
+          {user.headline
+            .split("#")
+            .filter((headline: string) => headline !== "")
+            .map((headline: string, index: number) => (
+              <li key={index}>{headline}</li>
+            ))}
+        </ul>
+      )}
     </Wrapper>
   );
 }
