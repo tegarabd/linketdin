@@ -8,10 +8,10 @@ import AboutPage from "./pages/AboutPage";
 import AuthPage from "./pages/authentication/AuthPage";
 import NotFound from "./pages/error/NotFound";
 import FeedPage from "./pages/feed";
-import JobsPage from "./pages/JobsPage";
-import MessagingPage from "./pages/MessagingPage";
-import MyNetworkPage from "./pages/MyNetworkPage";
-import NotificationsPage from "./pages/NotificationsPage";
+import JobsPage from "./pages/jobs/JobsPage";
+import MessagingPage from "./pages/messaging/MessagingPage";
+import MyNetworkPage from "./pages/mynetwork/MyNetworkPage";
+import NotificationsPage from "./pages/notification/NotificationsPage";
 import ProfilePage from "./pages/profile";
 
 function App() {

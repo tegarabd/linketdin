@@ -1,7 +1,6 @@
 type Message {
   id: ID!
   sender: User! @goField(forceResolver: true)
-  receiver: User! @goField(forceResolver: true)
   text: String!
   imageUrl: String
   createdAt: Time!
@@ -13,7 +12,7 @@ type MessageMutation {
 
 input CreateMessage {
   senderId: String!
-  receiverId: String!
+  threadId: String!
   text: String!
   imageUrl: String
 }

@@ -15,6 +15,10 @@ const Logo = styled(Link)`
   display: flex;
   justify-content: center;
   align-items: center;
+
+  & > h1 {
+    font-weight: 700;
+  }
 `;
 
 function HeaderLeft() {

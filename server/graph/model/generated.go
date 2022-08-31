@@ -92,14 +92,15 @@ type CreateJob struct {
 }
 
 type CreateMessage struct {
-	SenderID   string  `json:"senderId"`
-	ReceiverID string  `json:"receiverId"`
-	Text       string  `json:"text"`
-	ImageURL   *string `json:"imageUrl"`
+	SenderID string  `json:"senderId"`
+	ThreadID string  `json:"threadId"`
+	Text     string  `json:"text"`
+	ImageURL *string `json:"imageUrl"`
 }
 
 type CreateNotification struct {
-	UserID string `json:"userId"`
+	FromID string `json:"fromId"`
+	ToID   string `json:"toId"`
 	Text   string `json:"text"`
 }
 
@@ -108,6 +109,11 @@ type CreatePost struct {
 	PosterID string  `json:"posterId"`
 	PhotoURL *string `json:"photoUrl"`
 	VideoURL *string `json:"videoUrl"`
+}
+
+type CreateThread struct {
+	UserID     string `json:"userId"`
+	WithUserID string `json:"withUserId"`
 }
 
 type DeleteEducation struct {
@@ -289,4 +295,8 @@ type UserMutation struct {
 type ViewUser struct {
 	ViewerID     string `json:"viewerId"`
 	ViewedUserID string `json:"viewedUserId"`
+}
+
+type ThreadMutation struct {
+	Create *Thread `json:"create"`
 }

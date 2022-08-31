@@ -1,0 +1,15 @@
+type Thread {
+  id: ID!
+  user: User! @goField(forceResolver: true)
+  with: User! @goField(forceResolver: true)
+  messages: [Message!]! @goField(forceResolver: true)
+}
+
+type threadMutation {
+  create(input: CreateThread!): Thread! @goField(forceResolver: true)
+}
+
+input CreateThread {
+  userId: String!
+  withUserId: String!
+}

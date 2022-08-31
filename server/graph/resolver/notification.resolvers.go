@@ -15,6 +15,11 @@ func (r *notificationResolver) From(ctx context.Context, obj *model.Notification
 	return repository.GetUserByID(ctx, obj.FromID)
 }
 
+// To is the resolver for the to field.
+func (r *notificationResolver) To(ctx context.Context, obj *model.Notification) (*model.User, error) {
+	return repository.GetUserByID(ctx, obj.ToID)
+}
+
 // Create is the resolver for the create field.
 func (r *notificationMutationResolver) Create(ctx context.Context, obj *model.NotificationMutation, input *model.CreateNotification) (*model.Notification, error) {
 	return repository.CreateNotification(ctx, input)

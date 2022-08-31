@@ -3,9 +3,11 @@ import React, { ChangeEventHandler, FormEventHandler, useState } from "react";
 import styled from "styled-components";
 import InputCapsule from "../../../../../components/form/InputCapsule";
 import ProfilePhoto from "../../../../../components/profile/profilePhoto/ProfilePhoto";
+import { CREATE_NOTIFICATION } from "../../../../../graphql/notification";
 import { COMMENT_POST, POST, POST_COMMENTS } from "../../../../../graphql/post";
 import { USER_PROFILE } from "../../../../../graphql/user";
 import { useJwt } from "../../../../../hooks/useJwt";
+import { Post } from "../../../../../types/post";
 
 const Wrapper = styled.form`
   display: grid;
@@ -15,10 +17,10 @@ const Wrapper = styled.form`
 `;
 
 function CreateComment({
-  postId,
+  post,
   repliedToCommentId,
 }: {
-  postId: string;
+  post: Post;
   repliedToCommentId?: string;
 }) {
   const { sub } = useJwt();
@@ -31,14 +33,15 @@ function CreateComment({
     refetchQueries: [
       {
         query: POST,
-        variables: { postId },
+        variables: { postId: post.id },
       },
       {
         query: POST_COMMENTS,
-        variables: { postId, limit: -1, offset: 0 },
+        variables: { postId: post.id, limit: -1, offset: 0 },
       },
     ],
   });
+  const [createNotification] = useMutation(CREATE_NOTIFICATION);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     setText(event.target.value);
@@ -54,8 +57,18 @@ function CreateComment({
         input: {
           commenterId: sub,
           text,
-          postId,
+          postId: post.id,
           repliedToCommentId,
+        },
+      },
+    });
+
+    createNotification({
+      variables: {
+        input: {
+          fromId: sub,
+          toId: post.poster.id,
+          text: `commented on your post: "${text}"`,
         },
       },
     });
@@ -65,7 +78,12 @@ function CreateComment({
 
   return (
     <Wrapper onSubmit={handleSubmit}>
-      {data && <ProfilePhoto user={data.user} size="small" />}
+      {data && (
+        <ProfilePhoto
+          user={data.user}
+          size="small"
+        />
+      )}
       <InputCapsule
         value={text}
         onChange={handleChange}

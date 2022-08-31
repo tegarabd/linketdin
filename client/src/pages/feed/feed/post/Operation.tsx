@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import ButtonTertiary from "../../../../components/utilities/button/ButtonTertiary";
 import Line from "../../../../components/utilities/Line";
+import { CREATE_NOTIFICATION } from "../../../../graphql/notification";
 import { LIKE_POST, POST } from "../../../../graphql/post";
 import { useJwt } from "../../../../hooks/useJwt";
 import { Post } from "../../../../types/post";
@@ -24,8 +25,9 @@ function Operation({ post }: { post: Post }) {
   const { sub } = useJwt();
   const [commentShowed, setCommentShowed] = useState(false);
   const [like] = useMutation(LIKE_POST, {
-    refetchQueries: [{query: POST, variables: {postId: post.id}}]
+    refetchQueries: [{ query: POST, variables: { postId: post.id } }],
   });
+  const [createNotification] = useMutation(CREATE_NOTIFICATION);
 
   const showComment = () => {
     setCommentShowed(true);
@@ -40,6 +42,16 @@ function Operation({ post }: { post: Post }) {
         },
       },
     });
+
+    createNotification({
+      variables: {
+        input: {
+          fromId: sub,
+          toId: post.poster.id,
+          text: "liked your post",
+        },
+      },
+    });
   };
 
   return (
@@ -50,7 +62,7 @@ function Operation({ post }: { post: Post }) {
         <ButtonTertiary onClick={showComment}>Comment</ButtonTertiary>
         <ButtonTertiary>Send</ButtonTertiary>
       </ButtonGroup>
-      {commentShowed && <CommentSection postId={post.id} />}
+      {commentShowed && <CommentSection post={post} />}
     </Wrapper>
   );
 }

@@ -18,28 +18,24 @@ function ProfileContextProvider({ children }: { children: JSX.Element }) {
   const { data: userBlocked } = useQuery(USER_BLOCKED, {
     variables: { id: sub },
   });
-  const { data: viewedBlocked } = useQuery(USER_BLOCKED, {
-    variables: { id: userId },
-  });
 
   const [canModify, setCanModify] = useState(sub === userId);
-  const [canView, setCanView] = useState(true);
+  const [canView, setCanView] = useState(false);
 
   useEffect(() => {
     setCanModify(sub === userId);
 
-    if (userBlocked && viewedBlocked) {
-      const userBlockView = userBlocked.user.blocked.filter(
-        (blocked: User) => blocked.id === userId
-      );
-      const viewBlockUser = userBlocked.user.blocked.filter(
-        (blocked: User) => blocked.id === sub
-      );
-      setCanView(userBlockView || viewBlockUser);
+    if (userBlocked) {
+      const canView =
+        userBlocked.user.blocked.find(
+          (blocked: User) => blocked.id === userId
+        ) == undefined;
+
+      setCanView(canView);
     }
 
     return () => {};
-  }, [userBlocked, viewedBlocked]);
+  }, [userBlocked]);
 
   const value = { canModify, canView };
 

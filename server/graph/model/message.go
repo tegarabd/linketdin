@@ -7,8 +7,8 @@ type Message struct {
 	ID         string `json:"id"`
 	SenderID   string
 	Sender     *User `json:"sender"`
-	ReceiverID string
-	Receiver   *User   `json:"receiver"`
+	ThreadID string
+	Thread *Thread `json:"thread"`
 	Text       string  `json:"text"`
 	ImageURL   *string `json:"imageUrl"`
 }

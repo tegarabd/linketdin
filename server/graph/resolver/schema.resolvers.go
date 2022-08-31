@@ -61,6 +61,11 @@ func (r *mutationResolver) Comment(ctx context.Context) (*model.CommentMutation,
 	return &model.CommentMutation{}, nil
 }
 
+// Thread is the resolver for the thread field.
+func (r *mutationResolver) Thread(ctx context.Context) (*model.ThreadMutation, error) {
+	return &model.ThreadMutation{}, nil
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
 	return repository.GetUserByID(ctx, id)
@@ -108,6 +113,11 @@ func (r *queryResolver) SearchUser(ctx context.Context, query string, limit int,
 // SearchConnectedUser is the resolver for the searchConnectedUser field.
 func (r *queryResolver) SearchConnectedUser(ctx context.Context, userID string, query string) ([]*model.User, error) {
 	return repository.GetUserConnectionsByName(ctx, userID, query)
+}
+
+// Jobs is the resolver for the jobs field.
+func (r *queryResolver) Jobs(ctx context.Context) ([]*model.Job, error) {
+	return repository.GetJobs(ctx)
 }
 
 // Mutation returns generated.MutationResolver implementation.

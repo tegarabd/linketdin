@@ -13,7 +13,8 @@ func CreateNotification(ctx context.Context, input *model.CreateNotification) (*
 
 	notification := model.Notification{
 		ID:     uuid.NewString(),
-		FromID: input.UserID,
+		FromID: input.FromID,
+		ToID: input.ToID,
 		Text:   input.Text,
 	}
 

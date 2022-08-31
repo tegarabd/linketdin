@@ -258,8 +258,18 @@ func GetUserInvitations(ctx context.Context, user *model.User) ([]*model.Connect
 func GetUserNotifications(ctx context.Context, user *model.User) ([]*model.Notification, error) {
 	db := database.GetDB()
 
+	connections, err := GetUserConnections(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	connectionIds := make([]string, 0)
+	for _, connection := range connections {
+		connectionIds = append(connectionIds, connection.ID)
+	}
+
 	notifications := []*model.Notification{}
-	if err := db.Model(&user).Association("Notifications").Find(&notifications); err != nil {
+	if err := db.Raw("SELECT * FROM notifications WHERE from_id = ? OR (to_id IN ? AND from_id IN ?) ORDER BY created_at DESC", user.ID, []string{user.ID, "admin"}, connectionIds).Find(&notifications).Error; err != nil {
 		return nil, err
 	}
 
@@ -291,7 +301,7 @@ func GetUserMightKnow(ctx context.Context, user *model.User) ([]*model.User, err
 	}
 	
 	mightKnow := []*model.User{}
-	if err := db.Raw("SELECT * FROM user_connections uc JOIN users u ON uc.connection_id = u.id WHERE uc.user_id IN ? AND uc.connection_id <> ?", connectionIds, user.ID).Find(&mightKnow).Error; err != nil {
+	if err := db.Raw("SELECT * FROM user_connections uc JOIN users u ON uc.connection_id = u.id WHERE uc.user_id IN ? AND uc.connection_id <> ? AND uc.connection_id NOT IN ?", connectionIds, user.ID, connectionIds).Find(&mightKnow).Error; err != nil {
 		return nil, err
 	}
 
@@ -307,6 +317,17 @@ func GetUserProfileViews(ctx context.Context, user *model.User) ([]*model.User, 
 	}
 
 	return profileViews, nil
+}
+
+func GetUserThreads(ctx context.Context, user *model.User) ([]*model.Thread, error) {
+	db := database.GetDB()
+
+	threads := []*model.Thread{}
+	if err := db.Raw("SELECT * FROM threads WHERE user_id = ? OR with_id = ?", user.ID, user.ID).Find(&threads).Error; err != nil {
+		return nil, err
+	}
+
+	return threads, nil
 }
 
 func ViewUser(ctx context.Context, input *model.ViewUser) (*model.User, error) {
@@ -545,6 +566,10 @@ func Block(ctx context.Context, input *model.BlockUser) (*model.User, error) {
 	}
 
 	if err := db.Model(&user).Association("Blocked").Append(&model.User{ID: input.BlockedID}); err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(&user).Association("Connection").Delete(&model.User{ID: input.BlockedID}); err != nil {
 		return nil, err
 	}
 

@@ -62,11 +62,6 @@ func (r *userResolver) Notifications(ctx context.Context, obj *model.User) ([]*m
 	return repository.GetUserNotifications(ctx, obj)
 }
 
-// Messages is the resolver for the messages field.
-func (r *userResolver) Messages(ctx context.Context, obj *model.User) ([]*model.Message, error) {
-	return repository.GetUserMessages(ctx, obj)
-}
-
 // UserMightKnow is the resolver for the userMightKnow field.
 func (r *userResolver) UserMightKnow(ctx context.Context, obj *model.User) ([]*model.User, error) {
 	return repository.GetUserMightKnow(ctx, obj)
@@ -75,6 +70,11 @@ func (r *userResolver) UserMightKnow(ctx context.Context, obj *model.User) ([]*m
 // Blocked is the resolver for the blocked field.
 func (r *userResolver) Blocked(ctx context.Context, obj *model.User) ([]*model.User, error) {
 	return repository.GetUserBlocked(ctx, obj)
+}
+
+// Threads is the resolver for the threads field.
+func (r *userResolver) Threads(ctx context.Context, obj *model.User) ([]*model.Thread, error) {
+	return repository.GetUserThreads(ctx, obj)
 }
 
 // View is the resolver for the view field.
@@ -130,3 +130,13 @@ func (r *Resolver) UserMutation() generated.UserMutationResolver { return &userM
 
 type userResolver struct{ *Resolver }
 type userMutationResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *userResolver) Messages(ctx context.Context, obj *model.User) ([]*model.Message, error) {
+	return repository.GetUserMessages(ctx, obj)
+}

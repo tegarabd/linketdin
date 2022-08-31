@@ -1,6 +1,7 @@
 type Notification {
   id: ID!
   from: User! @goField(forceResolver: true)
+  to: User! @goField(forceResolver: true)
   text: String!
   createdAt: Time!
 }
@@ -10,6 +11,7 @@ type NotificationMutation {
 }
 
 input CreateNotification {
-  userId: String!
+  fromId: String!
+  toId: String!
   text: String!
 }

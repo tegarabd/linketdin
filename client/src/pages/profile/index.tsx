@@ -1,11 +1,13 @@
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { FC, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Content from "../../components/utilities/Content";
+import { CREATE_NOTIFICATION } from "../../graphql/notification";
 import { USER_PROFILE, VIEW_USER } from "../../graphql/user";
 import { useJwt } from "../../hooks/useJwt";
 import MainSideLayout from "../../layouts/MainSideLayout";
+import { User } from "../../types/user";
 import EducationType from "./education/Education";
 import Experience from "./experience/Experience";
 import Profile from "./profile/Profile";
@@ -25,27 +27,45 @@ function ProfileSection({
   const { userId } = useParams();
   const { sub } = useJwt();
   const { canView } = useProfile();
+  const { data } = useQuery(USER_PROFILE, { variables: { id: userId } });
   const [viewUser] = useMutation(VIEW_USER, {
     refetchQueries: [{ query: USER_PROFILE, variables: { id: userId } }],
   });
-
-  if (!canView) {
-    return (
-      <h3>
-        You're not allowed to view this profile, either you blocked this profile
-        or this profile blocked you.
-      </h3>
-    );
-  }
+  const [createNotification] = useMutation(CREATE_NOTIFICATION);
 
   useEffect(() => {
-    if (sub === userId) {
-      return;
+    if (data) {
+      const alreadyViewed =
+        data.user.profileViews.find((user: User) => user.id === sub) !=
+        undefined;
+
+      if (sub !== userId && !alreadyViewed) {
+        viewUser({ variables: { viewerId: sub, viewedUserId: userId } });
+        createNotification({
+          variables: {
+            input: {
+              fromId: sub,
+              toId: userId,
+              text: "viewed your profile",
+            },
+          },
+        });
+      }
     }
-    viewUser({ variables: { viewerId: sub, viewedUserId: userId } });
 
     return () => {};
   }, []);
+
+  if (!canView) {
+    return (
+      <Content>
+        <h3>
+          You're not allowed to view this profile, either you blocked this
+          profile or this profile blocked you.
+        </h3>
+      </Content>
+    );
+  }
 
   return <Wrapper>{children}</Wrapper>;
 }

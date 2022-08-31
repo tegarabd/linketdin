@@ -21,9 +21,9 @@ type User {
   posts: [Post!] @goField(forceResolver: true)
   invitations: [ConnectInvitation!] @goField(forceResolver: true)
   notifications: [Notification!] @goField(forceResolver: true)
-  messages: [Message!] @goField(forceResolver: true)
   userMightKnow: [User!] @goField(forceResolver: true)
   blocked: [User!] @goField(forceResolver: true)
+  threads: [Thread!]! @goField(forceResolver: true)
 }
 
 type UserMutation {

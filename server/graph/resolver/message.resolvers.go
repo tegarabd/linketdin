@@ -15,11 +15,6 @@ func (r *messageResolver) Sender(ctx context.Context, obj *model.Message) (*mode
 	return repository.GetUserByID(ctx, obj.SenderID)
 }
 
-// Receiver is the resolver for the receiver field.
-func (r *messageResolver) Receiver(ctx context.Context, obj *model.Message) (*model.User, error) {
-	return repository.GetUserByID(ctx, obj.ReceiverID)
-}
-
 // Create is the resolver for the create field.
 func (r *messageMutationResolver) Create(ctx context.Context, obj *model.MessageMutation, input *model.CreateMessage) (*model.Message, error) {
 	return repository.CreateMessage(ctx, input)

@@ -3,9 +3,11 @@ import { User } from "../../types/user";
 
 interface Props {
   size?: string;
+  align?: string;
 }
 
 const Wrapper = styled.div<Props>`
+  text-align: ${props => props.align === "center" ? "center" : "left"};
   & > h4 {
     font-size: ${(props) => (props.size === "large" ? "1.8rem" : "")};
     font-weight: 600;
@@ -26,14 +28,16 @@ function ProfileName({
   withHeadline,
   withPronouns,
   size,
+  align,
 }: {
   user: User | any;
   withHeadline?: boolean;
   withPronouns?: boolean;
   size?: string;
+  align?: string;
 }) {
   return (
-    <Wrapper size={size}>
+    <Wrapper size={size} align={align}>
       <h4>
         {`${user.firstName || ""} ${user.lastName || ""} ${
           user.additionalName || ""
@@ -41,14 +45,14 @@ function ProfileName({
         {withPronouns && <span>{user.pronouns && `(${user.pronouns})`}</span>}
       </h4>
       {withHeadline && (
-        <ul>
+        <div>
           {user.headline
             .split("#")
             .filter((headline: string) => headline !== "")
             .map((headline: string, index: number) => (
-              <li key={index}>{headline}</li>
+              <p key={index}>{headline}</p>
             ))}
-        </ul>
+        </div>
       )}
     </Wrapper>
   );

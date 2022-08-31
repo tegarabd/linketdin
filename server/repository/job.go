@@ -30,3 +30,15 @@ func CreateJob(ctx context.Context, input *model.CreateJob) (*model.Job, error) 
 
 	return &job, nil
 }
+
+func GetJobs(ctx context.Context) ([]*model.Job, error) {
+	db := database.GetDB()
+
+	jobs := []*model.Job{}
+
+	if err := db.Find(&jobs).Error; err != nil {
+		return nil, err
+	}
+
+	return jobs, nil
+}

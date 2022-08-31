@@ -95,6 +95,79 @@ export const USER_BLOCKED = gql`
   }
 `;
 
+export const USER_CONNECT_INVITATION = gql`
+  query userConnectInvitations($id: String!) {
+    user(id: $id) {
+      id
+      invitations {
+        id
+        from {
+          id
+        }
+        to {
+          id
+        }
+        note
+        createdAt
+      }
+    }
+  }
+`;
+
+export const USER_MIGHT_KNOW = gql`
+  query userMightKnow($id: String!) {
+    user(id: $id) {
+      id
+      userMightKnow {
+        id
+      }
+    }
+  }
+`;
+
+export const USER_NOTIFICATIONS = gql`
+  query userNotifications($id: String!) {
+    user(id: $id) {
+      id
+      notifications {
+        id
+        from {
+          id
+        }
+        to {
+          id
+        }
+        text
+        createdAt
+      }
+    }
+  }
+`;
+
+export const USER_THREADS = gql`
+  query userThreads($id: String!) {
+    user(id: $id) {
+      id
+      threads {
+        id
+        with {
+          id
+        }
+        user {
+          id
+        }
+        messages {
+          id
+          sender {
+            id
+          }
+          text
+        }
+      }
+    }
+  }
+`;
+
 export const UPDATE_USER_PROFILE_PHOTO = gql`
   mutation updateProfilePhoto($id: ID!, $url: String!) {
     user {
@@ -135,11 +208,20 @@ export const VIEW_USER = gql`
   }
 `;
 
-
 export const FOLLOW_USER = gql`
   mutation followUser($input: FollowUser!) {
     user {
       follow(input: $input) {
+        id
+      }
+    }
+  }
+`;
+
+export const BLOCK_USER = gql`
+  mutation blockUser($input: BlockUser!) {
+    user {
+      block(input: $input) {
         id
       }
     }

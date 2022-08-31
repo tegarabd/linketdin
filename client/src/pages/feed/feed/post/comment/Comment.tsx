@@ -3,6 +3,7 @@ import styled from "styled-components";
 import ProfileName from "../../../../../components/profile/ProfileName";
 import ProfilePhoto from "../../../../../components/profile/profilePhoto/ProfilePhoto";
 import { Comment as CommentType } from "../../../../../types/comment";
+import { Post } from "../../../../../types/post";
 import Counter from "./Counter";
 import CreateComment from "./CreateComment";
 import Replies from "./Replies";
@@ -28,13 +29,7 @@ const Body = styled.div`
   flex-direction: column;
 `;
 
-function Comment({
-  comment,
-  postId,
-}: {
-  comment: CommentType;
-  postId: string;
-}) {
+function Comment({ comment, post }: { comment: CommentType; post: Post }) {
   const [createReplyShowed, setCreateReplyShowed] = useState(false);
 
   const showCreateReply = () => {
@@ -43,7 +38,10 @@ function Comment({
 
   return (
     <Wrapper>
-      <ProfilePhoto user={comment.commenter} size="small" />
+      <ProfilePhoto
+        user={comment.commenter}
+        size="small"
+      />
       <Content>
         <Body>
           <ProfileName user={comment.commenter} />
@@ -53,8 +51,16 @@ function Comment({
           commentId={comment.id}
           onReplyButtonClicked={showCreateReply}
         />
-        <Replies commentId={comment.id} postId={postId} />
-        {createReplyShowed && <CreateComment postId={postId} repliedToCommentId={comment.id} />}
+        <Replies
+          commentId={comment.id}
+          post={post}
+        />
+        {createReplyShowed && (
+          <CreateComment
+            post={post}
+            repliedToCommentId={comment.id}
+          />
+        )}
       </Content>
     </Wrapper>
   );

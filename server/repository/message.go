@@ -14,7 +14,7 @@ func CreateMessage(ctx context.Context, input *model.CreateMessage) (*model.Mess
 	message := model.Message{
 		ID:         uuid.NewString(),
 		SenderID:   input.SenderID,
-		ReceiverID: input.SenderID,
+		ThreadID: input.ThreadID,
 		Text:       input.Text,
 		ImageURL:   input.ImageURL,
 	}

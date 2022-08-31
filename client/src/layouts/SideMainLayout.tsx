@@ -1,7 +1,10 @@
 import React from "react";
+import styled from "styled-components";
 
-function TwoSeperated() {
-  return <div>TwoSeperated</div>;
-}
+const SideMainLayout = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 17fr);
+  gap: 1.2rem;
+`;
 
-export default TwoSeperated;
+export default SideMainLayout;

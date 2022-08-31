@@ -6,17 +6,20 @@ import ProfileName from "../../../components/profile/ProfileName";
 import ProfilePhoto from "../../../components/profile/profilePhoto/ProfilePhoto";
 import ButtonPrimary from "../../../components/utilities/button/ButtonPrimary";
 import Content from "../../../components/utilities/Content";
-import { FOLLOW_USER, USER_PROFILE } from "../../../graphql/user";
+import { BLOCK_USER, FOLLOW_USER, USER_PROFILE } from "../../../graphql/user";
 import ProfilePhotoDetail from "./ProfilePhotoDetail";
 import { ReactComponent as ConnectIcon } from "../../../assets/connect-icon.svg";
 import { ReactComponent as FollowIcon } from "../../../assets/follow-icon.svg";
 import { ReactComponent as UpdateIcon } from "../../../assets/edit-icon.svg";
+import { ReactComponent as BlockIcon } from "../../../assets/block-icon.svg";
 import { useJwt } from "../../../hooks/useJwt";
 import ButtonSecondary from "../../../components/utilities/button/ButtonSecondary";
 import ConnectModal from "../../../components/connect/ConnectModal";
 import { useProfile } from "../ProfileContextProvider";
 import ProfileUpdateModal from "./ProfileUpdateModal";
 import BackgroundPhotoDetail from "./BackgroundPhotoDetail";
+import ButtonTertiary from "../../../components/utilities/button/ButtonTertiary";
+import { CREATE_NOTIFICATION } from "../../../graphql/notification";
 
 const Wrapper = styled(Content)`
   padding: 0;
@@ -69,6 +72,10 @@ function Profile() {
   const [follow] = useMutation(FOLLOW_USER, {
     refetchQueries: [{ query: USER_PROFILE, variables: { id: userId } }],
   });
+  const [block] = useMutation(BLOCK_USER, {
+    refetchQueries: [{ query: USER_PROFILE, variables: { id: userId } }],
+  });
+  const [createNotification] = useMutation(CREATE_NOTIFICATION)
 
   const [profilePhotoDetailOpened, setProfilePhotoDetailOpened] =
     useState(false);
@@ -121,6 +128,19 @@ function Profile() {
         },
       },
     });
+    createNotification({
+      variables: {
+        input: {
+          fromId: sub,
+          toId: userId,
+          text: "started following you"
+        }
+      }
+    })
+  };
+
+  const handleBlock = () => {
+    block({ variables: { input: { userId: sub, blockedId: userId } } });
   };
 
   useEffect(() => {
@@ -163,9 +183,11 @@ function Profile() {
               />
             )}
           </ProfileImg>
-          <UpdateBackgroundButton onClick={openBackgroundPhotoDetail}>
-            <UpdateIcon />
-          </UpdateBackgroundButton>
+          {canModify && (
+            <UpdateBackgroundButton onClick={openBackgroundPhotoDetail}>
+              <UpdateIcon />
+            </UpdateBackgroundButton>
+          )}
           {backgroundPhotoDetailOpened && (
             <BackgroundPhotoDetail
               user={data.user}
@@ -199,6 +221,11 @@ function Profile() {
                 <ButtonPrimary onClick={openUpdateModal}>
                   <UpdateIcon /> Update profile
                 </ButtonPrimary>
+              )}
+              {sub !== userId && (
+                <ButtonTertiary onClick={handleBlock}>
+                  <BlockIcon /> Block
+                </ButtonTertiary>
               )}
             </ButtonGroup>
           </ProfileDescription>

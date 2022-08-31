@@ -1,7 +1,6 @@
 import styled from "styled-components";
 
 const Button = styled.button`
-  padding: 0.5rem;
   border-radius: 100vw;
   font-weight: 500;
   border: none;
@@ -9,6 +8,7 @@ const Button = styled.button`
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.5rem 1rem;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
 `;
 

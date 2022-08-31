@@ -7,5 +7,7 @@ type Notification struct {
 	ID     string `json:"id"`
 	FromID string
 	From   *User  `json:"from"`
+	ToID string
+	To *User `json:"to"`
 	Text   string `json:"text"`
 }

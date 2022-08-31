@@ -24,7 +24,8 @@ type User struct {
 	Following          []*User              `json:"following" gorm:"many2many:user_follow"`
 	Posts              []*Post              `json:"posts" gorm:"foreignKey:PosterID"`
 	Invitations        []*ConnectInvitation `json:"invitations" gorm:"foreignKey:FromID;foreignKey:ToID"`
-	Notifications      []*Notification      `json:"notifications" gorm:"foreignKey:FromID"`
-	Messages           []*Message           `json:"messages" gorm:"foreignKey:SenderID;foreignKey:ReceiverID"`
+	Notifications      []*Notification      `json:"notifications" gorm:"foreignKey:FromID;foreignKey:ToID"`
+	Messages           []*Message           `json:"messages" gorm:"foreignKey:SenderID"`
+	Threads						 []*Thread						`json:"threads" gorm:"foreignKey:UserID;foreignKey:WithID"`
 	Blocked	[]*User `json:"blocked" gorm:"many2many:user_blocked"`
 }

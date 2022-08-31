@@ -18,6 +18,7 @@ import EntirePageLoading from "../../../../../components/utilities/entirePage/En
 import uploadPostAttachment from "../../../../../firebase/uploadPostAttachment";
 import { uuidv4 } from "@firebase/util";
 import { useScroll } from "../../../../../hooks/useScroll";
+import { CREATE_NOTIFICATION } from "../../../../../graphql/notification";
 
 const Profile = styled.div`
   display: flex;
@@ -61,6 +62,7 @@ function CreatePostModal({ onClose }: { onClose: VoidFunction }) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [createPost] = useMutation(CREATE_POST);
+  const [createNotification] = useMutation(CREATE_NOTIFICATION)
 
   const handleTextChange: ChangeEventHandler<HTMLTextAreaElement> = (event) => {
     setText(event.target.value);
@@ -102,6 +104,16 @@ function CreatePostModal({ onClose }: { onClose: VoidFunction }) {
           photoUrl,
           videoUrl,
           posterId: sub,
+        },
+      },
+    });
+
+    await createNotification({
+      variables: {
+        input: {
+          fromId: sub,
+          toId: "admin",
+          text: "your connection, shared a post you may be interested in",
         },
       },
     });
