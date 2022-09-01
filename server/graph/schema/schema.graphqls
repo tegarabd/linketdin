@@ -19,6 +19,7 @@ type Query {
   searchUser(query: String!, limit: Int!, offset: Int!): [User!]! @goField(forceResolver: true) @authenticated
   searchConnectedUser(userId: String!, query: String!): [User!]! @goField(forceResolver: true) @authenticated
   jobs: [Job!]! @goField(forceResolver: true) @authenticated
+  thread(threadId: String!): Thread! @goField(forceResolver: true) @authenticated
 }
 
 type Mutation {

@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import Footer from "../../components/Footer";
 import Content from "../../components/utilities/Content";
 import SideMainLayout from "../../layouts/SideMainLayout";
 import ConnectInvitation from "./main/ConnectInvitation";
@@ -17,6 +18,7 @@ function MyNetworkPage() {
     <SideMainLayout>
       <Wrapper>
         <ConnectionCount />
+        <Footer />
       </Wrapper>
       <Wrapper>
         <ConnectInvitation />

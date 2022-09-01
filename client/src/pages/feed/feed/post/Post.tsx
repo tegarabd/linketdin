@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import ReactTooltip from "react-tooltip";
 import styled from "styled-components";
 import Content from "../../../../components/utilities/Content";
 import { Post as PostType } from "../../../../types/post";
+import ProfileCard from "../../../mynetwork/main/ProfileCard";
 import Counter from "./Counter";
 import Operation from "./Operation";
 import Profile from "./Profile";
@@ -21,14 +23,22 @@ const Padding = styled.div`
 function Post({ post }: { post: PostType }) {
   return (
     <Wrapper>
-      <Padding>
-        <Link to={`/in/${post.poster.id}`} >
+      <ReactTooltip/>
+      <Padding data-tip={post.poster.headline.split("#")[0]}>
+        <Link to={`/in/${post.poster.id}`}>
           <Profile poster={post.poster} />
         </Link>
         <p>{post.text}</p>
       </Padding>
       {post.photoUrl && <img src={post.photoUrl} />}
-      {post.videoUrl && <video src={post.videoUrl} muted autoPlay controls />}
+      {post.videoUrl && (
+        <video
+          src={post.videoUrl}
+          muted
+          autoPlay
+          controls
+        />
+      )}
       <Padding>
         <Counter post={post} />
         <Operation post={post} />

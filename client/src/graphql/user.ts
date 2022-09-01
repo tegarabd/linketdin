@@ -156,13 +156,45 @@ export const USER_THREADS = gql`
         user {
           id
         }
-        messages {
+        lastMessage {
           id
           sender {
             id
           }
           text
+          imageUrl
+          createdAt
         }
+      }
+    }
+  }
+`;
+
+export const SEARCH_USER = gql`
+  query searchUser($query: String!, $limit: Int!, $offset: Int!) {
+    searchUser(query: $query, limit: $limit, offset: $offset) {
+      id
+      email
+      firstName
+      lastName
+      additionalName
+      profilePhotoUrl
+      headline
+      backgroundPhotoUrl
+      pronouns
+      about
+      profileViews {
+        id
+      }
+      location {
+        city
+        region
+      }
+      connections {
+        id
+      }
+      followers {
+        id
       }
     }
   }

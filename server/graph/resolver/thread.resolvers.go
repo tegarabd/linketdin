@@ -20,6 +20,11 @@ func (r *threadResolver) With(ctx context.Context, obj *model.Thread) (*model.Us
 	return repository.GetUserByID(ctx, obj.WithID)
 }
 
+// LastMessage is the resolver for the lastMessage field.
+func (r *threadResolver) LastMessage(ctx context.Context, obj *model.Thread) (*model.Message, error) {
+	return repository.GetThreadLastMessage(ctx, obj)
+}
+
 // Messages is the resolver for the messages field.
 func (r *threadResolver) Messages(ctx context.Context, obj *model.Thread) ([]*model.Message, error) {
 	return repository.GetThreadMessages(ctx, obj)

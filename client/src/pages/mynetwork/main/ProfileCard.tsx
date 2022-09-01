@@ -41,6 +41,7 @@ function ProfileCard({ user }: { user: User }) {
             user={data.user}
             align="center"
             withHeadline
+            headlineLimit
           />
           <ButtonSecondary onClick={openConnectModal}>Connect</ButtonSecondary>
           {connectModalOpened && (

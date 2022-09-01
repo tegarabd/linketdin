@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { FC, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
+import Footer from "../../components/Footer";
 import Content from "../../components/utilities/Content";
 import { CREATE_NOTIFICATION } from "../../graphql/notification";
 import { USER_PROFILE, VIEW_USER } from "../../graphql/user";
@@ -81,6 +82,7 @@ function ProfilePage() {
         </ProfileSection>
         <Wrapper>
           <Content>User you might know</Content>
+          <Footer />
         </Wrapper>
       </MainSideLayout>
     </ProfileContextProvider>

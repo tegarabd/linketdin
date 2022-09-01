@@ -100,9 +100,9 @@ func GetUsersByName(ctx context.Context, query string, limit int, offset int) ([
 	users := []*model.User{}
 	
 	if err := db.
-		Where("first_name LIKE %?%", query).
-		Or("last_name LIKE %?%", query).
-		Or("additional_name LIKE %?%", query).
+		Where("first_name ILIKE ?", "%" + query + "%").
+		Or("last_name ILIKE ?", "%" + query + "%").
+		Or("additional_name ILIKE ?", "%" + query + "%").
 		Limit(limit).
 		Offset(offset).
 		Find(&users).Error; err != nil {

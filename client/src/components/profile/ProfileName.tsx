@@ -29,31 +29,39 @@ function ProfileName({
   withPronouns,
   size,
   align,
+  headlineLimit,
 }: {
   user: User | any;
   withHeadline?: boolean;
   withPronouns?: boolean;
   size?: string;
   align?: string;
+  headlineLimit?: boolean;
 }) {
   return (
-    <Wrapper size={size} align={align}>
+    <Wrapper
+      size={size}
+      align={align}
+    >
       <h4>
         {`${user.firstName || ""} ${user.lastName || ""} ${
           user.additionalName || ""
         }`}
         {withPronouns && <span>{user.pronouns && `(${user.pronouns})`}</span>}
       </h4>
-      {withHeadline && (
-        <div>
-          {user.headline
-            .split("#")
-            .filter((headline: string) => headline !== "")
-            .map((headline: string, index: number) => (
-              <p key={index}>{headline}</p>
-            ))}
-        </div>
-      )}
+      {withHeadline &&
+        (headlineLimit ? (
+          <p>{user.headline ? user.headline.split("#")[0].substring(0, 40) + "..." : ""}</p>
+        ) : (
+          <div>
+            {user.headline
+              .split("#")
+              .filter((headline: string) => headline !== "")
+              .map((headline: string, index: number) => (
+                <p key={index}>{headline}</p>
+              ))}
+          </div>
+        ))}
     </Wrapper>
   );
 }

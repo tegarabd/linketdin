@@ -13,6 +13,7 @@ import MessagingPage from "./pages/messaging/MessagingPage";
 import MyNetworkPage from "./pages/mynetwork/MyNetworkPage";
 import NotificationsPage from "./pages/notification/NotificationsPage";
 import ProfilePage from "./pages/profile";
+import SearchPage from "./pages/search/SearchPage";
 
 function App() {
   return (
@@ -20,7 +21,10 @@ function App() {
       <Header />
       <Layout>
         <Routes>
-          <Route path="/" element={<AboutPage />} />
+          <Route
+            path="/"
+            element={<AboutPage />}
+          />
           <Route
             path="/auth/*"
             element={
@@ -77,7 +81,18 @@ function App() {
               </AuthenticatedRoute>
             }
           />
-          <Route path="*" element={<NotFound />} />
+          <Route
+            path="/search/results/:type"
+            element={
+              <AuthenticatedRoute>
+                <SearchPage />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
         </Routes>
       </Layout>
     </>

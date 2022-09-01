@@ -5,5 +5,6 @@ export type Thread = {
   id: string;
   user: User;
   with: User;
+  lastMessage: Message;
   messages: Array<Message>;
 };

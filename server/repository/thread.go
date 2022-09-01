@@ -19,6 +19,28 @@ func GetThreadMessages(ctx context.Context, thread *model.Thread) ([]*model.Mess
 	return messages, nil
 }
 
+func GetThreadLastMessage(ctx context.Context, thread *model.Thread) (*model.Message, error) {
+	db := database.GetDB()
+
+	message := model.Message{}
+	if err := db.Raw("SELECT * FROM messages WHERE thread_id = ? ORDER BY created_at DESC LIMIT 1", thread.ID).Find(&message).Error; err != nil {
+		return nil, err
+	}
+
+	return &message, nil
+}
+
+func GetThreadById(ctx context.Context, threadId string) (*model.Thread, error) {
+	db := database.GetDB()
+
+	thread := model.Thread{}
+	if err := db.Find(&thread, "id = ?", threadId).Error; err != nil {
+		return nil, err
+	}
+
+	return &thread, nil
+}
+
 func CreateThread(ctx context.Context, input *model.CreateThread) (*model.Thread, error) {
 	db := database.GetDB()
 

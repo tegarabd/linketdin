@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import Footer from "../../components/Footer";
 import Content from "../../components/utilities/Content";
 import Line from "../../components/utilities/Line";
 import SideMainAsideLayout from "../../layouts/SideMainAsideLayout";
@@ -23,7 +24,9 @@ function NotificationsPage() {
       <Wrapper>
         <Notifications />
       </Wrapper>
-      <Wrapper></Wrapper>
+      <Wrapper>
+        <Footer />
+      </Wrapper>
     </SideMainAsideLayout>
   );
 }

@@ -7,7 +7,6 @@ import { GOOGLE } from "../graphql/authentication";
 import { useJwt } from "../hooks/useJwt";
 import { useAuthentication } from "../providers/AuthenticationContextProvider";
 import { GoogleAuth } from "../types/authentication";
-import sign from "jwt-encode";
 
 const Wrapper = styled.div`
   display: grid;

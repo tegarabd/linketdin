@@ -1,9 +1,9 @@
-import { useQuery } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { POST_COMMENTS } from "../../../../../graphql/post";
-import { Comment as CommentType } from "../../../../../types/comment";
+import { Comment } from "../../../../../types/comment";
 import { Post } from "../../../../../types/post";
-import Comment from "./Comment";
 import Comments from "./Comments";
 import CreateComment from "./CreateComment";
 
@@ -14,13 +14,25 @@ const Wrapper = styled.div`
 `;
 
 function CommentSection({ post }: { post: Post }) {
-  const { data, fetchMore } = useQuery(POST_COMMENTS, {
-    variables: {
-      postId: post.id,
-      limit: 2,
-      offset: 0,
-    },
-  });
+  const [postComments, { data }] = useLazyQuery(POST_COMMENTS);
+  const [comments, setComments] = useState<Array<Comment>>([]);
+
+  useEffect(() => {
+    postComments({
+      variables: {
+        postId: post.id,
+        limit: 2,
+        offset: 0,
+      },
+    });
+    return () => {};
+  }, []);
+
+  useEffect(() => {
+    if (data) {
+      setComments([...comments, ...data.postComments]);
+    }
+  }, [data]);
 
   return (
     <Wrapper>
@@ -28,11 +40,13 @@ function CommentSection({ post }: { post: Post }) {
       {data && (
         <Comments
           post={post}
-          entries={data.postComments}
+          entries={comments}
           onLoadMore={() => {
-            fetchMore({
+            postComments({
               variables: {
-                offset: data.postComments.length,
+                postId: post.id,
+                limit: 2,
+                offset: comments.length,
               },
             });
           }}

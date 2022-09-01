@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import Footer from "../../components/Footer";
 import Content from "../../components/utilities/Content";
 import SideMainAsideLayout from "../../layouts/SideMainAsideLayout";
 import CreateJob from "./CreateJob";
@@ -28,6 +29,7 @@ function JobsPage() {
           <h3>Job seeker guidance</h3>
           <p>Recommended based on your activity</p>
         </Content>
+        <Footer />
       </Wrapper>
     </SideMainAsideLayout>
   );

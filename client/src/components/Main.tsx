@@ -1,13 +1,7 @@
 import React from "react";
-import Footer from "./Footer";
 
 function Main({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      {children}
-      <Footer />
-    </>
-  );
+  return <main>{children}</main>;
 }
 
 export default Main;

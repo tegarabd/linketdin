@@ -16,9 +16,20 @@ function Comments({
   return (
     <>
       {entries.map((comment: CommentType) => (
-        <Comment key={comment.id} comment={comment} post={post} />
+        <Comment
+          key={comment.id}
+          comment={comment}
+          post={post}
+        />
       ))}
-      <ButtonTertiary onClick={onLoadMore}>Load More</ButtonTertiary>
+      <div>
+        <ButtonTertiary
+          size="small"
+          onClick={onLoadMore}
+        >
+          Load more comments
+        </ButtonTertiary>
+      </div>
     </>
   );
 }

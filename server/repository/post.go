@@ -25,7 +25,7 @@ func GetPostsByText(ctx context.Context, query string, limit int, offset int) ([
 	db := database.GetDB()
 
 	var posts []*model.Post
-	if err := db.Where("text ILIKE %?%", query).Limit(limit).Offset(offset).Find(&posts).Error; err != nil {
+	if err := db.Where("text ILIKE ?", "%"+ query +"%").Limit(limit).Offset(offset).Find(&posts).Error; err != nil {
 		return nil, err
 	}
 

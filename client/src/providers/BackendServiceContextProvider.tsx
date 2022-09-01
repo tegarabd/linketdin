@@ -35,7 +35,6 @@ function BackendServiceContextProvider({
         Query: {
           fields: {
             postFeeds: offsetLimitPagination(),
-            postComments: offsetLimitPagination(["postId"])
           },
         },
       },

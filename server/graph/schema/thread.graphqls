@@ -2,6 +2,7 @@ type Thread {
   id: ID!
   user: User! @goField(forceResolver: true)
   with: User! @goField(forceResolver: true)
+  lastMessage: Message! @goField(forceResolver: true)
   messages: [Message!]! @goField(forceResolver: true)
 }
 

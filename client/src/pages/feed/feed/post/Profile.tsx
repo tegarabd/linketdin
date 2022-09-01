@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 import ProfileName from "../../../../components/profile/ProfileName";
 import ProfilePhoto from "../../../../components/profile/profilePhoto/ProfilePhoto";

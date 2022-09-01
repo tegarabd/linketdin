@@ -120,6 +120,11 @@ func (r *queryResolver) Jobs(ctx context.Context) ([]*model.Job, error) {
 	return repository.GetJobs(ctx)
 }
 
+// Thread is the resolver for the thread field.
+func (r *queryResolver) Thread(ctx context.Context, threadID string) (*model.Thread, error) {
+	return repository.GetThreadById(ctx, threadID)
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

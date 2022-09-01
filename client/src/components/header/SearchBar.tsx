@@ -1,4 +1,9 @@
-import React from "react";
+import React, { ChangeEventHandler, FormEventHandler, useState } from "react";
+import {
+  createSearchParams,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import styled from "styled-components";
 import { ReactComponent as Icon } from "../../assets/search-icon.svg";
 
@@ -32,10 +37,37 @@ const Input = styled.input`
 `;
 
 function SearchBar() {
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    setQuery(event.target.value);
+  };
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
+
+    if (query === "") return;
+
+    navigate({
+      pathname: "/search/results/all/",
+      search: createSearchParams({
+        query,
+      }).toString(),
+    });
+  };
+
   return (
     <Wrapper>
       <SearchIcon />
-      <Input type="search" placeholder="Search" />
+      <form onSubmit={handleSubmit}>
+        <Input
+          value={query}
+          onChange={handleChange}
+          type="search"
+          placeholder="Search"
+        />
+      </form>
     </Wrapper>
   );
 }
