@@ -9,6 +9,10 @@ import Notification from "./Notification";
 
 const Wrapper = styled(Content)`
   padding: 0;
+
+  & > p {
+    padding: 0.5rem;
+  }
 `;
 
 function Notifications() {

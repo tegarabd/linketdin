@@ -13,6 +13,7 @@ import { User } from "../../../types/user";
 
 const Wrapper = styled(Content)`
   justify-content: space-between;
+  align-items: center;
   height: 20rem;
 `;
 
@@ -31,8 +32,8 @@ function ProfileCard({ user }: { user: User }) {
 
   if (data) {
     return (
-      <Link to={`/in/${data.user.id}`}>
-        <Wrapper>
+      <Wrapper>
+        <Link to={`/in/${data.user.id}`}>
           <ProfilePhoto
             user={data.user}
             size="extra-large"
@@ -43,16 +44,16 @@ function ProfileCard({ user }: { user: User }) {
             withHeadline
             headlineLimit
           />
-          <ButtonSecondary onClick={openConnectModal}>Connect</ButtonSecondary>
-          {connectModalOpened && (
-            <ConnectModal
-              fromId={sub}
-              toId={user.id}
-              onClose={closeConnectModal}
-            />
-          )}
-        </Wrapper>
-      </Link>
+        </Link>
+        <ButtonSecondary onClick={openConnectModal}>Connect</ButtonSecondary>
+        {connectModalOpened && (
+          <ConnectModal
+            fromId={sub}
+            toId={user.id}
+            onClose={closeConnectModal}
+          />
+        )}
+      </Wrapper>
     );
   }
 

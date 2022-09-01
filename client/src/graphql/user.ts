@@ -200,6 +200,19 @@ export const SEARCH_USER = gql`
   }
 `;
 
+export const SEARCH_CONNECTED_USER = gql`
+  query searchConnectedUser($userId: String!, $query: String!) {
+    searchConnectedUser(userId: $userId, query: $query) {
+      id
+      firstName
+      lastName
+      additionalName
+      profilePhotoUrl
+      headline
+    }
+  }
+`;
+
 export const UPDATE_USER_PROFILE_PHOTO = gql`
   mutation updateProfilePhoto($id: ID!, $url: String!) {
     user {

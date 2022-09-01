@@ -88,7 +88,7 @@ func (r *queryResolver) Comment(ctx context.Context, commentID string) (*model.C
 
 // PostComments is the resolver for the postComments field.
 func (r *queryResolver) PostComments(ctx context.Context, postID string, limit int, offset int) ([]*model.Comment, error) {
-	return repository.GetPostComments(ctx, &model.Post{ID: postID}, limit, offset, true)
+	return repository.GetPostComments(ctx, &model.Post{ID: postID}, limit, offset, false)
 }
 
 // CommentReplies is the resolver for the commentReplies field.

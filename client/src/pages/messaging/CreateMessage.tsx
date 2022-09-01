@@ -119,6 +119,7 @@ function CreateMessage() {
       <form onSubmit={handleSubmit}>
         <Textarea
           id="text"
+          value={text}
           onChange={handleChange}
           placeholder="Write a message..."
         ></Textarea>
@@ -131,10 +132,10 @@ function CreateMessage() {
             disabled={file != null}
             onChange={handleFileChange}
           />
-          <ButtonPrimary>Send</ButtonPrimary>
+          <ButtonPrimary disabled={text === ""}>Send</ButtonPrimary>
         </ButtonGroup>
       </form>
-      {loading && <EntirePageLoading/>}
+      {loading && <EntirePageLoading />}
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import EntirePageLoading from "../../../components/utilities/entirePage/EntirePageLoading";
 import { REGISTER } from "../../../graphql/authentication";
 import { Redirect } from "../../../tools/Redirect";
 import {
+  GoogleAuth,
   RegisterData,
   RegisterEmailPassword,
   RegisterJob,
@@ -19,7 +20,13 @@ import Location from "./Location";
 import Name from "./Name";
 import ProfilePhoto from "./ProfilePhoto";
 
+type StateProps = {
+  data: GoogleAuth;
+};
+
 function RegisterPage() {
+  const { state } = useLocation();
+
   const navigate = useNavigate();
   const [register, { loading, data }] = useMutation(REGISTER);
   const [registerData, setRegisterData] = useState<RegisterData>({
@@ -36,6 +43,18 @@ function RegisterPage() {
   });
 
   useEffect(() => {
+    if (state) {
+      setRegisterData({
+        ...registerData,
+        email: (state as StateProps).data.email,
+        firstName: (state as StateProps).data.firstName,
+        lastName: (state as StateProps).data.lastName,
+        profilePhotoUrl: (state as StateProps).data.profilePhotoUrl,
+      });
+    }
+  }, [state]);
+
+  useEffect(() => {
     if (Object.values(registerData).some((value) => value === "")) {
       return;
     }
@@ -47,7 +66,7 @@ function RegisterPage() {
 
   useEffect(() => {
     if (data) {
-      navigate(`/auth/activate/${data.auth.register.activationId}`)
+      navigate(`/auth/activate/${data.auth.register.activationId}`);
     }
 
     return () => {};
@@ -98,12 +117,16 @@ function RegisterPage() {
 
   return (
     <Routes>
-      <Route path="/" element={<Redirect to="email_password" />} />
+      <Route
+        path="/"
+        element={<Redirect to="email_password" />}
+      />
       <Route
         path="/email_password"
         element={
           <EmailPassword
             handleSubmitEmailPassword={handleSubmitEmailPassword}
+            registerData={registerData}
           />
         }
       />
@@ -128,7 +151,10 @@ function RegisterPage() {
       <Route
         path="/job"
         element={
-          <Job handleSubmitJob={handleSubmitJob} registerData={registerData} />
+          <Job
+            handleSubmitJob={handleSubmitJob}
+            registerData={registerData}
+          />
         }
       />
       <Route
@@ -140,7 +166,10 @@ function RegisterPage() {
           />
         }
       />
-      <Route path="*" element={<NotFound />} />
+      <Route
+        path="*"
+        element={<NotFound />}
+      />
     </Routes>
   );
 }

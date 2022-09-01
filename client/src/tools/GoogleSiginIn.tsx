@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import EntirePageLoading from "../components/utilities/entirePage/EntirePageLoading";
-import { GOOGLE } from "../graphql/authentication";
+import { GOOGLE, IS_EMAIL_ALREADY_TAKEN } from "../graphql/authentication";
 import { useJwt } from "../hooks/useJwt";
 import { useAuthentication } from "../providers/AuthenticationContextProvider";
 import { GoogleAuth } from "../types/authentication";
@@ -18,7 +18,8 @@ interface CredentialResponse {
 }
 
 function GoogleSiginIn() {
-  const [googleAuth, { error, loading }] = useMutation(GOOGLE);
+  const [googleAuth] = useMutation(GOOGLE);
+  const [isEmailAlreadyTaken] = useMutation(IS_EMAIL_ALREADY_TAKEN);
   const authentication = useAuthentication();
   const navigate = useNavigate();
 
@@ -32,16 +33,15 @@ function GoogleSiginIn() {
       userId: decoded.sub,
     };
 
-    const {
-      auth: {
-        google: { token },
-      },
-    } = (await googleAuth({ variables: { input: data } })).data;
+    const email = await isEmailAlreadyTaken({
+      variables: { email: data.email },
+    });
 
-    if (!error) {
-      authentication.login(token);
-      navigate("/feed");
+    if (email.data.auth.isEmailAlreadyTaken) {
+      const google = await googleAuth({ variables: { input: data } });
+      authentication.login(google.data.auth.google.token);
     }
+    navigate("/auth/register", { state: { data } });
   };
 
   useEffect(() => {
@@ -68,9 +68,6 @@ function GoogleSiginIn() {
     return () => {};
   }, []);
 
-  if (loading) {
-    return <EntirePageLoading />;
-  }
   return <Wrapper id="googleSignInDiv"></Wrapper>;
 }
 

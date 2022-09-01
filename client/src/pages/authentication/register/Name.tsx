@@ -41,6 +41,10 @@ function Name({
     return <Redirect to="/auth/register/email_password" />;
   }
 
+  if (registerData.firstName !== "" && registerData.lastName !== "") {
+    return <Redirect to="/auth/register/location" />;
+  }
+
   return (
     <EntirePageLayout>
       <Title>Register Name</Title>

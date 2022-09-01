@@ -3,6 +3,7 @@ import React, { ChangeEventHandler, useState } from "react";
 import styled from "styled-components";
 import { CONNECT_USER } from "../../graphql/connect";
 import { USER_PROFILE } from "../../graphql/user";
+import { useScroll } from "../../hooks/useScroll";
 import Textarea from "../form/Textarea";
 import ButtonPrimary from "../utilities/button/ButtonPrimary";
 import EntirePageModal from "../utilities/entirePage/EntirePageModal";
@@ -22,6 +23,7 @@ function ConnectModal({
   toId: string;
   onClose: VoidFunction;
 }) {
+  const {makeWindowScrollable} = useScroll()
   const [note, setNote] = useState("");
   const [connect] = useMutation(CONNECT_USER, {
     refetchQueries: [{ query: USER_PROFILE, variables: { id: toId } }],
@@ -39,6 +41,8 @@ function ConnectModal({
         note,
       },
     });
+
+    makeWindowScrollable()
     onClose();
   };
 

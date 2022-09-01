@@ -14,25 +14,13 @@ const Wrapper = styled.div`
 `;
 
 function CommentSection({ post }: { post: Post }) {
-  const [postComments, { data }] = useLazyQuery(POST_COMMENTS);
-  const [comments, setComments] = useState<Array<Comment>>([]);
-
-  useEffect(() => {
-    postComments({
-      variables: {
-        postId: post.id,
-        limit: 2,
-        offset: 0,
-      },
-    });
-    return () => {};
-  }, []);
-
-  useEffect(() => {
-    if (data) {
-      setComments([...comments, ...data.postComments]);
-    }
-  }, [data]);
+  const { data, fetchMore } = useQuery(POST_COMMENTS, {
+    variables: {
+      postId: post.id,
+      offset: 0,
+      limit: 2,
+    },
+  });
 
   return (
     <Wrapper>
@@ -40,13 +28,33 @@ function CommentSection({ post }: { post: Post }) {
       {data && (
         <Comments
           post={post}
-          entries={comments}
+          entries={data.postComments}
           onLoadMore={() => {
-            postComments({
+            fetchMore({
               variables: {
-                postId: post.id,
-                limit: 2,
-                offset: comments.length,
+                offset: data.postComments.length,
+              },
+              updateQuery(previousQueryResult, { fetchMoreResult }) {
+
+                const sameData = previousQueryResult.postComments.some(
+                  (prevComment: Comment) => {
+                    return fetchMoreResult.postComments.some(
+                      (newComment: Comment) => newComment.id === prevComment.id
+                    );
+                  }
+                );
+
+                if (sameData) {
+                  return previousQueryResult;
+                }
+
+                return {
+                  __typename: "postComments",
+                  postComments: [
+                    ...previousQueryResult.postComments,
+                    ...fetchMoreResult.postComments,
+                  ],
+                };
               },
             });
           }}

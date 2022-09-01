@@ -71,7 +71,6 @@ export const POST_COMMENTS = gql`
     postComments(postId: $postId, limit: $limit, offset: $offset) {
       id
       commenter {
-        id
         firstName
         lastName
         additionalName

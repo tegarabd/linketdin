@@ -7,26 +7,15 @@ import { Post } from "../../../../../types/post";
 import Comment from "./Comment";
 
 function Replies({ commentId, post }: { commentId: string; post: Post }) {
-  const [commentReplies, { data }] = useLazyQuery(COMMENT_REPLIES);
+  const { data, fetchMore } = useQuery(COMMENT_REPLIES, {
+    variables: {
+      commentId,
+      limit: 2,
+      offset: 0,
+    },
+  });
 
   const [show, setShow] = useState(false);
-  const [replies, setReplies] = useState<Array<CommentType>>([]);
-
-  useEffect(() => {
-    commentReplies({
-      variables: { commentId, offset: 0, limit: 2 },
-    });
-
-    return () => {};
-  }, []);
-
-  useEffect(() => {
-    if (data) {
-      setReplies([...replies, ...data.commentReplies]);
-    }
-
-    return () => {};
-  }, [data]);
 
   const showReply = () => {
     setShow(true);
@@ -48,7 +37,7 @@ function Replies({ commentId, post }: { commentId: string; post: Post }) {
           )}
           {show && (
             <>
-              {replies.map((reply: CommentType) => (
+              {data.commentReplies.map((reply: CommentType) => (
                 <Comment
                   key={reply.id}
                   comment={reply}
@@ -59,12 +48,32 @@ function Replies({ commentId, post }: { commentId: string; post: Post }) {
                 <ButtonTertiary
                   size="small"
                   onClick={() => {
-                    setShow(false);
-                    commentReplies({
+                    fetchMore({
                       variables: {
-                        commentId,
-                        offset: replies.length,
-                        limit: 2,
+                        offset: data.commentReplies.length,
+                      },
+                      updateQuery(previousQueryResult, { fetchMoreResult }) {
+                        const sameData =
+                          previousQueryResult.commentReplies.some(
+                            (prevComment: CommentType) => {
+                              return fetchMoreResult.commentReplies.some(
+                                (newComment: CommentType) =>
+                                  newComment.id === prevComment.id
+                              );
+                            }
+                          );
+
+                        if (sameData) {
+                          return previousQueryResult;
+                        }
+
+                        return {
+                          __typename: "commentReplies",
+                          commentReplies: [
+                            ...previousQueryResult.commentReplies,
+                            ...fetchMoreResult.commentReplies,
+                          ],
+                        };
                       },
                     });
                   }}

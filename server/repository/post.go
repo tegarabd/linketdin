@@ -78,13 +78,13 @@ func GetPostComments(ctx context.Context, post *model.Post, limit int, offset in
 	var comments []*model.Comment
 
 	if all {
-		if err := db.Model(&post).Limit(limit).Offset(offset).Association("Comments").Find(&comments); err != nil {
+		if err := db.Limit(limit).Offset(offset).Raw("SELECT * FROM comments WHERE post_id = ?", post.ID).Find(&comments).Error; err != nil {
 			return nil, err
 		}
 
 		return comments, nil
 	} else {
-		if err := db.Model(&post).Limit(limit).Offset(offset).Where("replied_to_id IS NULL").Association("Comments").Find(&comments); err != nil {
+		if err := db.Raw("SELECT * FROM comments WHERE post_id = ? AND replied_to_id IS NULL LIMIT ? OFFSET ?", post.ID, limit, offset).Find(&comments).Error; err != nil {
 			return nil, err
 		}
 

@@ -200,10 +200,10 @@ func GetUserConnectionsByName(ctx context.Context, userId string, query string) 
 	connections := []*model.User{}
 	if err := db.Raw(
 		"SELECT * FROM user_connections uc JOIN users u ON uc.connection_id = u.id WHERE user_id = ? " +
-		"AND (u.first_name ILIKE '%?%' OR u.last_name ILIKE '%?%' OR u.additional_name ILIKE '%?%') " +
+		"AND (u.first_name ILIKE ? OR u.last_name ILIKE ? OR u.additional_name ILIKE ?) " +
 		"UNION " +
 		"SELECT * FROM user_connections uc JOIN users u ON uc.user_id = u.id WHERE connection_id = ? " +
-		"AND (u.first_name ILIKE '%?%' OR u.last_name ILIKE '%?%' OR u.additional_name ILIKE '%?%')", userId, query, query, query, userId, query, query, query).Find(&connections).Error; err != nil {
+		"AND (u.first_name ILIKE ? OR u.last_name ILIKE ? OR u.additional_name ILIKE ?)", userId, "%" + query + "%", "%" + query + "%", "%" + query + "%", userId, "%" + query + "%", "%" + query + "%", "%" + query + "%").Find(&connections).Error; err != nil {
 		return nil, err
 	}
 

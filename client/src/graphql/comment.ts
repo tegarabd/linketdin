@@ -27,7 +27,6 @@ export const COMMENT_REPLIES = gql`
     commentReplies(commentId: $commentId, limit: $limit, offset: $offset) {
       id
       commenter {
-        id
         firstName
         lastName
         additionalName

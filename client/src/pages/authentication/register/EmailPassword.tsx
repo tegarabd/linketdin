@@ -9,18 +9,23 @@ import StyledLink from "../../../components/utilities/link/StyledLink";
 import { IS_EMAIL_ALREADY_TAKEN } from "../../../graphql/authentication";
 import EntirePageLayout from "../../../layouts/EntirePageLayout";
 import GoogleSiginIn from "../../../tools/GoogleSiginIn";
-import { RegisterEmailPassword } from "../../../types/authentication";
+import {
+  RegisterData,
+  RegisterEmailPassword,
+} from "../../../types/authentication";
 
 function EmailPassword({
   handleSubmitEmailPassword,
+  registerData,
 }: {
   handleSubmitEmailPassword: (input: RegisterEmailPassword) => void;
+  registerData: RegisterData;
 }) {
   const [error, setError] = useState<string>(null!);
   const [isEmailAlreadyTaken] = useMutation(IS_EMAIL_ALREADY_TAKEN);
   const [registerEmailPassword, setRegisterEmailPassword] =
     useState<RegisterEmailPassword>({
-      email: "",
+      email: registerData.email === "" ? "" : registerData.email,
       password: "",
     });
 
@@ -59,10 +64,22 @@ function EmailPassword({
     <EntirePageLayout>
       <Title>Register</Title>
       <Form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email</label>
-        <Input id="email" type="email" onChange={handleChange} />
+        {registerData.email === "" && (
+          <>
+            <label htmlFor="email">Email</label>
+            <Input
+              id="email"
+              type="email"
+              onChange={handleChange}
+            />
+          </>
+        )}
         <label htmlFor="password">Password</label>
-        <Input id="password" type="password" onChange={handleChange} />
+        <Input
+          id="password"
+          type="password"
+          onChange={handleChange}
+        />
         <Errors errors={[error]} />
         <ButtonPrimary type="submit">Join</ButtonPrimary>
       </Form>
