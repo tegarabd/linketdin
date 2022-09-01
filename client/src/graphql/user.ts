@@ -156,15 +156,15 @@ export const USER_THREADS = gql`
         user {
           id
         }
-        lastMessage {
-          id
-          sender {
-            id
-          }
-          text
-          imageUrl
-          createdAt
-        }
+        # lastMessage {
+        #   id
+        #   sender {
+        #     id
+        #   }
+        #   text
+        #   imageUrl
+        #   createdAt
+        # }
       }
     }
   }

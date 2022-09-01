@@ -28,7 +28,7 @@ const MessageSection = styled(Content)`
   height: 35rem;
   overflow-y: auto;
   margin-bottom: 1rem;
-`
+`;
 
 function With({ thread }: { thread: Thread }) {
   const { sub } = useJwt();
@@ -51,6 +51,7 @@ function Messages() {
   const { data } = useQuery(THREAD, {
     variables: { threadId },
     skip: threadId == undefined,
+    pollInterval: 1000,
   });
 
   return (

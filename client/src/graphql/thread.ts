@@ -22,3 +22,13 @@ export const THREAD = gql`
     }
   }
 `;
+
+export const CREATE_THREAD = gql`
+  mutation createThread($input: CreateThread!) {
+    thread {
+      create(input: $input) {
+        id
+      }
+    }
+  }
+`;

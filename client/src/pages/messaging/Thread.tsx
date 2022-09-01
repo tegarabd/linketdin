@@ -30,10 +30,8 @@ function Thread({ thread }: { thread: ThreadType }) {
           <div>
             <ProfileName user={data.user} />
             <p>
-              {thread.lastMessage.sender.id === sub
-                ? "You:"
-                : "Them:"}{" "}
-              {thread.lastMessage.text.substring(0, 12)}...
+              {thread.lastMessage?.sender?.id === sub ? "You:" : "Them:"}{" "}
+              {thread.lastMessage?.text?.substring(0, 12)}...
             </p>
           </div>
         </Wrapper>
